@@ -1,398 +1,416 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="UTF-8">
-    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
-    <meta http-equiv="Content-Security-Policy" content="script-src 'self'; style-src 'self' 'unsafe-inline'">
-    <meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'">
-    <title>KBonk</title>
-    <link rel="stylesheet" type="text/css" href="style.css"></style>
-  </head>
-  <body>
-    <div id="header">
-      <div id="headerPink"></div>
-      <div id="headerWhite"></div>
-      <div id="headerLogo">
-        <img id="logoKBonk" src="ui/logo48_l.png">
-        <h1>KBonk</h1>
+
+<head>
+  <meta charset="UTF-8">
+  <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+  <meta http-equiv="Content-Security-Policy" content="script-src 'self'; style-src 'self' 'unsafe-inline'">
+  <meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'">
+  <title>KBonk bilibili</title>
+  <link rel="stylesheet" type="text/css" href="style.css">
+  </style>
+</head>
+
+<body>
+  <div id="header">
+    <div id="headerPink"></div>
+    <div id="headerWhite"></div>
+    <div id="headerLogo">
+      <img id="logoKBonk" src="ui/logo120.png">
+      <h1>KBonk bilibili</h1>
+    </div>
+    <div id="headerStatus">
+      <h2 id="headerStatusInner">状态</h2>
+    </div>
+  </div>
+  <div id="body">
+    <div id="topButtons">
+      <div id="helpButton" class="topButton">
+        <div class="innerTopButton">帮助</div>
+        <div class="cornerTopButton"></div>
+        <div class="overlayButton"></div>
       </div>
-      <div id="headerStatus">
-        <h2 id="headerStatusInner">Status</h2>
+      <div id="calibrateButton" class="topButton">
+        <div class="overlayButton"></div>
+        <div class="innerTopButton">校准</div>
+        <div class="cornerTopButton"></div>
+      </div>
+      <div id="settingsButton" class="topButton">
+        <div class="overlayButton"></div>
+        <div class="innerTopButton">设置</div>
+        <div class="cornerTopButton"></div>
+      </div>
+      <div id="testBonksButton" class="topButton">
+        <div class="overlayButton"></div>
+        <div class="innerTopButton">测试</div>
+        <div class="cornerTopButton"></div>
       </div>
     </div>
-    <div id="body">
-      <div id="topButtons">
-        <div id="helpButton" class="topButton">
-          <div class="innerTopButton">Help</div>
-          <div class="cornerTopButton"></div>
-          <div class="overlayButton"></div>
-        </div>
-        <div id="calibrateButton" class="topButton">
-          <div class="overlayButton"></div>
-          <div class="innerTopButton">Calibrate</div>
-          <div class="cornerTopButton"></div>
-        </div>
-        <div id="settingsButton" class="topButton">
-          <div class="overlayButton"></div>
-          <div class="innerTopButton">Settings</div>
-          <div class="cornerTopButton"></div>
-        </div>
-        <div id="testBonksButton" class="topButton">
-          <div class="overlayButton"></div>
-          <div class="innerTopButton">Test Bonks</div>
-          <div class="cornerTopButton"></div>
-        </div>
-      </div>
-      <div id="mainBody">
+    <div id="mainBody">
 
-        <!-- WIDE WINDOW -->
+      <!-- WIDE WINDOW -->
 
-        <div id="wideWindow" class="hidden">
-          <div id="wideWindowInner">
-            <span class="windowCorner"></span>
-            <span class="windowBack">BACK</span>
+      <div id="wideWindow" class="hidden">
+        <div id="wideWindowInner">
+          <span class="windowCorner"></span>
+          <span class="windowBack">返回</span>
 
-            <!-- HELP -->
-            <div id="help" class="hidden">
-            </div>
+          <!-- HELP -->
+          <div id="help" class="hidden">
+          </div>
 
-            <!-- STATUS -->
-            <div id="statusWindow" class="hidden">
-              <h1 id="status">Status</h2>
-              <div id="statusDesc">Status Description</div>
+          <!-- STATUS -->
+          <div id="statusWindow" class="hidden">
+            <h1 id="status">状态</h2>
+              <div id="statusDesc">状态描述</div>
               <div id="calibrateButtons">
                 <div id="nextCalibrate" class="topButton">
                   <div class="overlayButton"></div>
-                  <div class="innerTopButton">START CALIBRATION</div>
+                  <div class="innerTopButton">开始校准</div>
                   <div class="cornerTopButton"></div>
                 </div>
                 <div id="cancelCalibrate" class="topButton">
                   <div class="overlayButton"></div>
-                  <div class="innerTopButton">CANCEL</div>
+                  <div class="innerTopButton">取消</div>
                   <div class="cornerTopButton"></div>
                 </div>
               </div>
-            </div>
+          </div>
 
-            <!-- SETTINGS -->
+          <!-- SETTINGS -->
 
-            <div id="settings" class="hidden">
+          <div id="settings" class="hidden">
+            <div class="settingsInner">
               <!-- BARRAGE AND ITEM SETTINGS -->
 
               <div class="header grid1-2">
                 <div class="headerInner">
-                  Barrages
+                  投多个设置
                 </div>
               </div>
 
               <div class="header grid4-5">
                 <div class="headerInner">
-                  Items
+                  物体
                 </div>
               </div>
 
-              <p class="grid1">Barrage Count</p>
+              <p class="grid1">投掷数量</p>
               <input type="number" id="barrageCount" class="grid2" min="0" value="30">
-              
-              <p class="grid4">Global Volume</p>
+
+              <p class="grid4">总音量</p>
               <input type="range" id="volume" class="grid5" min="0" max="1" value="0.2" step="0.1">
 
-              <p class="grid1">Barrage Frequency (s)</p>
+              <p class="grid1">投掷频率（秒）</p>
               <input type="number" id="barrageFrequency" class="grid2" min="0" value="0.05">
 
-              <p class="grid4">Item Scale (At Min Model Size)</p>
+              <p class="grid4">物体比例（模型最小时）</p>
               <input type="number" id="itemScaleMin" class="grid5" min="0" value="0.25">
-              
-              <p class="grid4">Item Scale (At Max Model Size)</p>
+
+              <p class="grid4">物体比例（模型最大时）</p>
               <input type="number" id="itemScaleMax" class="grid5" min="0" value="3">
 
-              <br/>
+              <br />
 
               <!-- THROW AND MODEL SETTINGS -->
 
               <div class="header grid1-2">
                 <div class="headerInner">
-                  Throws
+                  投掷
                 </div>
               </div>
 
               <div class="header grid4-5">
                 <div class="headerInner">
-                  Model
+                  模型
                 </div>
               </div>
 
-              <p class="grid1">Throw Duration (s)</p>
+              <p class="grid1">投掷时长（秒）</p>
               <input type="number" id="throwDuration" class="grid2" min="0.1" value="1.0">
 
-              <p class="grid4">Model Return Speed</p>
+              <p class="grid4">模型恢复速度</p>
               <input type="number" id="returnSpeed" class="grid5" min="0" value="0.05">
 
-              <p class="grid1">Spin Speed (Min)</p>
+              <p class="grid1">旋转速度（最低）</p>
               <input type="number" id="spinSpeedMin" class="grid2" min="0" value="5" step="0.1">
 
-              <p class="grid4">Close Eyes on Hit</p>
+              <p class="grid4">被击中时闭眼</p>
               <label class="checkbox grid5">
                 <input type="checkbox" id="closeEyes">
                 <div class="checkHover"></div>
                 <img src="ui/checkmark.png" class="checkmark">
               </label>
-              
-              <p class="grid1">Spin Speed (Max)</p>
+
+              <p class="grid1">旋转速度（最高）</p>
               <input type="number" id="spinSpeedMax" class="grid2" min="0" value="10" step="0.1">
-              
-              <p class="grid4">Open Eyes on Hit</p>
+
+              <p class="grid4">被击中时睁眼</p>
               <label class="checkbox grid5">
                 <input type="checkbox" id="openEyes">
                 <div class="checkHover"></div>
                 <img src="ui/checkmark.png" class="checkmark">
               </label>
 
-              <p class="grid1">Throw Angle (Min)</p>
+              <p class="grid1">投掷角度（最小）</p>
               <input type="number" id="throwAngleMin" class="grid2" min="-90" value="-45" step="1">
 
-              <p class="grid1">Throw Angle (Max)</p>
+              <p class="grid1">投掷角度（最大）</p>
               <input type="number" id="throwAngleMax" class="grid2" max="90" value="45" step="1">
 
               <!-- EMPTY DIV FOR SPACING -->
               <div class="grid2"></div>
 
-              <br/>
+              <br />
 
               <!-- ADVANCED SETTINGS -->
 
               <div class="header grid1-2">
                 <div class="headerInner">
-                  Advanced
+                  高级设置
                 </div>
               </div>
 
               <div class="header grid4-5">
                 <div class="headerInner">
-                  Physics Simulation
+                  物理模拟
                 </div>
               </div>
-              
-              <p class="grid1">Minimize To System Tray</p>
+
+              <p class="grid1">在系统托盘区显示</p>
               <label class="checkbox grid2">
                 <input type="checkbox" id="minimizeToTray">
                 <div class="checkHover"></div>
                 <img src="ui/checkmark.png" class="checkmark">
               </label>
-              
-              <p class="grid4">Physics Simulation</p>
+
+              <p class="grid4">启用物理模拟</p>
               <label class="checkbox grid5">
                 <input type="checkbox" id="physicsSim" checked>
                 <div class="checkHover"></div>
                 <img src="ui/checkmark.png" class="checkmark">
               </label>
 
-              <p class="grid1">Impact Delay (ms)</p>
+              <p class="grid1">受击延时（毫秒）</p>
               <input type="number" id="delay" class="grid2" min="0" value="0">
 
-              <p class="grid4">Physics Simulation FPS</p>
+              <p class="grid4">物理模拟帧数</p>
               <input type="number" id="physicsFPS" class="grid5" min="1" max="60" value="60" step="1">
 
-              <p class="grid1">Browser Source Port</p>
+              <p class="grid1">浏览器源端口</p>
               <input type="number" id="portThrower" class="grid2" value="8080">
 
-              <p class="grid4">Gravity Multiplier</p>
+              <p class="grid4">重力系数</p>
               <input type="number" id="physicsGravity" class="grid5" min="0.01" value="1">
-              
-              <p class="grid1">VTube Studio Port</p>
+
+              <p class="grid1">VTS API端口</p>
               <input type="number" id="portVTubeStudio" class="grid2" value="8001">
-              
-              <p class="grid4">Reverse Gravity</p>
+
+              <p class="grid4">重力反转</p>
               <label class="checkbox grid5">
                 <input type="checkbox" id="physicsReverse">
                 <div class="checkHover"></div>
                 <img src="ui/checkmark.png" class="checkmark">
               </label>
 
-              <p class="grid4">Rotate Gravity with Model</p>
+              <p class="grid4">重力跟随模型旋转</p>
               <label class="checkbox grid5">
                 <input type="checkbox" id="physicsRotate">
                 <div class="checkHover"></div>
                 <img src="ui/checkmark.png" class="checkmark">
               </label>
 
-              <p class="grid4">Horizontal Bounce Multiplier</p>
+              <p class="grid4">水平弹性系数</p>
               <input type="number" id="physicsHorizontal" class="grid5" value="1">
 
-              <p class="grid4">Vertical Bounce Multiplier</p>
+              <p class="grid4">垂直弹性系数</p>
               <input type="number" id="physicsVertical" class="grid5" value="1">
-
+            </div>
+            <div class="credit">
+              <div class="divider"></div>
+              <div class="creditInner">
+                <div class="typeou author">
+                  <div class="title">
+                    <h2>原作者：</h2>
+                  </div>
+                  <div class="creditLogo">
+                    <img class="creditLogoImage" src="ui/credit_typeou.png">
+                  </div>
+                  <div class="link">
+                    <span>原项目链接：</span><br>
+                    <a href="#" id="originalItchLink">https://typeou.itch.io/karasubonk</a>
+                  </div>
+                  <div class="link">
+                    <span>原作者链接:</span><br>
+                    <a href="#" id="originalAuthorLink">https://www.typeou.dev</a>
+                  </div>
+                </div>
+                <div class="luis author">
+                  <div class="title">
+                    <h2>本地化 / B站兼容：</h2>
+                  </div>
+                  <div class="creditLogo">
+                    <img src="ui/logo36_bottom.png" alt="" class="creditLogoImage">
+                    <span>LuiScreaMed</span>
+                  </div>
+                  <div class="link">
+                    <span>项目链接：</span><br>
+                    <a href="#" id="creditGithubLink">https://github.com/LuiScreaMed/karasubonk</a>
+                  </div>
+                  <div class="link">
+                    <span>B站主页:</span><br>
+                    <a href="#" id="bilibiliLink">https://space.bilibili.com/3837681</a>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <!-- TEST BONKS -->
+          </div>
 
-            <div id="testBonks" class="hidden">
-              <div id="testBonksTable">
+          <!-- TEST BONKS -->
+
+          <div id="testBonks" class="hidden">
+            <div id="testBonksTable">
+              <div class="testContainer">
+                <div id="testSingle" class="topButton">
+                  <div class="overlayButton"></div>
+                  <div class="innerTopButton">随机投一个</div>
+                  <div class="cornerTopButton"></div>
+                </div>
+              </div>
+
+              <div class="testContainer">
+                <div id="testBarrage" class="topButton">
+                  <div class="overlayButton"></div>
+                  <div class="innerTopButton">随机投多个</div>
+                  <div class="cornerTopButton"></div>
+                </div>
+              </div>
+
+              <div class="testContainer">
+                <div id="testGuard" class="topButton">
+                  <div class="overlayButton"></div>
+                  <div class="innerTopButton">上舰</div>
+                  <div class="cornerTopButton"></div>
+                </div>
+              </div>
+
+              <div class="testContainer">
+                <div id="testFollow" class="topButton">
+                  <div class="overlayButton"></div>
+                  <div class="innerTopButton">关注</div>
+                  <div class="cornerTopButton"></div>
+                </div>
+              </div>
+
+              <div class="testContainer">
+                <div id="testSuperChat" class="topButton">
+                  <div class="overlayButton"></div>
+                  <div class="innerTopButton">醒目留言</div>
+                  <div class="cornerTopButton"></div>
+                </div>
+              </div>
+
+              <div id="testCustom" class="testContainer" hidden>
+                <div class="topButton">
+                  <div class="overlayButton"></div>
+                  <div class="innerTopButton">自定义</div>
+                  <div class="cornerTopButton"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SIDEBAR AND MAIN WINDOW -->
+
+      <div id="sideBar">
+        <div id="sideBarInner">
+          <span class="windowCorner"></span>
+          <div id="imagesButton" class="sideButton">
+            <div class="sideButtonInner">
+              <div class="overlayButton buttonSelected"></div>
+              <h2>投掷物图片</h2>
+              <hr>
+              <p>投掷物图片列表</p>
+            </div>
+          </div>
+          <div id="soundsButton" class="sideButton">
+            <div class="sideButtonInner">
+              <div class="overlayButton"></div>
+              <h2>击中音效</h2>
+              <hr>
+              <p>击中音效列表</p>
+            </div>
+          </div>
+          <div id="customButton" class="sideButton">
+            <div class="sideButtonInner">
+              <div class="overlayButton"></div>
+              <h2>自定义投掷</h2>
+              <hr>
+              <p>设计与事件绑定的投掷类型</p>
+            </div>
+          </div>
+          <div id="eventsButton" class="sideButton">
+            <div class="sideButtonInner">
+              <div class="overlayButton"></div>
+              <h2>事件</h2>
+              <hr>
+              <p>直播事件自定义</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="mainWindow">
+        <div id="mainWindowInner">
+
+          <!-- IMAGE DETAILS -->
+
+          <div id="imageDetails" class="hidden">
+            <span class="windowCorner"></span>
+            <span class="windowBack">返回</span>
+            <div id="imageDetailsInner">
+              <img class="imageImage" src="throws/辣条.png">
+              <p class="imageLabel">IMAGE URL</p>
+              <div id="testImage">
                 <div class="testContainer">
                   <div id="testSingle" class="topButton">
                     <div class="overlayButton"></div>
-                    <div class="innerTopButton">SINGLE</div>
-                    <div class="cornerTopButton"></div>
-                  </div>
-                </div>
-  
-                <div class="testContainer">
-                  <div id="testBarrage" class="topButton">
-                    <div class="overlayButton"></div>
-                    <div class="innerTopButton">BARRAGE</div>
-                    <div class="cornerTopButton"></div>
-                  </div>
-                </div>
-  
-                <div class="testContainer">
-                  <div id="testEmote" class="topButton">
-                    <div class="overlayButton"></div>
-                    <div class="innerTopButton">EMOTE SINGLE</div>
-                    <div class="cornerTopButton"></div>
-                  </div>
-                </div>
-  
-                <div class="testContainer">
-                  <div id="testRaid" class="topButton">
-                    <div class="overlayButton"></div>
-                    <div class="innerTopButton">EMOTE BARRAGE</div>
-                    <div class="cornerTopButton"></div>
-                  </div>
-                </div>
-  
-                <div class="testContainer">
-                  <div id="testSub" class="topButton">
-                    <div class="overlayButton"></div>
-                    <div class="innerTopButton">SUB</div>
-                    <div class="cornerTopButton"></div>
-                  </div>
-                </div>
-  
-                <div class="testContainer">
-                  <div id="testSubGift" class="topButton">
-                    <div class="overlayButton"></div>
-                    <div class="innerTopButton">GIFT SUB</div>
-                    <div class="cornerTopButton"></div>
-                  </div>
-                </div>
-  
-                <div class="testContainer">
-                  <div id="testBits" class="topButton">
-                    <div class="overlayButton"></div>
-                    <div class="innerTopButton">BITS</div>
-                    <div class="cornerTopButton"></div>
-                  </div>
-                </div>
-  
-                <div class="testContainer">
-                  <div id="testFollow" class="topButton">
-                    <div class="overlayButton"></div>
-                    <div class="innerTopButton">FOLLOW</div>
-                    <div class="cornerTopButton"></div>
-                  </div>
-                </div>
-  
-                <div id="testCustom" class="testContainer" hidden>
-                  <div class="topButton">
-                    <div class="overlayButton"></div>
-                    <div class="innerTopButton">CUSTOM</div>
+                    <div class="innerTopButton">测试</div>
                     <div class="cornerTopButton"></div>
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- SIDEBAR AND MAIN WINDOW -->
-
-        <div id="sideBar">
-          <div id="sideBarInner">
-            <span class="windowCorner"></span>
-            <div id="imagesButton" class="sideButton">
-              <div class="sideButtonInner">
-                <div class="overlayButton buttonSelected"></div>
-                <h2>Bonk Images</h2>
-                <hr>
-                <p>Bonk Image Gallery</p>
-              </div>
-            </div>
-            <div id="soundsButton" class="sideButton">
-              <div class="sideButtonInner">
-                <div class="overlayButton"></div>
-                <h2>Bonk Sounds</h2>
-                <hr>
-                <p>Bonk Sound Gallery</p>
-              </div>
-            </div>
-            <div id="customButton" class="sideButton">
-              <div class="sideButtonInner">
-                <div class="overlayButton"></div>
-                <h2>Custom</h2>
-                <hr>
-                <p>Design unique bonks for events</p>
-              </div>
-            </div>
-            <div id="eventsButton" class="sideButton">
-              <div class="sideButtonInner">
-                <div class="overlayButton"></div>
-                <h2>Events</h2>
-                <hr>
-                <p>Stream triggers for bonks</p>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div id="mainWindow">
-          <div id="mainWindowInner">
-
-            <!-- IMAGE DETAILS -->
-
-            <div id="imageDetails" class="hidden">
-              <span class="windowCorner"></span>
-              <span class="windowBack">BACK</span>
-              <div id="imageDetailsInner">
-                <img class="imageImage" src="throws/I_C_Banana.png">
-                <p class="imageLabel">IMAGE URL</p>
-                <div id="testImage">
-                  <div class="testContainer">
-                    <div id="testSingle" class="topButton">
-                      <div class="overlayButton"></div>
-                      <div class="innerTopButton">TEST</div>
-                      <div class="cornerTopButton"></div>
-                    </div>
-                  </div>
-                </div>
-                <div id="imageSettings">
-                  <div id="imageSettings1">
-                    <div class="imageDetailsShadow">
-                      <div class="imageDetailsInner">
-                        <div class="settingsTable">
-                          <p>Scale</p>
-                          <input type="number" class="imageScale" min="0" step="0.1">
-                          <p>Weight</p>
-                          <input type="range" class="imageWeight" min="0" max="1" step="0.1">
-                          <p>Volume</p>
-                          <input class="imageSoundVolume" type="range" min="0" max="1" step="0.1">
-                        </div>
+              <div id="imageSettings">
+                <div id="imageSettings1">
+                  <div class="imageDetailsShadow">
+                    <div class="imageDetailsInner">
+                      <div class="settingsTable">
+                        <p>比例</p>
+                        <input type="number" class="imageScale" min="0" step="0.1">
+                        <p>重量</p>
+                        <input type="range" class="imageWeight" min="0" max="1" step="0.1">
+                        <p>音量</p>
+                        <input class="imageSoundVolume" type="range" min="0" max="1" step="0.1">
                       </div>
                     </div>
                   </div>
-                  <div id="imageSettings2">
-                    <div class="imageDetailsShadow">
-                      <div class="imageDetailsInner">
-                        <div class="settingsTable">
-                          <p>Sound</p>
-                          <input type="text" class="imageSoundName" disabled>
-                          <p>Upload</p>
-                          <input id="loadImageSound" type="file" accept="audio/*">
-                          <div class="deleteSound grid 1-2">
-                            <p class="grid1">Delete Sound</p>
-                            <label class="delete grid2">
-                              <button class="imageSoundRemove"></button>
-                              <img src="ui/x.png" class="checkmark"></img>
-                            </label>
-                          </div>
+                </div>
+                <div id="imageSettings2">
+                  <div class="imageDetailsShadow">
+                    <div class="imageDetailsInner">
+                      <div class="settingsTable">
+                        <p>击中音效</p>
+                        <input type="text" class="imageSoundName" disabled>
+                        <p>添加</p>
+                        <input id="loadImageSound" type="file" accept="audio/*">
+                        <div class="deleteSound grid 1-2">
+                          <p class="grid1">删除音效</p>
+                          <label class="delete grid2">
+                            <button class="imageSoundRemove"></button>
+                            <img src="ui/x.png" class="checkmark"></img>
+                          </label>
                         </div>
                       </div>
                     </div>
@@ -400,594 +418,719 @@
                 </div>
               </div>
             </div>
+          </div>
 
-            <!-- BONK IMAGES -->
+          <!-- BONK IMAGES -->
 
-            <div id="bonkImages">
-              <span id="imagesBitsTab" class="tab secondTab">BITS</span>
-              <span id="imagesDefaultTab" class="tab firstTab selectedTab">DEFAULT</span>
-              <div id="imageTable" class="imageTable">
-                <div class="selectAll">
-                  <div>
-                    <p>Select/Deselect All</p>
-                    <label class="checkbox">
-                      <input type="checkbox" class="imageEnabled" checked>
-                      <div class="checkHover"></div>
-                      <img src="ui/checkmark.png" class="checkmark">
-                    </label>
-                  </div>
-                </div>
-                <input id="loadImage" type="file" accept="image/*" multiple hidden>
-                <div id="newImage" class="new row">
-                  <div class="imageRowShadow">
-                    <div class="imageRowInner">
-                      <img class="imageImage" src="ui/add.png"></img>
-                      <p class="imageLabel">ADD IMAGES</p>
-                      <div class="imageRowHover"></div>
-                    </div>
-                  </div>
-                </div>
-                <div id="imageRow" class="row" hidden>
-                  <div class="imageRowShadow">
-                    <div class="imageRowInner">
-                      <label class="checkbox">
-                        <input type="checkbox" class="imageEnabled" checked>
-                        <div class="checkHover"></div>
-                        <img src="ui/checkmark.png" class="checkmark">
-                      </label>
-                      <label class="cogwheel">
-                        <button class="imageDetails">Details</button>
-                        <img src="ui/cog.png" class="checkmark">
-                      </label>
-                      <img class="imageImage" src="throws/I_C_Banana.png"></img>
-                      <p class="imageLabel">IMAGE URL</p>
-                      <label class="delete">
-                        <button class="imageRemove"></button>
-                        <img src="ui/x.png" class="checkmark"></img>
-                      </label>
-                      <div class="imageRowHover"></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div id="bitImageTable" class="imageTable hidden">
-                <div id="bit1" class="imageRow row">
-                  <div class="imageRowShadow">
-                    <div class="imageRowInner">
-                      <input id="loadBitImageone" type="file" accept="image/*" hidden>
-                      <label class="cogwheel">
-                        <button id="bitImageAdd1"></button>
-                        <img src="ui/add.png" class="checkmark"></img>
-                      </label>
-                      <img class="imageImage" src="throws/1.png"></img>
-                      <p class="imageLabel">1 BIT</p>
-                      <div>
-                        <img src="ui/scale.png" title="Scale">
-                        <input class="bitImageScale" type="number" min="0" value="1.5">
-                      </div>
-                      <div class="imageRowHover"></div>
-                    </div>
-                  </div>
-                </div>
-                <div id="bit100" class="imageRow row">
-                  <div class="imageRowShadow">
-                    <div class="imageRowInner">
-                      <input id="loadBitImageoneHundred" type="file" accept="image/*" hidden>
-                      <label class="cogwheel">
-                        <button id="bitImageAdd100"></button>
-                        <img src="ui/add.png" class="checkmark"></img>
-                      </label>
-                      <img class="imageImage" src="throws/100.png"></img>
-                      <p class="imageLabel">100 BITS</p>
-                      <div>
-                        <img src="ui/scale.png" title="Scale" title="Scale">
-                        <input class="bitImageScale" type="number" min="0" value="1.5">
-                      </div>
-                      <div class="imageRowHover"></div>
-                    </div>
-                  </div>
-                </div>
-                <div id="bit1000" class="imageRow row">
-                  <div class="imageRowShadow">
-                    <div class="imageRowInner">
-                      <input id="loadBitImageoneThousand" type="file" accept="image/*" hidden>
-                      <label class="cogwheel">
-                        <button id="bitImageAdd1000"></button>
-                        <img src="ui/add.png" class="checkmark"></img>
-                      </label>
-                      <img class="imageImage" src="throws/1000.png"></img>
-                      <p class="imageLabel">1000 BITS</p>
-                      <div>
-                        <img src="ui/scale.png" title="Scale">
-                        <input class="bitImageScale" type="number" min="0" value="1.5">
-                      </div>
-                      <div class="imageRowHover"></div>
-                    </div>
-                  </div>
-                </div>
-                <div id="bit5000" class="imageRow row">
-                  <div class="imageRowShadow">
-                    <div class="imageRowInner">
-                      <input id="loadBitImagefiveThousand" type="file" accept="image/*" hidden>
-                      <label class="cogwheel">
-                        <button id="bitImageAdd5000"></button>
-                        <img src="ui/add.png" class="checkmark"></img>
-                      </label>
-                      <img class="imageImage" src="throws/5000.png"></img>
-                      <p class="imageLabel">5000 BITS</p>
-                      <div>
-                        <img src="ui/scale.png" title="Scale">
-                        <input class="bitImageScale" type="number" min="0" value="1.5">
-                      </div>
-                      <div class="imageRowHover"></div>
-                    </div>
-                  </div>
-                </div>
-                <div id="bit10000" class="imageRow row">
-                  <div class="imageRowShadow">
-                    <div class="imageRowInner">
-                      <input id="loadBitImagetenThousand" type="file" accept="image/*" hidden>
-                      <label class="cogwheel">
-                        <button id="bitImageAdd10000"></button>
-                        <img src="ui/add.png" class="checkmark"></img>
-                      </label>
-                      <img class="imageImage" src="throws/10000.png"></img>
-                      <p class="imageLabel">10000 BITS</p>
-                      <div>
-                        <img src="ui/scale.png" title="Scale">
-                        <input class="bitImageScale" type="number" min="0" value="1.5">
-                      </div>
-                      <div class="imageRowHover"></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- BONK SOUNDS -->
-
-            <div id="bonkSounds" class="hidden">
-              <span id="soundsBitsTab" class="tab secondTab">BITS</span>
-              <span id="soundsDefaultTab" class="tab firstTab selectedTab">DEFAULT</span>
-              <div id="soundTable" class="imageTable">
-                <div class="selectAll">
-                  <div>
-                    <p>Select/Deselect All</p>
-                    <label class="checkbox">
-                      <input type="checkbox" class="imageEnabled" checked>
-                      <div class="checkHover"></div>
-                      <img src="ui/checkmark.png" class="checkmark">
-                    </label>
-                  </div>
-                </div>
-                <div id="newSound" class="new row">
-                  <input id="loadSound" type="file" accept="audio/*" multiple hidden>
-                  <div class="imageRowShadow">
-                    <div class="imageRowInner">
-                      <img class="imageImage" src="ui/add.png"></img>
-                      <p class="imageLabel">ADD SOUNDS</p>
-                      <div class="imageRowHover"></div>
-                    </div>
-                  </div>
-                </div>
-                <div id="soundRow" class="row" hidden>
-                  <div class="imageRowShadow">
-                    <div class="imageRowInner">
-                      <label class="checkbox">
-                        <input type="checkbox" class="imageEnabled" checked>
-                        <div class="checkHover"></div>
-                        <img src="ui/checkmark.png" class="checkmark">
-                      </label>
-                      <label class="cogwheel">
-                        <img src="ui/speaker.png" class="checkmark" title="Volume"></img>
-                      </label>
-                      <p class="imageLabel">SOUND URL</p>
-                      <input class="soundVolume" type="range" min="0" max="1" step="0.1">
-                      <label class="delete">
-                        <button class="imageRemove"></button>
-                        <img src="ui/x.png" class="checkmark"></img>
-                      </label>
-                      <div class="imageRowHover"></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div id="bitSoundTable" class="imageTable hidden">
-                <div class="selectAll">
-                  <div>
-                    <p>Select/Deselect All</p>
-                    <label class="checkbox">
-                      <input type="checkbox" class="imageEnabled" checked>
-                      <div class="checkHover"></div>
-                      <img src="ui/checkmark.png" class="checkmark">
-                    </label>
-                  </div>
-                </div>
-                <div id="newBitSound" class="new row">
-                  <input id="loadBitSound" type="file" accept="audio/*" multiple hidden>
-                  <div class="imageRowShadow">
-                    <div class="imageRowInner">
-                      <img class="imageImage" src="ui/add.png"></img>
-                      <p class="imageLabel">ADD SOUNDS</p>
-                      <div class="imageRowHover"></div>
-                    </div>
-                  </div>
-                </div>
-                <div id="bitSoundRow" class="row" hidden>
-                  <div class="imageRowShadow">
-                    <div class="imageRowInner">
-                      <label class="checkbox">
-                        <input type="checkbox" class="imageEnabled" checked>
-                        <div class="checkHover"></div>
-                        <img src="ui/checkmark.png" class="checkmark">
-                      </label>
-                      <label class="cogwheel"></label>
-                      <p class="imageLabel">SOUND URL</p>
-                      <div class="imageRowHover"></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- BONK DETAILS -->
-
-            <div id="bonkDetails" class="hidden">
-              <span class="windowCorner"></span>
-              <span class="windowBack">BACK</span>
-              <div id="bonkDetailsTable">
-                <div class="header">
-                  <div class="headerInner">
-                    Custom Bonk Name
-                  </div>
-                </div>
-                <input type="text" min="0" step="1" class="bonkName grid1-3">
-
-                <div class="header">
-                  <div class="headerInner">
-                    Setting Overrides
-                  </div>
-                </div>
-
-                <p class="grid2">Item Count</p>
-                <input type="number" min="0" step="1" class="barrageCount">
-
-                <label class="checkbox grid1">
-                  <input type="checkbox" class="barrageFrequencyOverride" checked>
-                  <div class="checkHover"></div>
-                  <img src="ui/checkmark.png" class="checkmark">
-                </label>
-                <p class="grid2">Barrage Frequency (s)</p>
-                <input type="number" min="0" step="1" class="barrageFrequency grid3">
-
-                <label class="checkbox grid1">
-                  <input type="checkbox" class="throwDurationOverride" checked>
-                  <div class="checkHover"></div>
-                  <img src="ui/checkmark.png" class="checkmark">
-                </label>
-                <p class="grid2">Throw Duration</p>
-                <input type="number" min="0" step="1" class="throwDuration grid3">
-
-                <label class="checkbox grid1">
-                  <input type="checkbox" class="spinSpeedOverride" checked>
-                  <div class="checkHover"></div>
-                  <img src="ui/checkmark.png" class="checkmark">
-                </label>
-                <p class="grid2">Spin Speed (Min)</p>
-                <input type="number" min="0" value="-45" step="1" class="spinSpeedMin grid3">
-
-                <p class="grid2">Spin Speed (Max)</p>
-                <input type="number" min="0" value="45" step="1" class="spinSpeedMax grid3">
-
-                <label class="checkbox grid1">
-                  <input type="checkbox" class="throwAngleOverride" checked>
-                  <div class="checkHover"></div>
-                  <img src="ui/checkmark.png" class="checkmark">
-                </label>
-                <p class="grid2">Throw Angle (Min)</p>
-                <input type="number" min="-90" value="-45" step="1" class="throwAngleMin grid3">
-
-                <p class="grid2">Throw Angle (Max)</p>
-                <input type="number" min="90" value="45" step="1" class="throwAngleMax grid3">
-
-                <p class="grid2">Windup Time (s)</p>
-                <input type="number" min="0" value="0" class="windupDelay grid3">
-
-                <br/>
-
-                <div class="header">
-                  <div class="headerInner">
-                    Gallery Overrides
-                  </div>
-                </div>
-
-                <label class="checkbox grid1">
-                  <input type="checkbox" class="imagesOverride" checked>
-                  <div class="checkHover"></div>
-                  <img src="ui/checkmark.png" class="checkmark">
-                </label>
-                <p class="grid2">Bonk Images</p>
-                <button class="images grid3">Gallery</button>
-
-                <label class="checkbox grid1">
-                  <input type="checkbox" class="soundsOverride" checked>
-                  <div class="checkHover"></div>
-                  <img src="ui/checkmark.png" class="checkmark">
-                </label>
-                <p class="grid2">Bonk Sounds</p>
-                <button class="sounds grid3">Gallery</button>
-
-                <p class="grid2">Impact Decals</p>
-                <button class="impactDecals grid3">Gallery</button>
-
-                <p class="grid2">Windup Sounds</p>
-                <button class="windupSounds grid3">Gallery</button>
-              </div>
-            </div>
-
-            <!-- CUSTOM BONKS -->
-
-            <div id="customBonks" class="hidden">
-              <span class="windowCorner"></span>
-              <div id="bonksTable" class="imageTable">
-                <div id="bonksAdd" class="new row">
-                  <div class="imageRowShadow">
-                    <div class="imageRowInner">
-                      <img class="imageImage" src="ui/add.png"></img>
-                      <p class="imageLabel">ADD BONK</p>
-                      <div class="imageRowHover"></div>
-                    </div>
-                  </div>
-                </div>
-                <div id="customBonkRow" class="row" hidden>
-                  <div class="imageRowShadow">
-                    <div class="imageRowInner">
-                      <img class="imageImage bonkDetailsButton" src="ui/cog64.png"></img>
-                      <p class="imageLabel">BONK NAME</p>
-                      <label class="delete">
-                        <button class="imageRemove"></button>
-                        <img src="ui/x.png" class="checkmark"></img>
-                      </label>
-                      <div class="imageRowHover"></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- CUSTOM BONK IMAGE OVERRIDES -->
-
-            <div id="bonkImagesCustom" class="hidden">
-              <span class="windowCorner"></span>
-              <span class="windowBack">BACK</span>
-              <div id="imageTableCustom" class="imageTable">
-                <div class="selectAll">
-                  <div>
-                    <p>Select/Deselect All</p>
-                    <label class="checkbox">
-                      <input type="checkbox" class="imageEnabled" checked>
-                      <div class="checkHover"></div>
-                      <img src="ui/checkmark.png" class="checkmark">
-                    </label>
-                  </div>
-                </div>
-                <input id="loadImageCustom" type="file" accept="image/*" multiple hidden>
-                <div id="newImageCustom" class="new row">
-                  <div class="imageRowShadow">
-                    <div class="imageRowInner">
-                      <img class="imageImage" src="ui/add.png"></img>
-                      <p class="imageLabel">ADD IMAGES</p>
-                      <div class="imageRowHover"></div>
-                    </div>
-                  </div>
-                </div>
-                <div id="imageRowCustom" class="row" hidden>
-                  <div class="imageRowShadow">
-                    <div class="imageRowInner">
-                      <label class="checkbox">
-                        <input type="checkbox" class="imageEnabled" checked>
-                        <div class="checkHover"></div>
-                        <img src="ui/checkmark.png" class="checkmark">
-                      </label>
-                      <img class="imageImage" src="throws/I_C_Banana.png"></img>
-                      <p class="imageLabel">IMAGE URL</p>
-                      <div class="imageRowHover"></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- CUSTOM BONK SOUND OVERRIDES -->
-
-            <div id="bonkSoundsCustom" class="hidden">
-              <span class="windowCorner"></span>
-              <span class="windowBack">BACK</span>
-              <div id="soundTableCustom" class="imageTable">
-                <div class="selectAll">
-                  <div>
-                    <p>Select/Deselect All</p>
-                    <label class="checkbox">
-                      <input type="checkbox" class="imageEnabled" checked>
-                      <div class="checkHover"></div>
-                      <img src="ui/checkmark.png" class="checkmark">
-                    </label>
-                  </div>
-                </div>
-                <div id="newSoundCustom" class="new row">
-                  <input id="loadSoundCustom" type="file" accept="audio/*" multiple hidden>
-                  <div class="imageRowShadow">
-                    <div class="imageRowInner">
-                      <img class="imageImage" src="ui/add.png"></img>
-                      <p class="imageLabel">ADD SOUNDS</p>
-                      <div class="imageRowHover"></div>
-                    </div>
-                  </div>
-                </div>
-                <div id="soundRowCustom" class="row" hidden>
-                  <div class="imageRowShadow">
-                    <div class="imageRowInner">
-                      <label class="checkbox">
-                        <input type="checkbox" class="imageEnabled" checked>
-                        <div class="checkHover"></div>
-                        <img src="ui/checkmark.png" class="checkmark">
-                      </label>
-                      <label class="cogwheel"></label>
-                      <p class="imageLabel">SOUND URL</p>
-                      <div class="imageRowHover"></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- CUSTOM IMPACT DECALS -->
-
-            <div id="impactDecals" class="hidden">
-              <span class="windowCorner"></span>
-              <span class="windowBack">BACK</span>
-              <div id="impactDecalsTable" class="imageTable">
-                <div class="selectAll">
-                  <div>
-                    <p>Select/Deselect All</p>
-                    <label class="checkbox">
-                      <input type="checkbox" class="imageEnabled" checked>
-                      <div class="checkHover"></div>
-                      <img src="ui/checkmark.png" class="checkmark">
-                    </label>
-                  </div>
-                </div>
-                <div id="newImpactDecal" class="new row">
-                  <input id="loadImpactDecal" type="file" accept="image/*" multiple hidden>
-                  <div class="imageRowShadow">
-                    <div class="imageRowInner">
-                      <img class="imageImage" src="ui/add.png"></img>
-                      <p class="imageLabel">ADD IMAGES</p>
-                      <div class="imageRowHover"></div>
-                    </div>
-                  </div>
-                </div>
-                <div id="impactDecalRow" class="row" hidden>
-                  <div class="imageRowShadow">
-                    <div class="imageRowInner">
-                      <label class="checkbox">
-                        <input type="checkbox" class="imageEnabled" checked>
-                        <div class="checkHover"></div>
-                        <img src="ui/checkmark.png" class="checkmark">
-                      </label>
-                      <img class="imageImage" src="throws/I_C_Banana.png"></img>
-                      <p class="imageLabel">IMAGE URL</p>
-                      <div class="decalSettings">
-                        <img src="ui/duration.png" title="Duration (s)">
-                        <input type="number" class="decalDuration" min="0" value="0.25">
-                        <img src="ui/scale.png" title="Scale">
-                        <input type="number" class="decalScale" min="0" value="1">
-                      </div>
-                      <label class="delete">
-                        <button class="imageRemove"></button>
-                        <img src="ui/x.png" class="checkmark"></img>
-                      </label>
-                      <div class="imageRowHover"></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- CUSTOM WINDUP SOUNDS -->
-
-            <div id="windupSounds" class="hidden">
-              <span class="windowCorner"></span>
-              <span class="windowBack">BACK</span>
-              <div id="windupSoundTable" class="imageTable">
-                <div class="selectAll">
-                  <div>
-                    <p>Select/Deselect All</p>
-                    <label class="checkbox">
-                      <input type="checkbox" class="imageEnabled" checked>
-                      <div class="checkHover"></div>
-                      <img src="ui/checkmark.png" class="checkmark">
-                    </label>
-                  </div>
-                </div>
-                <div id="newWindupSound" class="new row">
-                  <input id="loadWindupSound" type="file" accept="audio/*" multiple hidden>
-                  <div class="imageRowShadow">
-                    <div class="imageRowInner">
-                      <img class="imageImage" src="ui/add.png"></img>
-                      <p class="imageLabel">ADD SOUNDS</p>
-                      <div class="imageRowHover"></div>
-                    </div>
-                  </div>
-                </div>
-                <div id="windupSoundRow" class="row" hidden>
-                  <div class="imageRowShadow">
-                    <div class="imageRowInner">
-                      <label class="checkbox">
-                        <input type="checkbox" class="imageEnabled" checked>
-                        <div class="checkHover"></div>
-                        <img src="ui/checkmark.png" class="checkmark">
-                      </label>
-                      <p class="imageLabel">SOUND URL</p>
-                      <input class="soundVolume" type="range" min="0" max="1" step="0.1">
-                      <label class="delete">
-                        <button class="imageRemove"></button>
-                        <img src="ui/x.png" class="checkmark"></img>
-                      </label>
-                      <div class="imageRowHover"></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- EVENTS -->
-
-            <div id="events" class="hidden">
-              <span class="windowCorner"></span>
-              <div id="eventsTable">
-                <div class="header">
-                  <div class="headerInner">
-                    Redeems
-                    <img id="redeemAdd" src="ui/add30.png">
-                  </div>
-                </div>
-                <b class="grid1">Enabled</b>
-                <b class="grid2">Redeem Name</b>
-                <b class="grid4">Bonk Type</b>
-                <div id="redeemsRow" class="hidden">
-                  <label class="checkbox grid1">
-                    <input type="checkbox" class="redeemEnabled" checked>
+          <div id="bonkImages">
+            <span id="imagesCoinTab" class="tab thirdTab">电池瓜子</span>
+            <span id="imagesGuardTab" class="tab secondTab">大航海</span>
+            <span id="imagesDefaultTab" class="tab firstTab selectedTab">默认</span>
+            <div id="imageTable" class="imageTable">
+              <div class="selectAll">
+                <div>
+                  <p>全选/取消全选</p>
+                  <label class="checkbox">
+                    <input type="checkbox" class="imageEnabled" checked>
                     <div class="checkHover"></div>
                     <img src="ui/checkmark.png" class="checkmark">
                   </label>
-                  <p class="redeemName grid2">Redeem Name</p>
-                  <button class="redeemID grid3">Listen</button>
-                  <button class="redeemCancel grid3 hidden">Cancel</button>
-                  <select class="bonkType grid4">
-                    <option value="single">Single</option>
-                    <option value="barrage">Barrage</option>
-                    <option value="emote">Emote</option>
-                    <option value="emotes">Emote Barrage</option>
+                </div>
+              </div>
+              <input id="loadImage" type="file" accept="image/*" multiple hidden>
+              <div id="newImage" class="new row">
+                <div class="imageRowShadow">
+                  <div class="imageRowInner">
+                    <img class="imageImage" src="ui/add.png"></img>
+                    <p class="imageLabel">添加图片</p>
+                    <div class="imageRowHover"></div>
+                  </div>
+                </div>
+              </div>
+              <div id="imageRow" class="row" hidden>
+                <div class="imageRowShadow">
+                  <div class="imageRowInner">
+                    <label class="checkbox">
+                      <input type="checkbox" class="imageEnabled" checked>
+                      <div class="checkHover"></div>
+                      <img src="ui/checkmark.png" class="checkmark">
+                    </label>
+                    <label class="cogwheel">
+                      <button class="imageDetails">详情</button>
+                      <img src="ui/cog.png" class="checkmark">
+                    </label>
+                    <img class="imageImage" src="throws/辣条.png"></img>
+                    <p class="imageLabel">IMAGE URL</p>
+                    <label class="delete">
+                      <button class="imageRemove"></button>
+                      <img src="ui/x.png" class="checkmark"></img>
+                    </label>
+                    <div class="imageRowHover"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div id="guardImageTable" class="imageTable hidden">
+              <div id="guard3" class="imageRow row">
+                <!-- <div id="bit1" class="imageRow row"> -->
+                <div class="imageRowShadow">
+                  <div class="imageRowInner">
+                    <input id="loadGuardImage3" type="file" accept="image/*" hidden>
+                    <!-- <input id="loadBitImageone" type="file" accept="image/*" hidden> -->
+                    <label class="cogwheel">
+                      <button id="guardImageAdd3"></button>
+                      <!-- <button id="bitImageAdd1"></button> -->
+                      <img src="ui/add.png" class="checkmark"></img>
+                    </label>
+                    <img class="imageImage" src="throws/舰长.png"></img>
+                    <p class="imageLabel">舰长</p>
+                    <div>
+                      <img src="ui/scale.png" title="Scale">
+                      <input class="guardImageScale" type="number" min="0" value="1.5">
+                      <!-- <input class="bitImageScale" type="number" min="0" value="1.5"> -->
+                    </div>
+                    <div class="imageRowHover"></div>
+                  </div>
+                </div>
+              </div>
+              <div id="guard2" class="imageRow row">
+                <!-- <div id="bit100" class="imageRow row"> -->
+                <div class="imageRowShadow">
+                  <div class="imageRowInner">
+                    <input id="loadGuardImage2" type="file" accept="image/*" hidden>
+                    <!-- <input id="loadBitImageoneHundred" type="file" accept="image/*" hidden> -->
+                    <label class="cogwheel">
+                      <button id="guardImageAdd2"></button>
+                      <!-- <button id="bitImageAdd100"></button> -->
+                      <img src="ui/add.png" class="checkmark"></img>
+                    </label>
+                    <img class="imageImage" src="throws/提督.png"></img>
+                    <p class="imageLabel">提督</p>
+                    <div>
+                      <img src="ui/scale.png" title="Scale" title="Scale">
+                      <input class="guardImageScale" type="number" min="0" value="1.5">
+                      <!-- <input class="bitImageScale" type="number" min="0" value="1.5"> -->
+                    </div>
+                    <div class="imageRowHover"></div>
+                  </div>
+                </div>
+              </div>
+              <div id="guard1" class="imageRow row">
+                <!-- <div id="bit1000" class="imageRow row"> -->
+                <div class="imageRowShadow">
+                  <div class="imageRowInner">
+                    <input id="loadGuardImage1" type="file" accept="image/*" hidden>
+                    <!-- <input id="loadBitImageoneThousand" type="file" accept="image/*" hidden> -->
+                    <label class="cogwheel">
+                      <button id="guardImageAdd1"></button>
+                      <!-- <button id="bitImageAdd1000"></button> -->
+                      <img src="ui/add.png" class="checkmark"></img>
+                    </label>
+                    <img class="imageImage" src="throws/总督.png"></img>
+                    <p class="imageLabel">总督</p>
+                    <div>
+                      <img src="ui/scale.png" title="Scale">
+                      <input class="guardImageScale" type="number" min="0" value="1.5">
+                      <!-- <input class="bitImageScale" type="number" min="0" value="1.5"> -->
+                    </div>
+                    <div class="imageRowHover"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- 电池瓜子tab -->
+            <div id="coinImageTable" class="imageTable hidden">
+              <div id="coinBattery" class="imageRow row">
+                <div class="imageRowShadow">
+                  <div class="imageRowInner">
+                    <input id="loadCoinImagebattery" type="file" accept="image/*" hidden>
+                    <label class="cogwheel">
+                      <button id="coinBatteryAdd"></button>
+                      <img src="ui/add.png" class="checkmark"></img>
+                    </label>
+                    <img class="imageImage" src="throws/battery.png"></img>
+                    <p class="imageLabel">电池</p>
+                    <div>
+                      <img src="ui/scale.png" title="Scale">
+                      <input class="coinImageScale" type="number" min="0" value="1.5">
+                    </div>
+                    <div class="imageRowHover"></div>
+                  </div>
+                </div>
+              </div>
+              <div id="coinSilver" class="imageRow row">
+                <div class="imageRowShadow">
+                  <div class="imageRowInner">
+                    <input id="loadCoinImagesilver" type="file" accept="image/*" hidden>
+                    <label class="cogwheel">
+                      <button id="coinSilverAdd"></button>
+                      <img src="ui/add.png" class="checkmark"></img>
+                    </label>
+                    <img class="imageImage" src="throws/silver.png"></img>
+                    <p class="imageLabel">银瓜子</p>
+                    <div>
+                      <img src="ui/scale.png" title="Scale" title="Scale">
+                      <input class="coinImageScale" type="number" min="0" value="1.5">
+                    </div>
+                    <div class="imageRowHover"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- BONK SOUNDS -->
+
+          <div id="bonkSounds" class="hidden">
+            <span id="soundsCoinTab" class="tab thirdTab">电池瓜子</span>
+            <span id="soundsGuardTab" class="tab secondTab">大航海</span>
+            <span id="soundsDefaultTab" class="tab firstTab selectedTab">默认</span>
+            <div id="soundTable" class="imageTable">
+              <div class="selectAll">
+                <div>
+                  <p>全选/取消全选</p>
+                  <label class="checkbox">
+                    <input type="checkbox" class="imageEnabled" checked>
+                    <div class="checkHover"></div>
+                    <img src="ui/checkmark.png" class="checkmark">
+                  </label>
+                </div>
+              </div>
+              <div id="newSound" class="new row">
+                <input id="loadSound" type="file" accept="audio/*" multiple hidden>
+                <div class="imageRowShadow">
+                  <div class="imageRowInner">
+                    <img class="imageImage" src="ui/add.png"></img>
+                    <p class="imageLabel">添加音效</p>
+                    <div class="imageRowHover"></div>
+                  </div>
+                </div>
+              </div>
+              <div id="soundRow" class="row" hidden>
+                <div class="imageRowShadow">
+                  <div class="imageRowInner">
+                    <label class="checkbox">
+                      <input type="checkbox" class="imageEnabled" checked>
+                      <div class="checkHover"></div>
+                      <img src="ui/checkmark.png" class="checkmark">
+                    </label>
+                    <label class="cogwheel">
+                      <img src="ui/speaker.png" class="checkmark" title="Volume"></img>
+                    </label>
+                    <p class="imageLabel">音效路径</p>
+                    <input class="soundVolume" type="range" min="0" max="1" step="0.1">
+                    <label class="delete">
+                      <button class="imageRemove"></button>
+                      <img src="ui/x.png" class="checkmark"></img>
+                    </label>
+                    <div class="imageRowHover"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div id="guardSoundTable" class="imageTable hidden">
+              <div class="selectAll">
+                <div>
+                  <p>全选/取消全选</p>
+                  <label class="checkbox">
+                    <input type="checkbox" class="imageEnabled" checked>
+                    <div class="checkHover"></div>
+                    <img src="ui/checkmark.png" class="checkmark">
+                  </label>
+                </div>
+              </div>
+              <div id="newGuardSound" class="new row">
+                <!-- <div id="newBitSound" class="new row"> -->
+                <input id="loadGuardSound" type="file" accept="audio/*" multiple hidden>
+                <!-- <input id="loadBitSound" type="file" accept="audio/*" multiple hidden> -->
+                <div class="imageRowShadow">
+                  <div class="imageRowInner">
+                    <img class="imageImage" src="ui/add.png"></img>
+                    <p class="imageLabel">添加音效</p>
+                    <div class="imageRowHover"></div>
+                  </div>
+                </div>
+              </div>
+              <div id="guardSoundRow" class="row" hidden>
+                <!-- <div id="bitSoundRow" class="row" hidden> -->
+                <div class="imageRowShadow">
+                  <div class="imageRowInner">
+                    <label class="checkbox">
+                      <input type="checkbox" class="imageEnabled" checked>
+                      <div class="checkHover"></div>
+                      <img src="ui/checkmark.png" class="checkmark">
+                    </label>
+                    <label class="cogwheel"></label>
+                    <p class="imageLabel">音效路径</p>
+                    <div class="imageRowHover"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div id="coinSoundTable" class="imageTable hidden">
+              <div class="selectAll">
+                <div>
+                  <p>全选/取消全选</p>
+                  <label class="checkbox">
+                    <input type="checkbox" class="imageEnabled" checked>
+                    <div class="checkHover"></div>
+                    <img src="ui/checkmark.png" class="checkmark">
+                  </label>
+                </div>
+              </div>
+              <div id="newCoinSound" class="new row">
+                <input id="loadCoinSound" type="file" accept="audio/*" multiple hidden>
+                <div class="imageRowShadow">
+                  <div class="imageRowInner">
+                    <img class="imageImage" src="ui/add.png"></img>
+                    <p class="imageLabel">添加音效</p>
+                    <div class="imageRowHover"></div>
+                  </div>
+                </div>
+              </div>
+              <div id="coinSoundRow" class="row" hidden>
+                <div class="imageRowShadow">
+                  <div class="imageRowInner">
+                    <label class="checkbox">
+                      <input type="checkbox" class="imageEnabled" checked>
+                      <div class="checkHover"></div>
+                      <img src="ui/checkmark.png" class="checkmark">
+                    </label>
+                    <label class="cogwheel"></label>
+                    <p class="imageLabel">音效路径</p>
+                    <div class="imageRowHover"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- BONK DETAILS -->
+
+          <div id="bonkDetails" class="hidden">
+            <span class="windowCorner"></span>
+            <span class="windowBack">返回</span>
+            <div id="bonkDetailsTable">
+              <div class="header">
+                <div class="headerInner">
+                  自定义投掷名
+                </div>
+              </div>
+              <input type="text" min="0" step="1" class="bonkName grid1-3">
+
+              <div class="header">
+                <div class="headerInner">
+                  投掷选项
+                </div>
+              </div>
+
+              <!-- 自动投掷数量开关 -->
+              <label class="checkbox grid1">
+                <input type="checkbox" class="barrageCountManual" checked>
+                <div class="checkHover"></div>
+                <img src="ui/checkmark.png" class="checkmark">
+              </label>
+              <p class="grid2">物体数量（禁用则自动）</p>
+              <input type="number" min="0" step="1" class="barrageCount">
+
+              <label class="checkbox grid1">
+                <input type="checkbox" class="barrageFrequencyOverride" checked>
+                <div class="checkHover"></div>
+                <img src="ui/checkmark.png" class="checkmark">
+              </label>
+              <p class="grid2">多次投掷的间隔（秒）</p>
+              <input type="number" min="0" step="1" class="barrageFrequency grid3">
+
+              <label class="checkbox grid1">
+                <input type="checkbox" class="throwDurationOverride" checked>
+                <div class="checkHover"></div>
+                <img src="ui/checkmark.png" class="checkmark">
+              </label>
+              <p class="grid2">投掷时长（秒）</p>
+              <input type="number" min="0" step="1" class="throwDuration grid3">
+
+              <label class="checkbox grid1">
+                <input type="checkbox" class="spinSpeedOverride" checked>
+                <div class="checkHover"></div>
+                <img src="ui/checkmark.png" class="checkmark">
+              </label>
+              <p class="grid2">旋转速度（最低）</p>
+              <input type="number" min="0" value="-45" step="1" class="spinSpeedMin grid3">
+
+              <p class="grid2">旋转速度（最高）</p>
+              <input type="number" min="0" value="45" step="1" class="spinSpeedMax grid3">
+
+              <label class="checkbox grid1">
+                <input type="checkbox" class="throwAngleOverride" checked>
+                <div class="checkHover"></div>
+                <img src="ui/checkmark.png" class="checkmark">
+              </label>
+              <p class="grid2">投掷角度（最小）</p>
+              <input type="number" min="-90" value="-45" step="1" class="throwAngleMin grid3">
+
+              <p class="grid2">投掷角度（最大）</p>
+              <input type="number" min="90" value="45" step="1" class="throwAngleMax grid3">
+
+              <p class="grid2">掷出延时（秒）</p>
+              <input type="number" min="0" value="0" class="windupDelay grid3">
+
+              <br />
+
+              <div class="header">
+                <div class="headerInner">
+                  视听选项
+                </div>
+              </div>
+
+              <label class="checkbox grid1">
+                <input type="checkbox" class="imagesOverride" checked>
+                <div class="checkHover"></div>
+                <img src="ui/checkmark.png" class="checkmark">
+              </label>
+              <p class="grid2">投掷物图片</p>
+              <button class="images grid3">列表</button>
+
+              <label class="checkbox grid1">
+                <input type="checkbox" class="soundsOverride" checked>
+                <div class="checkHover"></div>
+                <img src="ui/checkmark.png" class="checkmark">
+              </label>
+              <p class="grid2">击中音效</p>
+              <button class="sounds grid3">列表</button>
+
+              <p class="grid2">击中反馈图片</p>
+              <button class="impactDecals grid3">列表</button>
+
+              <p class="grid2">掷出音效</p>
+              <button class="windupSounds grid3">列表</button>
+            </div>
+          </div>
+
+          <!-- CUSTOM BONKS -->
+
+          <div id="customBonks" class="hidden">
+            <span class="windowCorner"></span>
+            <div id="bonksTable" class="imageTable">
+              <div id="bonksAdd" class="new row">
+                <div class="imageRowShadow">
+                  <div class="imageRowInner">
+                    <img class="imageImage" src="ui/add.png"></img>
+                    <p class="imageLabel">添加自定义投掷</p>
+                    <div class="imageRowHover"></div>
+                  </div>
+                </div>
+              </div>
+              <div id="customBonkRow" class="row" hidden>
+                <div class="imageRowShadow">
+                  <div class="imageRowInner">
+                    <img class="imageImage bonkDetailsButton" src="ui/cog64.png"></img>
+                    <p class="imageLabel">投掷名称</p>
+                    <label class="delete">
+                      <button class="imageRemove"></button>
+                      <img src="ui/x.png" class="checkmark"></img>
+                    </label>
+                    <div class="imageRowHover"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- CUSTOM BONK IMAGE OVERRIDES -->
+
+          <div id="bonkImagesCustom" class="hidden">
+            <span class="windowCorner"></span>
+            <span class="windowBack">返回</span>
+            <div id="imageTableCustom" class="imageTable">
+              <div class="selectAll">
+                <div>
+                  <p>全选/取消全选</p>
+                  <label class="checkbox">
+                    <input type="checkbox" class="imageEnabled" checked>
+                    <div class="checkHover"></div>
+                    <img src="ui/checkmark.png" class="checkmark">
+                  </label>
+                </div>
+              </div>
+              <input id="loadImageCustom" type="file" accept="image/*" multiple hidden>
+              <div id="newImageCustom" class="new row">
+                <div class="imageRowShadow">
+                  <div class="imageRowInner">
+                    <img class="imageImage" src="ui/add.png"></img>
+                    <p class="imageLabel">添加图片</p>
+                    <div class="imageRowHover"></div>
+                  </div>
+                </div>
+              </div>
+              <div id="imageRowCustom" class="row" hidden>
+                <div class="imageRowShadow">
+                  <div class="imageRowInner">
+                    <label class="checkbox">
+                      <input type="checkbox" class="imageEnabled" checked>
+                      <div class="checkHover"></div>
+                      <img src="ui/checkmark.png" class="checkmark">
+                    </label>
+                    <img class="imageImage" src="throws/辣条.png"></img>
+                    <p class="imageLabel">IMAGE URL</p>
+                    <div class="imageRowHover"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- CUSTOM BONK SOUND OVERRIDES -->
+
+          <div id="bonkSoundsCustom" class="hidden">
+            <span class="windowCorner"></span>
+            <span class="windowBack">返回</span>
+            <div id="soundTableCustom" class="imageTable">
+              <div class="selectAll">
+                <div>
+                  <p>全选/取消全选</p>
+                  <label class="checkbox">
+                    <input type="checkbox" class="imageEnabled" checked>
+                    <div class="checkHover"></div>
+                    <img src="ui/checkmark.png" class="checkmark">
+                  </label>
+                </div>
+              </div>
+              <div id="newSoundCustom" class="new row">
+                <input id="loadSoundCustom" type="file" accept="audio/*" multiple hidden>
+                <div class="imageRowShadow">
+                  <div class="imageRowInner">
+                    <img class="imageImage" src="ui/add.png"></img>
+                    <p class="imageLabel">添加音效</p>
+                    <div class="imageRowHover"></div>
+                  </div>
+                </div>
+              </div>
+              <div id="soundRowCustom" class="row" hidden>
+                <div class="imageRowShadow">
+                  <div class="imageRowInner">
+                    <label class="checkbox">
+                      <input type="checkbox" class="imageEnabled" checked>
+                      <div class="checkHover"></div>
+                      <img src="ui/checkmark.png" class="checkmark">
+                    </label>
+                    <label class="cogwheel"></label>
+                    <p class="imageLabel">SOUND URL</p>
+                    <div class="imageRowHover"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- CUSTOM IMPACT DECALS -->
+
+          <div id="impactDecals" class="hidden">
+            <span class="windowCorner"></span>
+            <span class="windowBack">返回</span>
+            <div id="impactDecalsTable" class="imageTable">
+              <div class="selectAll">
+                <div>
+                  <p>全选/取消全选</p>
+                  <label class="checkbox">
+                    <input type="checkbox" class="imageEnabled" checked>
+                    <div class="checkHover"></div>
+                    <img src="ui/checkmark.png" class="checkmark">
+                  </label>
+                </div>
+              </div>
+              <div id="newImpactDecal" class="new row">
+                <input id="loadImpactDecal" type="file" accept="image/*" multiple hidden>
+                <div class="imageRowShadow">
+                  <div class="imageRowInner">
+                    <img class="imageImage" src="ui/add.png"></img>
+                    <p class="imageLabel">添加图片</p>
+                    <div class="imageRowHover"></div>
+                  </div>
+                </div>
+              </div>
+              <div id="impactDecalRow" class="row" hidden>
+                <div class="imageRowShadow">
+                  <div class="imageRowInner">
+                    <label class="checkbox">
+                      <input type="checkbox" class="imageEnabled" checked>
+                      <div class="checkHover"></div>
+                      <img src="ui/checkmark.png" class="checkmark">
+                    </label>
+                    <img class="imageImage" src="throws/辣条.png"></img>
+                    <p class="imageLabel">IMAGE URL</p>
+                    <div class="decalSettings">
+                      <img src="ui/duration.png" title="Duration (s)">
+                      <input type="number" class="decalDuration" min="0" value="0.25">
+                      <img src="ui/scale.png" title="Scale">
+                      <input type="number" class="decalScale" min="0" value="1">
+                    </div>
+                    <label class="delete">
+                      <button class="imageRemove"></button>
+                      <img src="ui/x.png" class="checkmark"></img>
+                    </label>
+                    <div class="imageRowHover"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- CUSTOM WINDUP SOUNDS -->
+
+          <div id="windupSounds" class="hidden">
+            <span class="windowCorner"></span>
+            <span class="windowBack">返回</span>
+            <div id="windupSoundTable" class="imageTable">
+              <div class="selectAll">
+                <div>
+                  <p>全选/取消全选</p>
+                  <label class="checkbox">
+                    <input type="checkbox" class="imageEnabled" checked>
+                    <div class="checkHover"></div>
+                    <img src="ui/checkmark.png" class="checkmark">
+                  </label>
+                </div>
+              </div>
+              <div id="newWindupSound" class="new row">
+                <input id="loadWindupSound" type="file" accept="audio/*" multiple hidden>
+                <div class="imageRowShadow">
+                  <div class="imageRowInner">
+                    <img class="imageImage" src="ui/add.png"></img>
+                    <p class="imageLabel">添加音效</p>
+                    <div class="imageRowHover"></div>
+                  </div>
+                </div>
+              </div>
+              <div id="windupSoundRow" class="row" hidden>
+                <div class="imageRowShadow">
+                  <div class="imageRowInner">
+                    <label class="checkbox">
+                      <input type="checkbox" class="imageEnabled" checked>
+                      <div class="checkHover"></div>
+                      <img src="ui/checkmark.png" class="checkmark">
+                    </label>
+                    <p class="imageLabel">SOUND URL</p>
+                    <input class="soundVolume" type="range" min="0" max="1" step="0.1">
+                    <label class="delete">
+                      <button class="imageRemove"></button>
+                      <img src="ui/x.png" class="checkmark"></img>
+                    </label>
+                    <div class="imageRowHover"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- EVENTS -->
+
+          <div id="events" class="hidden">
+            <span class="windowCorner"></span>
+            <div id="eventsTable">
+              <div class="header">
+                <div class="headerInner">
+                  礼物类型
+                  <img id="giftAdd" src="ui/add30.png">
+                </div>
+              </div>
+              <div class="eventGrid">
+                <b class="grid1">启用</b>
+                <b class="grid2">礼物名</b>
+                <b class="grid3">投掷类型</b>
+                <b class="grid4">冷却时长（秒）</b>
+              </div>
+              <div class="eventList">
+                <div id="giftsRow" class="hidden">
+                  <label class="checkbox grid1">
+                    <input type="checkbox" class="giftEnabled" checked>
+                    <div class="checkHover"></div>
+                    <img src="ui/checkmark.png" class="checkmark">
+                  </label>
+                  <input type="text" class="giftName grid2">
+                  <select class="bonkType grid3">
+                    <option value="single">随机投一个</option>
+                    <option value="barrage">随机投多个</option>
                   </select>
+                  <input type="number" min="0" class="giftCooldown grid4">
                   <label class="delete grid5">
-                    <button class="imageRemove redeemRemove"></button>
+                    <button class="imageRemove giftRemove"></button>
                     <img src="ui/x.png" class="checkmark"></img>
                   </label>
                 </div>
+              </div>
 
-                <br/>
+              <br />
 
-                <div class="header">
-                  <div class="headerInner">
-                    Commands
-                    <img id="commandAdd" src="ui/add30.png">
-                  </div>
+              <div class="header">
+                <div class="headerInner">
+                  礼物选项
                 </div>
-                <b class="grid1">Enabled</b>
-                <b class="grid2">Command Name</b>
-                <b class="grid3">Bonk Type</b>
-                <b class="grid4">Cooldown</b>
+              </div>
+
+              <div class="eventGrid">
+                <!-- 最低礼物电池数和瓜子数 -->
+                <!-- <b class="grid2">选项</b> -->
+                <p class="grid2">单个礼物所需最少价值</p>
+
+                <p class="grid3">最少电池</p>
+                <input type="number" id="coinMinBattery" class="grid4" step="1" min="0" value="0">
+
+                <p class="grid3">最少瓜子</p>
+                <input type="number" id="coinMinSilver" class="grid4" step="1" min="0" value="0">
+
+                <!-- 未绑定礼物类型的礼物投掷瓜子电池 -->
+                <b class="grid1">启用</b>
+                <b class="grid2">选项</b>
+
+                <label class="checkbox grid1">
+                  <input type="checkbox" id="coinsThrowEnabled" checked>
+                  <div class="checkHover"></div>
+                  <img src="ui/checkmark.png" class="checkmark">
+                </label>
+                <p class="grid2">投掷瓜子电池</p>
+
+                <p class="grid3">投掷上限</p>
+                <input type="number" id="coinsThrowMaxCount" class="grid4" step="1" min="0" value="100">
+
+                <p class="grid2">(未绑定礼物类型的礼物)</p>
+
+                <p class="grid3">投掷单位</p>
+                <input type="number" id="coinsThrowUnit" class="grid4" step="1" min="1" value="1">
+
+                <p class="grid3">冷却时长（秒）</p>
+                <input type="number" id="coinsThrowCooldown" class="grid4" min="0" value="0">
+
+                <!-- 礼物复数时上限 -->
+                <b class="grid1">启用</b>
+                <b class="grid2">选项</b>
+
+                <label class="checkbox grid1">
+                  <input type="checkbox" id="multiGiftsEnabled" checked>
+                  <div class="checkHover"></div>
+                  <img src="ui/checkmark.png" class="checkmark">
+                </label>
+                <p class="grid2">复数礼物限制</p>
+
+                <p class="grid3">投掷上限</p>
+                <input type="number" id="multiGiftsMaxCount" class="grid4" step="1" min="0" value="100">
+              </div>
+
+              <br />
+
+              <!-- 弹幕关键字，可用作表情的判断 -->
+              <div class="header">
+                <div class="headerInner">
+                  弹幕关键字
+                  <img id="commandAdd" src="ui/add30.png">
+                </div>
+              </div>
+              <div class="eventGrid">
+                <b class="grid1">启用</b>
+                <b class="grid2">关键字</b>
+                <b class="grid3">投掷类型</b>
+                <b class="grid4">冷却时长（秒）</b>
+              </div>
+              <div class="eventList">
                 <div id="commandsRow" class="hidden">
                   <label class="checkbox grid1">
                     <input type="checkbox" class="commandEnabled" checked>
@@ -996,10 +1139,8 @@
                   </label>
                   <input type="text" class="commandName grid2">
                   <select class="bonkType grid3">
-                    <option value="single">Single</option>
-                    <option value="barrage">Barrage</option>
-                    <option value="emote">Emote</option>
-                    <option value="emotes">Emote Barrage</option>
+                    <option value="single">随机投一个</option>
+                    <option value="barrage">随机投多个</option>
                   </select>
                   <input type="number" min="0" class="commandCooldown grid4">
                   <label class="delete grid5">
@@ -1007,143 +1148,105 @@
                     <img src="ui/x.png" class="checkmark"></img>
                   </label>
                 </div>
+              </div>
 
-                <br/>
+              <br />
 
-                <div class="header">
-                  <div class="headerInner">
-                    Other
-                  </div>
+              <div class="header">
+                <div class="headerInner">
+                  其他
                 </div>
+              </div>
 
-                <!-- Subs & Follows -->
-                <b class="grid1">Enabled</b>
-                <b class="grid2">Event Type</b>
-                <b class="grid3">Bonk Type</b>
-                <b class="grid4">Cooldown (s)</b>
+              <div class="eventGrid">
+                <b class="grid1">启用</b>
+                <b class="grid2">事件</b>
+                <b class="grid3">投掷类型</b>
+                <b class="grid4">冷却时长（秒）</b>
 
-                <!-- Follow -->
+                <!-- 关注 -->
                 <label class="checkbox grid1">
                   <input type="checkbox" id="followEnabled" checked>
                   <div class="checkHover"></div>
                   <img src="ui/checkmark.png" class="checkmark">
                 </label>
-                <p class="grid2">Follow</p>
+                <p class="grid2">关注</p>
                 <select id="followType" class="grid3">
-                  <option value="single">Single</option>
-                  <option value="barrage" selected>Barrage</option>
-                  <option value="emote">Emote</option>
-                  <option value="emotes">Emote Barrage</option>
+                  <option value="single">随机投一个</option>
+                  <option value="barrage" selected>随机投多个</option>
                 </select>
                 <input type="number" id="followCooldown" class="grid4" min="0" value="0">
+              </div>
 
-                <!-- Subscription -->
+              <br />
+
+              <!-- 醒目留言电池 -->
+              <b class="grid1">启用</b>
+              <b class="grid2">事件</b>
+
+              <div class="eventGrid">
                 <label class="checkbox grid1">
-                  <input type="checkbox" id="subEnabled" checked>
+                  <input type="checkbox" id="superChatEnabled" checked>
                   <div class="checkHover"></div>
                   <img src="ui/checkmark.png" class="checkmark">
                 </label>
-                <p class="grid2">Subscription</p>
-                <select id="subType" class="grid3">
-                  <option value="single">Single</option>
-                  <option value="barrage" selected>Barrage</option>
-                  <option value="emote">Emote</option>
-                  <option value="emotes">Emote Barrage</option>
-                </select>
-                <input type="number" id="subCooldown" class="grid4" min="0" value="0">
+                <p class="grid2">醒目留言投掷电池</p>
 
-                <!-- Gift Subscription -->
+                <p class="grid3">最低电池数</p>
+                <input type="number" id="superChatMinBattery" class="grid4" step="10" min="300" value="300">
+
+                <p class="grid3">最多投掷</p>
+                <input type="number" id="superChatMaxCount" class="grid4" step="1" min="1" value="100">
+
+                <p class="grid3">投掷单位</p>
+                <input type="number" id="superChatCoinUnit" class="grid4" step="1" min="1" value="10">
+
+                <p class="grid3">冷却时长（秒）</p>
+                <input type="number" id="superChatCooldown" class="grid4" min="0" value="0">
+              </div>
+
+              <br>
+
+              <!-- 大航海 -->
+              <b class="grid1">启用</b>
+              <b class="grid2">事件</b>
+
+              <div class="eventGrid">
                 <label class="checkbox grid1">
-                  <input type="checkbox" id="subGiftEnabled" checked>
+                  <input type="checkbox" id="guardEnabled" checked>
                   <div class="checkHover"></div>
                   <img src="ui/checkmark.png" class="checkmark">
                 </label>
-                <p class="grid2">Gift Subscription</p>
-                <select id="subGiftType" class="grid3">
-                  <option value="single">Single</option>
-                  <option value="barrage" selected>Barrage</option>
-                  <option value="emote">Emote</option>
-                  <option value="emotes">Emote Barrage</option>
-                </select>
-                <input type="number" id="subGiftCooldown" class="grid4" min="0" value="0">
+                <p class="grid2">大航海</p>
 
-                <br/>
-  
-                <!-- Bits -->
-                <b class="grid1">Enabled</b>
-                <b class="grid2">Event Type</b>
-
-                <label class="checkbox grid1">
-                  <input type="checkbox" id="bitsEnabled" checked>
-                  <div class="checkHover"></div>
-                  <img src="ui/checkmark.png" class="checkmark">
-                </label>
-                <p class="grid2">Bits</p>
-
-                <p class="grid3">Min Donation</p>
-                <input type="number" id="bitsMinDonation" class="grid4" step="1" min="0" value="0">
-
-                <p class="grid3">Max Bonks</p>
-                <input type="number" id="bitsMaxBarrageCount" class="grid4" step="1" min="0" value="100">
-
-                <p class="grid3">Cooldown (s)</p>
-                <input type="number" id="bitsCooldown" class="grid4" min="0" value="0">
-                
-                <p class="grid2-3 right" title="If enabled, only 1-bit icons will be thrown. This will not throw an accurate number of bits if the donation is higher than the max bonks. &#013;If disabled, all of 1, 100, 1,000, 5,000, and 10,000-bit icons can be thrown. This will usually throw an accurate number of bits.">Throw Only 1-Bit Icons</p>
-                <label class="checkbox grid4">
-                  <input type="checkbox" id="bitsOnlySingle">
-                  <div class="checkHover"></div>
-                  <img src="ui/checkmark.png" class="checkmark">
-                </label>
-
-                <!-- Raids -->
-                <b class="grid1">Enabled</b>
-                <b class="grid2">Event Type</b>
-
-                <label class="checkbox grid1">
-                  <input type="checkbox" id="raidEnabled" checked>
-                  <div class="checkHover"></div>
-                  <img src="ui/checkmark.png" class="checkmark">
-                </label>
-                <p class="grid2">Raids</p>
-                
-                <p class="grid3">Min Raiders</p>
-                <input type="number" id="raidMinRaiders" class="grid4" step="1" min="0" value="1">
-
-                <p class="grid3">Min Bonks</p>
-                <input type="number" id="raidMinBarrageCount" class="grid4" step="1" value="10">
-
-                <p class="grid3">Max Bonks</p>
-                <input type="number" id="raidMaxBarrageCount" class="grid4" step="1" value="100">
-
-                <p class="grid3">Cooldown (s)</p>
-                <input type="number" id="raidCooldown" class="grid4" min="0" value="0">
-                
-                <p class="grid2-3 right">Throw Raiding Channel's Emotes</p>
-                <label class="checkbox grid4">
-                  <input type="checkbox" id="raidEmotes" checked>
-                  <div class="checkHover"></div>
-                  <img src="ui/checkmark.png" class="checkmark">
-                </label>
+                <p class="grid3">冷却时长（秒）</p>
+                <input type="number" id="guardCooldown" class="grid4" min="0" value="0">
               </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-    <div id="footer">
-      <img id="logoTypeou" src="ui/logo40_wide_l.png">
-      <div id="user">
-        <p>User:</p>
-        <p id="username" class="errorText">None</p>
-        <button id="logout">Log in</button>
-        <p id="newVersion" class="errorText hidden">New Version Available!</p>
-        <div id="itchLink">
-          <a href="#">https://typeou.itch.io/kbonk</a>
-        </div>
+  </div>
+  <div id="footer">
+    <div id="bottomLogo">
+      <img src="ui/logo36_bottom.png" alt="" id="logoLuis">
+      <span>LuiScreaMed</span>
+      <!-- <img id="logoTypeou" src="ui/logo40_wide_l.png"> -->
+    </div>
+    <div id="room">
+      <p>房间号：</p>
+      <input id="roomid" type="text" value="372206" />
+      <!-- <p id="roomid" class="errorText">None</p> -->
+      <button id="logout">连接</button>
+      <p id="newVersion" class="errorText hidden">发现新版本！</p>
+      <div id="githubLink">
+        <a href="#">Github: karasubonk_bilibili</a>
       </div>
     </div>
+  </div>
 
-    <script src="renderer.js"></script>
-  </body>
+  <script src="renderer.js"></script>
+</body>
+
 </html>

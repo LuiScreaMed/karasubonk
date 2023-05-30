@@ -1,7 +1,7 @@
 const { ipcRenderer } = require("electron");
 const fs = require("fs");
 
-const version = 1.21;
+const version = "1.0";
 
 // ------
 // Status
@@ -10,42 +10,45 @@ const version = 1.21;
 var status = 0;
 
 const statusTitle = [
-    "Ready!",
-    "Awaiting Authentication...",
-    "Connecting to Browser Source...",
-    "Calibrating (1/2)",
-    "Calibrating (2/2)",
-    "Connecting to VTube Studio...",
-    "Listening for Redeem...",
-    "Calibration",
-    "Activating Event Listeners...",
-    "Error: Port In Use",
-    "Warning: Version Mismatch",
-    "Warning: Version Mismatch",
-    "Authenticating..."
+    "准备就绪！",
+    "等待连接直播间...",
+    "正在连接网页源...",
+    "校准中 (1/2)",
+    "校准中 (2/2)",
+    "正在连接VTube Studio...",
+    "校准",
+    "正在激活弹幕事件...",
+    "错误：端口被占用",
+    "警告：版本不匹配",
+    "警告：版本不匹配"
 ];
 
 const statusDesc = [
     "",
-    "<p>Click the \"Log in\" button below to open a Twitch authentication window in your browser.</p>",
-    "<p>If this message doesn't disappear after a few seconds, please refresh the KBonk Browser Source in OBS.</p><p>The KBonk Browser Source should be active with <mark>karasubonk/resources/app/bonker.html</mark> as the source file.</p>",
-    "<p>Please use VTube Studio to position your model's head under the guide being displayed in OBS.</p><p>Your VTube Studio Source and KBonk Browser Source should be overlapping.</p><p>Press the <mark>Continue Calibration</mark> button below to continue to the next step.</p>",
-    "<p>Please use VTube Studio to position your model's head under the guide being displayed in OBS.</p><p>Your VTube Studio Source and KBonk Browser Source should be overlapping.</p><p>Press the <mark>Confirm Calibration</mark> button below to finish calibration.</p>",
-    [ "<p>If this message doesn't disappear after a few seconds, please refresh the KBonk Browser Source.</p><p>If that doesn't work, please ensure the VTube Studio API is enabled on port <mark>", "</mark>.</p>" ],
-    "<p>Please use the Channel Point Reward you'd like to use.</p>",
-    "<p>This short process will decide the impact location of thrown objects.</p><p>Please click \"Start Calibration\" to start the calibration process.</p>",
-    "<p>Several windows will briefly appear during this process.</p>",
-    [ "<p>The port <mark>", "</mark> is already in use. Another process may be using this port.</p><p>Try changing the Browser Source Port in Settings, under Advanced Settings.</p><p>It should be some number between 1024 and 65535.</p>" ],
-    "<p>KBonk and the Browser Source are running on different versions.</p><p>Please ensure KBonk and the Browser Source are both running from the same folder.</p>",
-    "<p>No version response from Browser Source.</p><p>KBonk and the Browser Source may be running on different versions.</p><p>Please ensure KBonk and the Browser Source are both running from the same folder.</p>",
-    "<p>Awaiting authentication response from browser...</p>"
+    "<p>点击下方的“连接”按钮连接B站直播间。</p>",
+    `<p>如果这条提示没有消失，请在OBS中刷新浏览器源。</p><p>提示：请在OBS中添加该路径下的本地文件为浏览器源： </p><p><mark>karasubonk_bilibili/resources/app/bonker.html</mark></p><p><div id="bonkerLink" class="topButton">
+    <div class="overlayButton"></div>
+    <div class="innerTopButton">点击跳转至该文件所在文件夹</div>
+    <div class="cornerTopButton"></div>
+    </div></p>`,
+    "<p>请将VTS模型的头部移动至OBS浏览器源的标志上。</p><p>提示：您有可能因为将VTS源置于浏览器源上方导致无法看到标志。</p><p>单击 <mark>下一步</mark> 进行下一步校准</p>",
+    "<p>请将VTS模型的头部移动至OBS浏览器源的标志上。</p><p>提示：您有可能因为将VTS源置于浏览器源上方导致无法看到标志。</p><p>单击 <mark>完成</mark> 完成校准</p>",
+    ["<p>如果这条提示没有消失，请在OBS中刷新浏览器源。</p><p>如果刷新了浏览器源后仍然无效，请确认VTS中的API已经开启，并且端口为<mark>", "</mark>。</p>"],
+    "<p>这项设置用于校准扔出物体的目标方位。</p><p>请点击 \"开始校准\" 进行校准。</p>",
+    "",
+    ["<p>端口：<mark>", "</mark> 被占用。</p><p>您可以尝试在 <mark>设置 -> 高级设置</mark> 中修改浏览器源的端口。</p><p>端口应在 1024 至 65535 的范围内。</p>"],
+    "<p>KBonk 与浏览器源的版本不一致。</p><p>请确认OBS中使用的浏览器源文件位于当前KBonk应用的子目录中。</p>",
+    "<p>浏览器源没有返回版本号。</p><p>KBonk与浏览器源可能版本不一致。</p><p>请确认OBS中使用的浏览器源文件位于当前KBonk应用的子目录中。</p>"
 ];
 
-ipcRenderer.on("username", (event, message) => {
-    document.querySelector("#username").classList.add("readyText");
-    document.querySelector("#username").classList.remove("errorText");
-    document.querySelector("#username").innerText = message;
-    document.querySelector("#logout").innerText = "Log out";
+ipcRenderer.on("connectInputDisabled", (_, { input, button }) => {
+    document.querySelector("#roomid").disabled = input;
+    document.querySelector("#logout").disabled = button;
+    document.querySelector("#logout").classList[button ? "add" : "remove"]("disabled");
+})
+
+ipcRenderer.on("connected", () => {
+    document.querySelector("#logout").innerText = "断开连接";
 });
 
 var userDataPath = null;
@@ -54,41 +57,62 @@ ipcRenderer.on("userDataPath", (event, message) => {
 })
 ipcRenderer.send("getUserDataPath");
 
-document.querySelector("#logout").addEventListener("click", () => {
-    ipcRenderer.send("reauthenticate");
-    document.querySelector("#username").classList.remove("readyText");
-    document.querySelector("#username").classList.add("errorText");
-    document.querySelector("#username").innerText = "None";
-    document.querySelector("#logout").innerText = "Log in";
+function toBonkerFile() {
+    ipcRenderer.send("toBonkerFile");
+}
+
+// 仅允许输入数字
+document.querySelector("#roomid").oninput = function () {
+    this.value = this.value.replace(/\D/g, '');
+    if (this.value === "" || this.value === "0") {
+        this.value = "1"
+    }
+}
+
+document.querySelector("#logout").addEventListener("click", async () => {
+    let roomid = document.querySelector("#roomid").value;
+    setData("roomid", roomid);
+    ipcRenderer.send("connect", roomid);
+    document.querySelector("#logout").innerText = "连接";
 });
 
-document.querySelector("#itchLink a").addEventListener("click", () => { ipcRenderer.send("link"); });
+document.querySelector("#githubLink a").addEventListener("click", () => { ipcRenderer.send("link"); });
+
+document.querySelector("#originalItchLink").addEventListener("click", () => {
+    ipcRenderer.send("originalItchLink");
+})
+document.querySelector("#originalAuthorLink").addEventListener("click", () => {
+    ipcRenderer.send("originalAuthorLink");
+})
+document.querySelector("#creditGithubLink").addEventListener("click", () => {
+    ipcRenderer.send("creditGithubLink");
+})
+document.querySelector("#bilibiliLink").addEventListener("click", () => {
+    ipcRenderer.send("bilibiliLink");
+})
 
 ipcRenderer.on("status", (event, message) => { setStatus(event, message); });
 
-async function setStatus(_, message)
-{
-    // Fix: reduce ui refresh related to status.
-    if (status === message) return;
-
+async function setStatus(_, message) {
+    if (status == message) return;
+    if (status == 2) {
+        document.querySelector("#bonkerLink").removeEventListener("click", toBonkerFile);
+    }
     status = message;
     document.querySelector("#status").innerHTML = statusTitle[status];
-    document.querySelector("#headerStatusInner").innerHTML = statusTitle[status] + (status != 0 ? " (Click)" : "");
+    document.querySelector("#headerStatusInner").innerHTML = statusTitle[status] + (status != 0 ? " (单击查看详情)" : "");
 
-    if (status == 0)
-    {
+    if (status == 0) {
         document.querySelector("#headerStatus").classList.remove("errorText");
         document.querySelector("#headerStatus").classList.remove("workingText");
         document.querySelector("#headerStatus").classList.add("readyText");
     }
-    else if (status == 9 || status == 10 || status == 11)
-    {
+    else if (status == 8 || status == 9 || status == 10) {
         document.querySelector("#headerStatus").classList.add("errorText");
         document.querySelector("#headerStatus").classList.remove("workingText");
         document.querySelector("#headerStatus").classList.remove("readyText");
     }
-    else
-    {
+    else {
         document.querySelector("#headerStatus").classList.remove("errorText");
         document.querySelector("#headerStatus").classList.add("workingText");
         document.querySelector("#headerStatus").classList.remove("readyText");
@@ -96,19 +120,22 @@ async function setStatus(_, message)
 
     if (status == 5)
         document.querySelector("#statusDesc").innerHTML = statusDesc[status][0] + await getData("portVTubeStudio") + statusDesc[status][1];
-    else if (status == 9)
+    else if (status == 8)
         document.querySelector("#statusDesc").innerHTML = statusDesc[status][0] + await getData("portThrower") + statusDesc[status][1];
     else
         document.querySelector("#statusDesc").innerHTML = statusDesc[status];
 
-    if (status == 3 || status == 4 || status == 7)
-    {
-        if (status == 7)
-            document.querySelector("#nextCalibrate").querySelector(".innerTopButton").innerText = "Start Calibration";
+    if (status == 2) {
+        document.querySelector("#bonkerLink").addEventListener("click", toBonkerFile)
+    }
+
+    if (status == 3 || status == 4 || status == 6) {
+        if (status == 6)
+            document.querySelector("#nextCalibrate").querySelector(".innerTopButton").innerText = "开始校准";
         else if (status == 3)
-            document.querySelector("#nextCalibrate").querySelector(".innerTopButton").innerText = "Continue Calibration";
+            document.querySelector("#nextCalibrate").querySelector(".innerTopButton").innerText = "下一步";
         else if (status == 4)
-            document.querySelector("#nextCalibrate").querySelector(".innerTopButton").innerText = "Confirm Calibration";
+            document.querySelector("#nextCalibrate").querySelector(".innerTopButton").innerText = "完成";
         document.querySelector("#calibrateButtons").classList.remove("hidden");
     }
     else
@@ -123,18 +150,16 @@ async function setStatus(_, message)
 document.querySelector("#newImage").addEventListener("click", () => { document.querySelector("#loadImage").click(); });
 document.querySelector("#loadImage").addEventListener("change", loadImage);
 
-async function loadImage()
-{
+async function loadImage() {
     var throws = await getData("throws");
     var files = document.querySelector("#loadImage").files;
-    for (var i = 0; i < files.length; i++)
-    {
+    for (var i = 0; i < files.length; i++) {
         // Grab the image that was just loaded
         var imageFile = files[i];
         // If the folder for objects doesn't exist for some reason, make it
         if (!fs.existsSync(userDataPath + "/throws/"))
             fs.mkdirSync(userDataPath + "/throws/");
-    
+
         // Ensure that we're not overwriting any existing files with the same name
         // If a file already exists, add an interating number to the end until it"s a unique filename
         var append = "";
@@ -142,10 +167,10 @@ async function loadImage()
             while (fs.existsSync(userDataPath + "/throws/" + imageFile.name.substr(0, imageFile.name.lastIndexOf(".")) + append + imageFile.name.substr(imageFile.name.lastIndexOf("."))))
                 append = append == "" ? 2 : (append + 1);
         var filename = imageFile.name.substr(0, imageFile.name.lastIndexOf(".")) + append + imageFile.name.substr(imageFile.name.lastIndexOf("."));
-    
+
         // Make a copy of the file into the local folder
         fs.copyFileSync(imageFile.path, userDataPath + "/throws/" + filename);
-        
+
         // Add the new image, update the data, and refresh the images page
         throws.unshift({
             "enabled": true,
@@ -160,13 +185,13 @@ async function loadImage()
     setData("throws", throws);
     openImages();
     copyFilesToDirectory();
-    
+
     // Reset the image upload
     document.querySelector("#loadImage").value = null;
 }
 
 document.querySelector("#imageTable").querySelector(".selectAll input").addEventListener("change", async () => {
-    document.querySelector("#imageTable").querySelectorAll(".imageEnabled").forEach((element) => { 
+    document.querySelector("#imageTable").querySelectorAll(".imageEnabled").forEach((element) => {
         element.checked = document.querySelector("#imageTable").querySelector(".selectAll input").checked;
     });
     var throws = await getData("throws");
@@ -175,17 +200,14 @@ document.querySelector("#imageTable").querySelector(".selectAll input").addEvent
     setData("throws", throws);
 });
 
-async function openImages()
-{
+async function openImages() {
     var throws = await getData("throws");
 
     document.querySelector("#imageTable").querySelectorAll(".imageRow").forEach((element) => { element.remove(); });
-    
+
     var allEnabled = true;
-    for (var i = 0; i < throws.length; i++)
-    {
-        if (!throws[i].enabled)
-        {
+    for (var i = 0; i < throws.length; i++) {
+        if (!throws[i].enabled) {
             allEnabled = false;
             break;
         }
@@ -194,12 +216,9 @@ async function openImages()
 
     if (throws == null)
         setData("throws", []);
-    else
-    {
-        throws.forEach((_, index) =>
-        {
-            if (fs.existsSync(userDataPath + "/" + throws[index].location))
-            {
+    else {
+        throws.forEach((_, index) => {
+            if (fs.existsSync(userDataPath + "/" + throws[index].location)) {
                 var row = document.querySelector("#imageRow").cloneNode(true);
                 row.removeAttribute("id");
                 row.classList.add("imageRow");
@@ -207,7 +226,7 @@ async function openImages()
                 document.querySelector("#imageTable").appendChild(row);
 
                 row.querySelector(".imageLabel").innerText = throws[index].location.substr(throws[index].location.lastIndexOf('/') + 1);
-    
+
                 row.querySelector(".imageImage").src = userDataPath + "/" + throws[index].location;
 
                 row.querySelector(".imageEnabled").checked = throws[index].enabled;
@@ -216,10 +235,8 @@ async function openImages()
                     setData("throws", throws);
 
                     var allEnabled = true;
-                    for (var i = 0; i < throws.length; i++)
-                    {
-                        if (!throws[i].enabled)
-                        {
+                    for (var i = 0; i < throws.length; i++) {
+                        if (!throws[i].enabled) {
                             allEnabled = false;
                             break;
                         }
@@ -239,8 +256,7 @@ async function openImages()
                     openImages();
                 });
             }
-            else
-            {
+            else {
                 throws.splice(index, 1);
                 setData("throws", throws);
             }
@@ -248,18 +264,16 @@ async function openImages()
     }
 }
 
-async function loadImageCustom(customName)
-{
+async function loadImageCustom(customName) {
     var throws = await getData("throws");
     var files = document.querySelector("#loadImageCustom").files;
-    for (var i = 0; i < files.length; i++)
-    {
+    for (var i = 0; i < files.length; i++) {
         // Grab the image that was just loaded
         var imageFile = files[i];
         // If the folder for objects doesn't exist for some reason, make it
         if (!fs.existsSync(userDataPath + "/throws/"))
             fs.mkdirSync(userDataPath + "/throws/");
-    
+
         // Ensure that we're not overwriting any existing files with the same name
         // If a file already exists, add an interating number to the end until it"s a unique filename
         var append = "";
@@ -267,10 +281,10 @@ async function loadImageCustom(customName)
             while (fs.existsSync(userDataPath + "/throws/" + imageFile.name.substr(0, imageFile.name.lastIndexOf(".")) + append + imageFile.name.substr(imageFile.name.lastIndexOf("."))))
                 append = append == "" ? 2 : (append + 1);
         var filename = imageFile.name.substr(0, imageFile.name.lastIndexOf(".")) + append + imageFile.name.substr(imageFile.name.lastIndexOf("."));
-    
+
         // Make a copy of the file into the local folder
         fs.copyFileSync(imageFile.path, userDataPath + "/throws/" + filename);
-        
+
         // Add the new image, update the data, and refresh the images page
         throws.unshift({
             "enabled": false,
@@ -279,19 +293,18 @@ async function loadImageCustom(customName)
             "scale": 1.0,
             "sound": null,
             "volume": 1.0,
-            "customs": [ customName ]
+            "customs": [customName]
         });
     }
     setData("throws", throws);
     openImagesCustom(customName);
     copyFilesToDirectory();
-    
+
     // Reset the image upload
     document.querySelector("#loadImageCustom").value = null;
 }
 
-async function openImagesCustom(customName)
-{
+async function openImagesCustom(customName) {
     // Refresh table to remove old event listeners
     var oldTable = document.querySelector("#imageTableCustom");
     var newTable = oldTable.cloneNode(true);
@@ -300,14 +313,12 @@ async function openImagesCustom(customName)
 
     document.querySelector("#newImageCustom").addEventListener("click", () => { document.querySelector("#loadImageCustom").click(); });
     document.querySelector("#loadImageCustom").addEventListener("change", () => { loadImageCustom(customName); });
-    
+
     var throws = await getData("throws");
 
     var allEnabled = true;
-    for (var i = 0; i < throws.length; i++)
-    {
-        if (!throws[i].customs.includes(customName))
-        {
+    for (var i = 0; i < throws.length; i++) {
+        if (!throws[i].customs.includes(customName)) {
             allEnabled = false;
             break;
         }
@@ -315,11 +326,10 @@ async function openImagesCustom(customName)
     document.querySelector("#imageTableCustom").querySelector(".selectAll input").checked = allEnabled;
 
     document.querySelector("#imageTableCustom").querySelector(".selectAll input").addEventListener("change", () => {
-        document.querySelector("#imageTableCustom").querySelectorAll(".imageEnabled").forEach((element) => { 
+        document.querySelector("#imageTableCustom").querySelectorAll(".imageEnabled").forEach((element) => {
             element.checked = document.querySelector("#imageTableCustom").querySelector(".selectAll input").checked;
         });
-        for (var i = 0; i < throws.length; i++)
-        {
+        for (var i = 0; i < throws.length; i++) {
             if (document.querySelector("#imageTableCustom").querySelector(".selectAll input").checked && !throws[i].customs.includes(customName))
                 throws[i].customs.push(customName);
             else if (!document.querySelector("#imageTableCustom").querySelector(".selectAll input").checked && throws[i].customs.includes(customName))
@@ -332,12 +342,9 @@ async function openImagesCustom(customName)
 
     if (throws == null)
         setData("throws", []);
-    else
-    {
-        throws.forEach((_, index) =>
-        {
-            if (fs.existsSync(userDataPath + "/" + throws[index].location))
-            {
+    else {
+        throws.forEach((_, index) => {
+            if (fs.existsSync(userDataPath + "/" + throws[index].location)) {
                 var row = document.querySelector("#imageRowCustom").cloneNode(true);
                 row.removeAttribute("id");
                 row.classList.add("imageRow");
@@ -345,7 +352,7 @@ async function openImagesCustom(customName)
                 document.querySelector("#imageTableCustom").appendChild(row);
 
                 row.querySelector(".imageLabel").innerText = throws[index].location.substr(throws[index].location.lastIndexOf('/') + 1);
-    
+
                 row.querySelector(".imageImage").src = userDataPath + "/" + throws[index].location;
 
                 row.querySelector(".imageEnabled").checked = throws[index].customs.includes(customName);
@@ -357,10 +364,8 @@ async function openImagesCustom(customName)
                     setData("throws", throws);
 
                     var allEnabled = true;
-                    for (var i = 0; i < throws.length; i++)
-                    {
-                        if (!throws[i].customs.includes(customName))
-                        {
+                    for (var i = 0; i < throws.length; i++) {
+                        if (!throws[i].customs.includes(customName)) {
                             allEnabled = false;
                             break;
                         }
@@ -368,8 +373,7 @@ async function openImagesCustom(customName)
                     document.querySelector("#imageTableCustom").querySelector(".selectAll input").checked = allEnabled;
                 });
             }
-            else
-            {
+            else {
                 throws.splice(index, 1);
                 setData("throws", throws);
             }
@@ -377,19 +381,17 @@ async function openImagesCustom(customName)
     }
 }
 
-async function loadSoundCustom(customName)
-{
+async function loadSoundCustom(customName) {
     var impacts = await getData("impacts");
     var files = document.querySelector("#loadSoundCustom").files;
-    for (var i = 0; i < files.length; i++)
-    {
+    for (var i = 0; i < files.length; i++) {
         var soundFile = files[i];
         if (!fs.existsSync(userDataPath + "/impacts/"))
             fs.mkdirSync(userDataPath + "/impacts/");
 
         var append = "";
         if (soundFile.path != userDataPath + "\\impacts\\" + soundFile.name)
-            while (fs.existsSync( userDataPath + "/impacts/" + soundFile.name.substr(0, soundFile.name.lastIndexOf(".")) + append + soundFile.name.substr(soundFile.name.lastIndexOf("."))))
+            while (fs.existsSync(userDataPath + "/impacts/" + soundFile.name.substr(0, soundFile.name.lastIndexOf(".")) + append + soundFile.name.substr(soundFile.name.lastIndexOf("."))))
                 append = append == "" ? 2 : (append + 1);
         var filename = soundFile.name.substr(0, soundFile.name.lastIndexOf(".")) + append + soundFile.name.substr(soundFile.name.lastIndexOf("."));
 
@@ -399,18 +401,17 @@ async function loadSoundCustom(customName)
             "location": "impacts/" + filename,
             "volume": 1.0,
             "enabled": false,
-            "customs": [ customName ]
+            "customs": [customName]
         });
     }
     setData("impacts", impacts);
     openSoundsCustom(customName);
     copyFilesToDirectory();
-    
+
     document.querySelector("#loadSoundCustom").value = null;
 }
 
-async function openSoundsCustom(customName)
-{
+async function openSoundsCustom(customName) {
     // Refresh table to remove old event listeners
     var oldTable = document.querySelector("#soundTableCustom");
     var newTable = oldTable.cloneNode(true);
@@ -423,10 +424,8 @@ async function openSoundsCustom(customName)
     var impacts = await getData("impacts");
 
     var allEnabled = true;
-    for (var i = 0; i < impacts.length; i++)
-    {
-        if (!impacts[i].customs.includes(customName))
-        {
+    for (var i = 0; i < impacts.length; i++) {
+        if (!impacts[i].customs.includes(customName)) {
             allEnabled = false;
             break;
         }
@@ -434,11 +433,10 @@ async function openSoundsCustom(customName)
     document.querySelector("#soundTableCustom").querySelector(".selectAll input").checked = allEnabled;
 
     document.querySelector("#soundTableCustom").querySelector(".selectAll input").addEventListener("change", () => {
-        document.querySelector("#soundTableCustom").querySelectorAll(".imageEnabled").forEach((element) => { 
+        document.querySelector("#soundTableCustom").querySelectorAll(".imageEnabled").forEach((element) => {
             element.checked = document.querySelector("#soundTableCustom").querySelector(".selectAll input").checked;
         });
-        for (var i = 0; i < impacts.length; i++)
-        {
+        for (var i = 0; i < impacts.length; i++) {
             if (document.querySelector("#soundTableCustom").querySelector(".selectAll input").checked && !impacts[i].customs.includes(customName))
                 impacts[i].customs.push(customName);
             else if (!document.querySelector("#soundTableCustom").querySelector(".selectAll input").checked && impacts[i].customs.includes(customName))
@@ -446,17 +444,14 @@ async function openSoundsCustom(customName)
         }
         setData("impacts", impacts);
     });
-    
+
     document.querySelector("#soundTableCustom").querySelectorAll(".soundRow").forEach((element) => { element.remove(); });
 
     if (impacts == null)
         setData("impacts", []);
-    else
-    {
-        impacts.forEach((_, index) =>
-        {
-            if (fs.existsSync(userDataPath + "/" + impacts[index].location))
-            {
+    else {
+        impacts.forEach((_, index) => {
+            if (fs.existsSync(userDataPath + "/" + impacts[index].location)) {
                 var row = document.querySelector("#soundRowCustom").cloneNode(true);
                 row.removeAttribute("id");
                 row.classList.add("soundRow");
@@ -472,10 +467,8 @@ async function openSoundsCustom(customName)
                         impacts[index].customs.push(customName);
                     setData("impacts", impacts);
 
-                    for (var i = 0; i < impacts.length; i++)
-                    {
-                        if (!impacts[i].customs.includes(customName))
-                        {
+                    for (var i = 0; i < impacts.length; i++) {
+                        if (!impacts[i].customs.includes(customName)) {
                             allEnabled = false;
                             break;
                         }
@@ -483,8 +476,7 @@ async function openSoundsCustom(customName)
                     document.querySelector("#soundTableCustom").querySelector(".selectAll input").checked = allEnabled;
                 });
             }
-            else
-            {
+            else {
                 impacts.splice(index, 1);
                 setData("impacts", impacts);
             }
@@ -492,12 +484,10 @@ async function openSoundsCustom(customName)
     }
 }
 
-async function loadImpactDecal(customName)
-{
+async function loadImpactDecal(customName) {
     var customBonks = await getData("customBonks");
     var files = document.querySelector("#loadImpactDecal").files;
-    for (var i = 0; i < files.length; i++)
-    {
+    for (var i = 0; i < files.length; i++) {
         var imageFile = files[i];
         if (!fs.existsSync(userDataPath + "/decals/"))
             fs.mkdirSync(userDataPath + "/decals/");
@@ -520,12 +510,11 @@ async function loadImpactDecal(customName)
     setData("customBonks", customBonks);
     openImpactDecals(customName);
     copyFilesToDirectory();
-    
+
     document.querySelector("#loadImpactDecal").value = null;
 }
 
-async function openImpactDecals(customName)
-{
+async function openImpactDecals(customName) {
     // Refresh table to remove old event listeners
     var oldTable = document.querySelector("#impactDecalsTable");
     var newTable = oldTable.cloneNode(true);
@@ -538,10 +527,8 @@ async function openImpactDecals(customName)
     var customBonks = await getData("customBonks");
 
     var allEnabled = true;
-    for (var i = 0; i < customBonks[customName].impactDecals.length; i++)
-    {
-        if (!customBonks[customName].impactDecals[i].enabled)
-        {
+    for (var i = 0; i < customBonks[customName].impactDecals.length; i++) {
+        if (!customBonks[customName].impactDecals[i].enabled) {
             allEnabled = false;
             break;
         }
@@ -549,20 +536,18 @@ async function openImpactDecals(customName)
     document.querySelector("#impactDecalsTable").querySelector(".selectAll input").checked = allEnabled;
 
     document.querySelector("#impactDecalsTable").querySelector(".selectAll input").addEventListener("change", async () => {
-        document.querySelector("#impactDecalsTable").querySelectorAll(".imageEnabled").forEach((element) => { 
+        document.querySelector("#impactDecalsTable").querySelectorAll(".imageEnabled").forEach((element) => {
             element.checked = document.querySelector("#impactDecalsTable").querySelector(".selectAll input").checked;
         });
         for (var i = 0; i < customBonks[customName].impactDecals.length; i++)
             customBonks[customName].impactDecals[i].enabled = document.querySelector("#impactDecalsTable").querySelector(".selectAll input").checked;
         setData("customBonks", customBonks);
     });
-    
+
     document.querySelector("#impactDecalsTable").querySelectorAll(".imageRow").forEach((element) => { element.remove(); });
 
-    customBonks[customName].impactDecals.forEach((_, index) =>
-    {
-        if (fs.existsSync(userDataPath + "/" + customBonks[customName].impactDecals[index].location))
-        {
+    customBonks[customName].impactDecals.forEach((_, index) => {
+        if (fs.existsSync(userDataPath + "/" + customBonks[customName].impactDecals[index].location)) {
             var row = document.querySelector("#impactDecalRow").cloneNode(true);
             row.removeAttribute("id");
             row.classList.add("imageRow");
@@ -584,10 +569,8 @@ async function openImpactDecals(customName)
                 setData("customBonks", customBonks);
 
                 var allEnabled = true;
-                for (var i = 0; i < customBonks[customName].impactDecals.length; i++)
-                {
-                    if (!customBonks[customName].impactDecals[i].enabled)
-                    {
+                for (var i = 0; i < customBonks[customName].impactDecals.length; i++) {
+                    if (!customBonks[customName].impactDecals[i].enabled) {
                         allEnabled = false;
                         break;
                     }
@@ -609,20 +592,17 @@ async function openImpactDecals(customName)
                 setData("customBonks", customBonks);
             });
         }
-        else
-        {
+        else {
             customBonks[customName].impactDecals.splice(index, 1);
             setData("customBonks", customBonks);
         }
     });
 }
 
-async function loadWindupSound(customName)
-{
+async function loadWindupSound(customName) {
     var customBonks = await getData("customBonks");
     var files = document.querySelector("#loadWindupSound").files;
-    for (var i = 0; i < files.length; i++)
-    {
+    for (var i = 0; i < files.length; i++) {
         var soundFile = files[i];
         if (!fs.existsSync(userDataPath + "/windups/"))
             fs.mkdirSync(userDataPath + "/windups/");
@@ -644,12 +624,11 @@ async function loadWindupSound(customName)
     setData("customBonks", customBonks);
     openWindupSounds(customName);
     copyFilesToDirectory();
-    
+
     document.querySelector("#loadWindupSound").value = null;
 }
 
-async function openWindupSounds(customName)
-{
+async function openWindupSounds(customName) {
     // Refresh table to remove old event listeners
     var oldTable = document.querySelector("#windupSoundTable");
     var newTable = oldTable.cloneNode(true);
@@ -662,10 +641,8 @@ async function openWindupSounds(customName)
     var customBonks = await getData("customBonks");
 
     var allEnabled = true;
-    for (var i = 0; i < customBonks[customName].windupSounds.length; i++)
-    {
-        if (!customBonks[customName].windupSounds[i].enabled)
-        {
+    for (var i = 0; i < customBonks[customName].windupSounds.length; i++) {
+        if (!customBonks[customName].windupSounds[i].enabled) {
             allEnabled = false;
             break;
         }
@@ -673,20 +650,18 @@ async function openWindupSounds(customName)
     document.querySelector("#windupSoundTable").querySelector(".selectAll input").checked = allEnabled;
 
     document.querySelector("#windupSoundTable").querySelector(".selectAll input").addEventListener("change", async () => {
-        document.querySelector("#windupSoundTable").querySelectorAll(".imageEnabled").forEach((element) => { 
+        document.querySelector("#windupSoundTable").querySelectorAll(".imageEnabled").forEach((element) => {
             element.checked = document.querySelector("#windupSoundTable").querySelector(".selectAll input").checked;
         });
         for (var i = 0; i < customBonks[customName].windupSounds.length; i++)
             customBonks[customName].windupSounds[i].enabled = document.querySelector("#windupSoundTable").querySelector(".selectAll input").checked;
         setData("customBonks", customBonks);
     });
-    
+
     document.querySelector("#windupSoundTable").querySelectorAll(".soundRow").forEach((element) => { element.remove(); });
 
-    customBonks[customName].windupSounds.forEach((_, index) =>
-    {
-        if (fs.existsSync(userDataPath + "/" + customBonks[customName].windupSounds[index].location))
-        {
+    customBonks[customName].windupSounds.forEach((_, index) => {
+        if (fs.existsSync(userDataPath + "/" + customBonks[customName].windupSounds[index].location)) {
             var row = document.querySelector("#windupSoundRow").cloneNode(true);
             row.removeAttribute("id");
             row.classList.add("soundRow");
@@ -706,10 +681,8 @@ async function openWindupSounds(customName)
                 setData("customBonks", customBonks);
 
                 var allEnabled = true;
-                for (var i = 0; i < customBonks[customName].windupSounds.length; i++)
-                {
-                    if (!customBonks[customName].windupSounds[i].enabled)
-                    {
+                for (var i = 0; i < customBonks[customName].windupSounds.length; i++) {
+                    if (!customBonks[customName].windupSounds[i].enabled) {
                         allEnabled = false;
                         break;
                     }
@@ -724,58 +697,40 @@ async function openWindupSounds(customName)
                 setData("customBonks", customBonks);
             });
         }
-        else
-        {
+        else {
             customBonks[customName].windupSounds.splice(index, 1);
             setData("customBonks", customBonks);
         }
     });
 }
 
-document.querySelector("#bit1").querySelector(".bitImageScale").addEventListener("change", async () => {
-    var bitThrows = await getData("bitThrows");
-    bitThrows.one.scale = parseFloat(document.querySelector("#bit1").querySelector(".bitImageScale").value);
-    setData("bitThrows", bitThrows);
+document.querySelector("#guard3").querySelector(".guardImageScale").addEventListener("change", async () => {
+    var guardThrows = await getData("guardThrows");
+    guardThrows.guard3.scale = parseFloat(document.querySelector("#guard3").querySelector(".guardImageScale").value);
+    setData("guardThrows", guardThrows);
 });
-document.querySelector("#bitImageAdd1").addEventListener("click", () => { document.querySelector("#loadBitImageone").click(); });
-document.querySelector("#loadBitImageone").addEventListener("change", () => { loadBitImage("one") });
+document.querySelector("#guardImageAdd3").addEventListener("click", () => { document.querySelector("#loadGuardImage3").click(); });
+document.querySelector("#loadGuardImage3").addEventListener("change", () => { loadGuardImage("3") });
 
-document.querySelector("#bit100").querySelector(".bitImageScale").addEventListener("change", async () => {
-    var bitThrows = await getData("bitThrows");
-    bitThrows.oneHundred.scale = parseFloat(document.querySelector("#bit100").querySelector(".bitImageScale").value);
-    setData("bitThrows", bitThrows);
+document.querySelector("#guard2").querySelector(".guardImageScale").addEventListener("change", async () => {
+    var guardThrows = await getData("guardThrows");
+    guardThrows.guard2.scale = parseFloat(document.querySelector("#guard2").querySelector(".guardImageScale").value);
+    setData("guardThrows", guardThrows);
 });
-document.querySelector("#bitImageAdd100").addEventListener("click", () => { document.querySelector("#loadBitImageoneHundred").click(); });
-document.querySelector("#loadBitImageoneHundred").addEventListener("change", () => { loadBitImage("oneHundred") });
+document.querySelector("#guardImageAdd2").addEventListener("click", () => { document.querySelector("#loadGuardImage2").click(); });
+document.querySelector("#loadGuardImage2").addEventListener("change", () => { loadGuardImage("2") });
 
-document.querySelector("#bit1000").querySelector(".bitImageScale").addEventListener("change", async () => {
-    var bitThrows = await getData("bitThrows");
-    bitThrows.oneThousand.scale = parseFloat(document.querySelector("#bit1000").querySelector(".bitImageScale").value);
-    setData("bitThrows", bitThrows);
+document.querySelector("#guard1").querySelector(".guardImageScale").addEventListener("change", async () => {
+    var guardThrows = await getData("guardThrows");
+    guardThrows.guard1.scale = parseFloat(document.querySelector("#guard1").querySelector(".guardImageScale").value);
+    setData("guardThrows", guardThrows);
 });
-document.querySelector("#bitImageAdd1000").addEventListener("click", () => { document.querySelector("#loadBitImageoneThousand").click(); });
-document.querySelector("#loadBitImageoneThousand").addEventListener("change", () => { loadBitImage("oneThousand") });
+document.querySelector("#guardImageAdd1").addEventListener("click", () => { document.querySelector("#loadGuardImage1").click(); });
+document.querySelector("#loadGuardImage1").addEventListener("change", () => { loadGuardImage("1") });
 
-document.querySelector("#bit5000").querySelector(".bitImageScale").addEventListener("change", async () => {
-    var bitThrows = await getData("bitThrows");
-    bitThrows.fiveThousand.scale = parseFloat(document.querySelector("#bit5000").querySelector(".bitImageScale").value);
-    setData("bitThrows", bitThrows);
-});
-document.querySelector("#bitImageAdd5000").addEventListener("click", () => { document.querySelector("#loadBitImagefiveThousand").click(); });
-document.querySelector("#loadBitImagefiveThousand").addEventListener("change", () => { loadBitImage("fiveThousand") });
-
-document.querySelector("#bit10000").querySelector(".bitImageScale").addEventListener("change", async () => {
-    var bitThrows = await getData("bitThrows");
-    bitThrows.tenThousand.scale = parseFloat(document.querySelector("#bit10000").querySelector(".bitImageScale").value);
-    setData("bitThrows", bitThrows);
-});
-document.querySelector("#bitImageAdd10000").addEventListener("click", () => { document.querySelector("#loadBitImagetenThousand").click(); });
-document.querySelector("#loadBitImagetenThousand").addEventListener("change", () => { loadBitImage("tenThousand") });
-
-async function loadBitImage(key)
-{
-    var bitThrows = await getData("bitThrows");
-    var files = document.querySelector("#loadBitImage" + key).files;
+async function loadGuardImage(key) {
+    var guardThrows = await getData("guardThrows");
+    var files = document.querySelector("#loadGuardImage" + key).files;
     // Grab the image that was just loaded
     var imageFile = files[0];
     // If the folder for objects doesn't exist for some reason, make it
@@ -792,47 +747,109 @@ async function loadBitImage(key)
 
     // Make a copy of the file into the local folder
     fs.copyFileSync(imageFile.path, userDataPath + "/throws/" + filename);
-    
+
     // Add the new image, update the data, and refresh the images page
-    bitThrows[key].location = "throws/" + filename;
-    setData("bitThrows", bitThrows);
-    openBitImages();
+    guardThrows[`guard${key}`].location = "throws/" + filename;
+    setData("guardThrows", guardThrows);
+    openGuardImages();
     copyFilesToDirectory();
-    
+
     // Reset the image upload
-    document.querySelector("#loadBitImage" + key).value = null;
+    document.querySelector("#loadGuardImage" + key).value = null;
 }
 
-async function openBitImages()
-{
-    var bitThrows = await getData("bitThrows");
+async function openGuardImages() {
+    var guardThrows = await getData("guardThrows");
 
-    if (bitThrows == null)
-    {
-        bitThrows = defaultData.bitThrows;
-        setData("bitThrows", bitThrows);
+    if (guardThrows == null) {
+        guardThrows = defaultData.guardThrows;
+        setData("guardThrows", guardThrows);
     }
 
-    document.querySelector("#bit1").querySelector(".imageImage").src = userDataPath + "/" + bitThrows.one.location;
-    document.querySelector("#bit1").querySelector(".bitImageScale").value = bitThrows.one.scale;
+    document.querySelector("#guard3").querySelector(".imageImage").src = userDataPath + "/" + guardThrows.guard3.location;
+    document.querySelector("#guard3").querySelector(".guardImageScale").value = guardThrows.guard3.scale;
 
-    document.querySelector("#bit100").querySelector(".imageImage").src = userDataPath + "/" + bitThrows.oneHundred.location;
-    document.querySelector("#bit100").querySelector(".bitImageScale").value = bitThrows.oneHundred.scale;
+    document.querySelector("#guard2").querySelector(".imageImage").src = userDataPath + "/" + guardThrows.guard2.location;
+    document.querySelector("#guard2").querySelector(".guardImageScale").value = guardThrows.guard2.scale;
 
-    document.querySelector("#bit1000").querySelector(".imageImage").src = userDataPath + "/" + bitThrows.oneThousand.location;
-    document.querySelector("#bit1000").querySelector(".bitImageScale").value = bitThrows.oneThousand.scale;
+    document.querySelector("#guard1").querySelector(".imageImage").src = userDataPath + "/" + guardThrows.guard1.location;
+    document.querySelector("#guard1").querySelector(".guardImageScale").value = guardThrows.guard1.scale;
+}
 
-    document.querySelector("#bit5000").querySelector(".imageImage").src = userDataPath + "/" + bitThrows.fiveThousand.location;
-    document.querySelector("#bit5000").querySelector(".bitImageScale").value = bitThrows.fiveThousand.scale;
+// 电池瓜子操作
+document.querySelector("#coinBattery").querySelector(".coinImageScale").addEventListener("change", async () => {
+    let coinThrows = await getData("coinThrows");
+    coinThrows.battery.scale = parseFloat(document.querySelector("#coinBattery").querySelector(".coinImageScale").value);
+    setData("coinThrows", coinThrows);
+});
+document.querySelector("#coinBatteryAdd").addEventListener("click", () => {
+    document.querySelector("#loadCoinImagebattery").click();
+});
+document.querySelector("#loadCoinImagebattery").addEventListener("change", () => {
+    loadCoinImage("battery");
+})
 
-    document.querySelector("#bit10000").querySelector(".imageImage").src = userDataPath + "/" + bitThrows.tenThousand.location;
-    document.querySelector("#bit10000").querySelector(".bitImageScale").value = bitThrows.tenThousand.scale;
+document.querySelector("#coinSilver").querySelector(".coinImageScale").addEventListener("change", async () => {
+    let coinThrows = await getData("coinThrows");
+    coinThrows.silver.scale = parseFloat(document.querySelector("#coinSilver").querySelector(".coinImageScale").value);
+    setData("coinThrows", coinThrows);
+});
+document.querySelector("#coinSilverAdd").addEventListener("click", () => {
+    document.querySelector("#loadCoinImagesilver").click();
+});
+document.querySelector("#loadCoinImagesilver").addEventListener("change", () => {
+    loadCoinImage("silver");
+})
+
+// 加载电池瓜子图片
+async function loadCoinImage(key) {
+    var coinThrows = await getData("coinThrows");
+    var files = document.querySelector("#loadCoinImage" + key).files;
+    // Grab the image that was just loaded
+    var imageFile = files[0];
+    // If the folder for objects doesn't exist for some reason, make it
+    if (!fs.existsSync(userDataPath + "/throws/"))
+        fs.mkdirSync(userDataPath + "/throws/");
+
+    // Ensure that we're not overwriting any existing files with the same name
+    // If a file already exists, add an interating number to the end until it"s a unique filename
+    var append = "";
+    if (imageFile.path != userDataPath + "\\throws\\" + imageFile.name)
+        while (fs.existsSync(userDataPath + "/throws/" + imageFile.name.substr(0, imageFile.name.lastIndexOf(".")) + append + imageFile.name.substr(imageFile.name.lastIndexOf("."))))
+            append = append == "" ? 2 : (append + 1);
+    var filename = imageFile.name.substr(0, imageFile.name.lastIndexOf(".")) + append + imageFile.name.substr(imageFile.name.lastIndexOf("."));
+
+    // Make a copy of the file into the local folder
+    fs.copyFileSync(imageFile.path, userDataPath + "/throws/" + filename);
+
+    // Add the new image, update the data, and refresh the images page
+    coinThrows[key].location = "throws/" + filename;
+    setData("coinThrows", coinThrows);
+    openCoinImages();
+    copyFilesToDirectory();
+
+    // Reset the image upload
+    document.querySelector("#loadCoinImage" + key).value = null;
+}
+
+async function openCoinImages() {
+    var coinThrows = await getData("coinThrows");
+
+    if (coinThrows == null) {
+        coinThrows = defaultData.coinThrows;
+        setData("coinThrows", coinThrows);
+    }
+
+    document.querySelector("#coinBattery").querySelector(".imageImage").src = userDataPath + "/" + coinThrows.battery.location;
+    document.querySelector("#coinBattery").querySelector(".coinImageScale").value = coinThrows.battery.scale;
+
+    document.querySelector("#coinSilver").querySelector(".imageImage").src = userDataPath + "/" + coinThrows.silver.location;
+    document.querySelector("#coinSilver").querySelector(".coinImageScale").value = coinThrows.silver.scale;
 }
 
 document.querySelector("#loadImageSound").addEventListener("change", loadImageSound);
 
-async function loadImageSound()
-{
+async function loadImageSound() {
     // Grab the image that was just loaded
     var soundFile = document.querySelector("#loadImageSound").files[0];
     // If the folder for objects doesn"t exist for some reason, make it
@@ -843,18 +860,18 @@ async function loadImageSound()
     // If a file already exists, add an interating number to the end until it"s a unique filename
     var append = "";
     if (soundFile.path != userDataPath + "\\impacts\\" + soundFile.name)
-        while (fs.existsSync( userDataPath + "/impacts/" + soundFile.name.substr(0, soundFile.name.lastIndexOf(".")) + append + soundFile.name.substr(soundFile.name.lastIndexOf("."))))
+        while (fs.existsSync(userDataPath + "/impacts/" + soundFile.name.substr(0, soundFile.name.lastIndexOf(".")) + append + soundFile.name.substr(soundFile.name.lastIndexOf("."))))
             append = append == "" ? 2 : (append + 1);
     var filename = soundFile.name.substr(0, soundFile.name.lastIndexOf(".")) + append + soundFile.name.substr(soundFile.name.lastIndexOf("."));
 
     // Make a copy of the file into the local folder
     fs.copyFileSync(soundFile.path, userDataPath + "/impacts/" + filename);
-    
+
     // Get the existing images, add the new image, update the data, and refresh the images page
     var throws = await getData("throws");
     throws[currentImageIndex].sound = "impacts/" + filename;
     setData("throws", throws);
-    
+
     // Reset the image upload
     document.querySelector("#loadImageSound").value = null;
     openImageDetails(currentImageIndex);
@@ -862,8 +879,7 @@ async function loadImageSound()
 }
 
 var currentImageIndex = -1;
-async function openImageDetails()
-{
+async function openImageDetails() {
     var throws = await getData("throws");
 
     // Refresh nodes to remove old listeners
@@ -887,13 +903,11 @@ async function openImageDetails()
     details.querySelector(".imageImage").style.transform = "scale(" + throws[currentImageIndex].scale + ")";
     details.querySelector(".imageWeight").value = throws[currentImageIndex].weight;
     details.querySelector(".imageScale").value = throws[currentImageIndex].scale;
-    if (throws[currentImageIndex].sound != null)
-    {
+    if (throws[currentImageIndex].sound != null) {
         details.querySelector(".imageSoundName").value = throws[currentImageIndex].sound.substr(8);
         details.querySelector(".imageSoundRemove").removeAttribute("disabled");
     }
-    else
-    {
+    else {
         details.querySelector(".imageSoundName").value = null;
         details.querySelector(".imageSoundRemove").disabled = "disabled";
     }
@@ -927,19 +941,17 @@ async function openImageDetails()
 document.querySelector("#newSound").addEventListener("click", () => { document.querySelector("#loadSound").click(); });
 document.querySelector("#loadSound").addEventListener("change", loadSound);
 
-async function loadSound()
-{
+async function loadSound() {
     var impacts = await getData("impacts");
     var files = document.querySelector("#loadSound").files;
-    for (var i = 0; i < files.length; i++)
-    {
+    for (var i = 0; i < files.length; i++) {
         var soundFile = files[i];
         if (!fs.existsSync(userDataPath + "/impacts/"))
             fs.mkdirSync(userDataPath + "/impacts/");
 
         var append = "";
         if (soundFile.path != userDataPath + "\\impacts\\" + soundFile.name)
-            while (fs.existsSync( userDataPath + "/impacts/" + soundFile.name.substr(0, soundFile.name.lastIndexOf(".")) + append + soundFile.name.substr(soundFile.name.lastIndexOf("."))))
+            while (fs.existsSync(userDataPath + "/impacts/" + soundFile.name.substr(0, soundFile.name.lastIndexOf(".")) + append + soundFile.name.substr(soundFile.name.lastIndexOf("."))))
                 append = append == "" ? 2 : (append + 1);
         var filename = soundFile.name.substr(0, soundFile.name.lastIndexOf(".")) + append + soundFile.name.substr(soundFile.name.lastIndexOf("."));
 
@@ -949,19 +961,20 @@ async function loadSound()
             "location": "impacts/" + filename,
             "volume": 1.0,
             "enabled": true,
-            "bits": true,
+            "coins": false,
+            "guards": false,
             "customs": []
         });
     }
     setData("impacts", impacts);
     openSounds();
     copyFilesToDirectory();
-    
+
     document.querySelector("#loadSound").value = null;
 }
 
 document.querySelector("#soundTable").querySelector(".selectAll input").addEventListener("change", async () => {
-    document.querySelector("#soundTable").querySelectorAll(".imageEnabled").forEach((element) => { 
+    document.querySelector("#soundTable").querySelectorAll(".imageEnabled").forEach((element) => {
         element.checked = document.querySelector("#soundTable").querySelector(".selectAll input").checked;
     });
     var impacts = await getData("impacts");
@@ -970,20 +983,16 @@ document.querySelector("#soundTable").querySelector(".selectAll input").addEvent
     setData("impacts", impacts);
 });
 
-async function openSounds()
-{
+async function openSounds() {
     var impacts = await getData("impacts");
-    
+
     document.querySelector("#soundTable").querySelectorAll(".soundRow").forEach((element) => { element.remove(); });
 
     if (impacts == null)
         setData("impacts", []);
-    else
-    {
-        impacts.forEach((_, index) =>
-        {
-            if (fs.existsSync(userDataPath + "/" + impacts[index].location))
-            {
+    else {
+        impacts.forEach((_, index) => {
+            if (fs.existsSync(userDataPath + "/" + impacts[index].location)) {
                 var row = document.querySelector("#soundRow").cloneNode(true);
                 row.removeAttribute("id");
                 row.classList.add("soundRow");
@@ -1003,10 +1012,8 @@ async function openSounds()
                     setData("impacts", impacts);
 
                     var allEnabled = true;
-                    for (var i = 0; i < impacts.length; i++)
-                    {
-                        if (!impacts[i].enabled)
-                        {
+                    for (var i = 0; i < impacts.length; i++) {
+                        if (!impacts[i].enabled) {
                             allEnabled = false;
                             break;
                         }
@@ -1021,8 +1028,7 @@ async function openSounds()
                     setData("impacts", impacts);
                 });
             }
-            else
-            {
+            else {
                 impacts.splice(index, 1);
                 setData("impacts", impacts);
             }
@@ -1030,15 +1036,14 @@ async function openSounds()
     }
 }
 
-document.querySelector("#newBitSound").addEventListener("click", () => { document.querySelector("#loadBitSound").click(); });
-document.querySelector("#loadBitSound").addEventListener("change", loadBitSound);
+// 大航海音效操作
+document.querySelector("#newGuardSound").addEventListener("click", () => { document.querySelector("#loadGuardSound").click(); });
+document.querySelector("#loadGuardSound").addEventListener("change", loadGuardSound);
 
-async function loadBitSound()
-{
+async function loadGuardSound() {
     var impacts = await getData("impacts");
-    var files = document.querySelector("#loadBitSound").files;
-    for (var i = 0; i < files.length; i++)
-    {
+    var files = document.querySelector("#loadGuardSound").files;
+    for (var i = 0; i < files.length; i++) {
         var soundFile = files[i];
         if (!fs.existsSync(userDataPath + "/impacts/"))
             fs.mkdirSync(userDataPath + "/impacts/");
@@ -1049,72 +1054,151 @@ async function loadBitSound()
         var filename = soundFile.name.substr(0, soundFile.name.lastIndexOf(".")) + append + soundFile.name.substr(soundFile.name.lastIndexOf("."));
 
         fs.copyFileSync(soundFile.path, userDataPath + "/impacts/" + filename);
-        
+
         impacts.unshift({
             "location": "impacts/" + filename,
             "volume": 1.0,
             "enabled": false,
-            "bits": true,
+            "coins": false,
+            "guards": true,
             "customs": []
         });
     }
     setData("impacts", impacts);
-    openBitSounds();
+    openGuardSounds();
     copyFilesToDirectory();
 
-    document.querySelector("#loadBitSound").value = null;
+    document.querySelector("#loadGuardSound").value = null;
 }
 
-document.querySelector("#bitSoundTable").querySelector(".selectAll input").addEventListener("change", async () => {
-    document.querySelector("#bitSoundTable").querySelectorAll(".imageEnabled").forEach((element) => { 
-        element.checked = document.querySelector("#bitSoundTable").querySelector(".selectAll input").checked;
+document.querySelector("#guardSoundTable").querySelector(".selectAll input").addEventListener("change", async () => {
+    document.querySelector("#guardSoundTable").querySelectorAll(".imageEnabled").forEach((element) => {
+        element.checked = document.querySelector("#guardSoundTable").querySelector(".selectAll input").checked;
     });
     var impacts = await getData("impacts");
     for (var i = 0; i < impacts.length; i++)
-        impacts[i].bits = document.querySelector("#bitSoundTable").querySelector(".selectAll input").checked;
+        impacts[i].guards = document.querySelector("#guardSoundTable").querySelector(".selectAll input").checked;
     setData("impacts", impacts);
 });
 
-async function openBitSounds()
-{
+async function openGuardSounds() {
     var impacts = await getData("impacts");
-    
-    document.querySelectorAll(".bitSoundRow").forEach((element) => { element.remove(); });
+
+    document.querySelectorAll(".guardSoundRow").forEach((element) => { element.remove(); });
 
     if (impacts == null)
         setData("impacts", []);
-    else
-    {
-        impacts.forEach((_, index) =>
-        {
-            if (fs.existsSync(userDataPath + "/" + impacts[index].location))
-            {
-                var row = document.querySelector("#bitSoundRow").cloneNode(true);
+    else {
+        impacts.forEach((_, index) => {
+            if (fs.existsSync(userDataPath + "/" + impacts[index].location)) {
+                var row = document.querySelector("#guardSoundRow").cloneNode(true);
                 row.removeAttribute("id");
-                row.classList.add("bitSoundRow");
+                row.classList.add("guardSoundRow");
                 row.removeAttribute("hidden");
                 row.querySelector(".imageLabel").innerText = impacts[index].location.substr(impacts[index].location.lastIndexOf('/') + 1);
-                document.querySelector("#bitSoundTable").appendChild(row);
+                document.querySelector("#guardSoundTable").appendChild(row);
 
-                row.querySelector(".imageEnabled").checked = impacts[index].bits;
+                row.querySelector(".imageEnabled").checked = impacts[index].guards;
                 row.querySelector(".imageEnabled").addEventListener("change", () => {
-                    impacts[index].bits = row.querySelector(".imageEnabled").checked;
+                    impacts[index].guards = row.querySelector(".imageEnabled").checked;
                     setData("impacts", impacts);
 
                     var allEnabled = true;
-                    for (var i = 0; i < impacts.length; i++)
-                    {
-                        if (!impacts[i].bits)
-                        {
+                    for (var i = 0; i < impacts.length; i++) {
+                        if (!impacts[i].guards) {
                             allEnabled = false;
                             break;
                         }
                     }
-                    document.querySelector("#bitSoundTable").querySelector(".selectAll input").checked = allEnabled;
+                    document.querySelector("#guardSoundTable").querySelector(".selectAll input").checked = allEnabled;
                 });
             }
-            else
-            {
+            else {
+                impacts.splice(index, 1);
+                setData("impacts", impacts);
+            }
+        });
+    }
+}
+
+// 电池瓜子音效操作
+document.querySelector("#newCoinSound").addEventListener("click", () => { document.querySelector("#loadCoinSound").click(); });
+document.querySelector("#loadCoinSound").addEventListener("change", loadCoinSound);
+
+async function loadCoinSound() {
+    var impacts = await getData("impacts");
+    var files = document.querySelector("#loadCoinSound").files;
+    for (var i = 0; i < files.length; i++) {
+        var soundFile = files[i];
+        if (!fs.existsSync(userDataPath + "/impacts/"))
+            fs.mkdirSync(userDataPath + "/impacts/");
+
+        var append = "";
+        while (fs.existsSync(userDataPath + "/impacts/" + soundFile.name.substr(0, soundFile.name.lastIndexOf(".")) + append + soundFile.name.substr(soundFile.name.lastIndexOf("."))))
+            append = append == "" ? 2 : (append + 1);
+        var filename = soundFile.name.substr(0, soundFile.name.lastIndexOf(".")) + append + soundFile.name.substr(soundFile.name.lastIndexOf("."));
+
+        fs.copyFileSync(soundFile.path, userDataPath + "/impacts/" + filename);
+
+        impacts.unshift({
+            "location": "impacts/" + filename,
+            "volume": 1.0,
+            "enabled": false,
+            "coins": true,
+            "guards": false,
+            "customs": []
+        });
+    }
+    setData("impacts", impacts);
+    openCoinSounds();
+    copyFilesToDirectory();
+
+    document.querySelector("#loadCoinSound").value = null;
+}
+
+document.querySelector("#coinSoundTable").querySelector(".selectAll input").addEventListener("change", async () => {
+    document.querySelector("#coinSoundTable").querySelectorAll(".imageEnabled").forEach((element) => {
+        element.checked = document.querySelector("#coinSoundTable").querySelector(".selectAll input").checked;
+    });
+    var impacts = await getData("impacts");
+    for (var i = 0; i < impacts.length; i++)
+        impacts[i].coins = document.querySelector("#coinSoundTable").querySelector(".selectAll input").checked;
+    setData("impacts", impacts);
+});
+
+async function openCoinSounds() {
+    var impacts = await getData("impacts");
+
+    document.querySelectorAll(".coinSoundRow").forEach((element) => { element.remove(); });
+
+    if (impacts == null)
+        setData("impacts", []);
+    else {
+        impacts.forEach((_, index) => {
+            if (fs.existsSync(userDataPath + "/" + impacts[index].location)) {
+                var row = document.querySelector("#coinSoundRow").cloneNode(true);
+                row.removeAttribute("id");
+                row.classList.add("coinSoundRow");
+                row.removeAttribute("hidden");
+                row.querySelector(".imageLabel").innerText = impacts[index].location.substr(impacts[index].location.lastIndexOf('/') + 1);
+                document.querySelector("#coinSoundTable").appendChild(row);
+
+                row.querySelector(".imageEnabled").checked = impacts[index].coins;
+                row.querySelector(".imageEnabled").addEventListener("change", () => {
+                    impacts[index].coins = row.querySelector(".imageEnabled").checked;
+                    setData("impacts", impacts);
+
+                    var allEnabled = true;
+                    for (var i = 0; i < impacts.length; i++) {
+                        if (!impacts[i].coins) {
+                            allEnabled = false;
+                            break;
+                        }
+                    }
+                    document.querySelector("#coinSoundTable").querySelector(".selectAll input").checked = allEnabled;
+                });
+            }
+            else {
                 impacts.splice(index, 1);
                 setData("impacts", impacts);
             }
@@ -1124,17 +1208,17 @@ async function openBitSounds()
 
 document.querySelector("#bonksAdd").addEventListener("click", addBonk);
 
-async function addBonk()
-{
+async function addBonk() {
     var newBonkNumber = 1;
     var customBonks = await getData("customBonks");
     if (customBonks == null)
         customBonks = {};
-    
-    while (customBonks["Custom Bonk " + newBonkNumber] != null)
+
+    while (customBonks["自定义投掷 " + newBonkNumber] != null)
         newBonkNumber++;
 
-    customBonks["Custom Bonk " + newBonkNumber] = {
+    customBonks["自定义投掷 " + newBonkNumber] = {
+        "barrageCountManual": true,
         "barrageCount": 1,
         "barrageFrequencyOverride": false,
         "barrageFrequency": await getData("barrageFrequency"),
@@ -1157,24 +1241,22 @@ async function addBonk()
     var throws = await getData("throws");
     for (var i = 0; i < throws.length; i++)
         if (throws[i].enabled)
-            throws[i].customs.push("Custom Bonk " + newBonkNumber);
+            throws[i].customs.push("自定义投掷 " + newBonkNumber);
     setData("throws", throws);
 
     var impacts = await getData("impacts");
     for (var i = 0; i < impacts.length; i++)
         if (impacts[i].enabled)
-            impacts[i].customs.push("Custom Bonk " + newBonkNumber);
+            impacts[i].customs.push("自定义投掷 " + newBonkNumber);
     setData("impacts", impacts);
-    
+
     openBonks();
 }
 
-async function bonkDetails(customBonkName)
-{
+async function bonkDetails(customBonkName) {
     var customBonks = await getData("customBonks");
 
-    if (customBonks[customBonkName] != null)
-    {
+    if (customBonks[customBonkName] != null) {
         showPanel("bonkDetails", true);
 
         // Copy new elements to remove all old listeners
@@ -1189,16 +1271,13 @@ async function bonkDetails(customBonkName)
         bonkDetailsTable.querySelector(".bonkName").value = customBonkName;
         bonkDetailsTable.querySelector(".bonkName").addEventListener("change", async () => {
             customBonks = await getData("customBonks");
-            if (customBonks[bonkDetailsTable.querySelector(".bonkName").value] == null)
-            {
+            if (customBonks[bonkDetailsTable.querySelector(".bonkName").value] == null) {
                 customBonks[bonkDetailsTable.querySelector(".bonkName").value] = customBonks[customBonkName];
                 delete customBonks[customBonkName];
 
                 var throws = await getData("throws");
-                for (var i = 0; i < throws.length; i++)
-                {
-                    if (throws[i].customs.includes(customBonkName))
-                    {
+                for (var i = 0; i < throws.length; i++) {
+                    if (throws[i].customs.includes(customBonkName)) {
                         throws[i].customs.splice(throws[i].customs.indexOf(customBonkName), 1);
                         throws[i].customs.push(bonkDetailsTable.querySelector(".bonkName").value);
                     }
@@ -1206,10 +1285,8 @@ async function bonkDetails(customBonkName)
                 setData("throws", throws);
 
                 var impacts = await getData("impacts");
-                for (var i = 0; i < impacts.length; i++)
-                {
-                    if (impacts[i].customs.includes(customBonkName))
-                    {
+                for (var i = 0; i < impacts.length; i++) {
+                    if (impacts[i].customs.includes(customBonkName)) {
                         impacts[i].customs.splice(impacts[i].customs.indexOf(customBonkName), 1);
                         impacts[i].customs.push(bonkDetailsTable.querySelector(".bonkName").value);
                     }
@@ -1218,10 +1295,19 @@ async function bonkDetails(customBonkName)
 
                 customBonkName = bonkDetailsTable.querySelector(".bonkName").value;
             }
-            else
-            {
+            else {
                 // Error: Name exists
             }
+            setData("customBonks", customBonks);
+        });
+
+        // 手动投掷数
+        bonkDetailsTable.querySelector(".barrageCountManual").checked = customBonks[customBonkName].barrageCountManual || false;
+        bonkDetailsTable.querySelector(".barrageCount").disabled = !customBonks[customBonkName].barrageCountManual || false;
+        bonkDetailsTable.querySelector(".barrageCountManual").addEventListener("change", async () => {
+            customBonks = await getData("customBonks");
+            customBonks[customBonkName].barrageCountManual = bonkDetailsTable.querySelector(".barrageCountManual").checked;
+            bonkDetailsTable.querySelector(".barrageCount").disabled = !customBonks[customBonkName].barrageCountManual;
             setData("customBonks", customBonks);
         });
 
@@ -1331,8 +1417,7 @@ async function bonkDetails(customBonkName)
         });
 
         bonkDetailsTable.querySelector(".images").addEventListener("click", () => {
-            if (!bonkDetailsTable.querySelector(".images").disabled)
-            {
+            if (!bonkDetailsTable.querySelector(".images").disabled) {
                 openImagesCustom(customBonkName);
                 showPanel("bonkImagesCustom", true);
             }
@@ -1349,8 +1434,7 @@ async function bonkDetails(customBonkName)
         });
 
         bonkDetailsTable.querySelector(".sounds").addEventListener("click", () => {
-            if (!bonkDetailsTable.querySelector(".sounds").disabled)
-            {
+            if (!bonkDetailsTable.querySelector(".sounds").disabled) {
                 openSoundsCustom(customBonkName);
                 showPanel("bonkSoundsCustom", true);
             }
@@ -1378,18 +1462,15 @@ async function bonkDetails(customBonkName)
     }
 }
 
-async function openBonks()
-{
+async function openBonks() {
     var customBonks = await getData("customBonks");
 
     document.querySelectorAll(".customBonkRow").forEach(element => { element.remove(); });
 
     if (customBonks == null)
         setData("customBonks", {});
-    else
-    {
-        for (const key in customBonks)
-        {
+    else {
+        for (const key in customBonks) {
             const row = document.querySelector("#customBonkRow").cloneNode(true);
             row.removeAttribute("id");
             row.removeAttribute("hidden");
@@ -1407,45 +1488,33 @@ async function openBonks()
                 setData("customBonks", customBonks);
 
                 var throws = await getData("throws");
-                for (var i = 0; i < throws.length; i++)
-                {
+                for (var i = 0; i < throws.length; i++) {
                     if (throws[i].customs.includes(key))
                         throws[i].customs.splice(throws[i].customs.indexOf(key), 1);
                 }
                 setData("throws", throws);
 
                 var impacts = await getData("impacts");
-                for (var i = 0; i < impacts.length; i++)
-                {
+                for (var i = 0; i < impacts.length; i++) {
                     if (impacts[i].customs.includes(key))
                         impacts[i].customs.splice(impacts[i].customs.indexOf(key), 1);
                 }
 
                 setData("impacts", impacts);
 
-                var eventType = await getData("redeems");
-                for (var i = 0; i < eventType.length; i++)
-                {
-                    if (eventType[i].bonkType == key)
-                        eventType[i].bonkType = "single";
-                }
-                setData("redeems", eventType);
-
-                eventType = await getData("commands");
-                for (var i = 0; i < eventType.length; i++)
-                {
+                let eventType = await getData("commands");
+                for (var i = 0; i < eventType.length; i++) {
                     if (eventType[i].bonkType == key)
                         eventType[i].bonkType = "single";
                 }
                 setData("commands", eventType);
 
-                eventType = await getData("subType");
-                if (eventType == key)
-                    setData("subType", "barrage");
-
-                eventType = await getData("subGiftType");
-                if (eventType == key)
-                    setData("subGiftType", "barrage");
+                eventType = await getData("gifts");
+                for (let i = 0; i < eventType.length; i++) {
+                    if (eventType[i].bonkType == key)
+                        eventType[i].bonkType = "single";
+                }
+                setData("gifts", eventType);
 
                 openBonks();
             });
@@ -1453,18 +1522,15 @@ async function openBonks()
     }
 }
 
-async function openTestBonks()
-{
+async function openTestBonks() {
     var customBonks = await getData("customBonks");
 
     document.querySelectorAll(".testCustom").forEach(element => { element.remove(); });
 
     if (customBonks == null)
         setData("customBonks", {});
-    else
-    {
-        for (const key in customBonks)
-        {
+    else {
+        for (const key in customBonks) {
             const row = document.querySelector("#testCustom").cloneNode(true);
             row.removeAttribute("id");
             row.removeAttribute("hidden");
@@ -1478,21 +1544,20 @@ async function openTestBonks()
     }
 }
 
-document.querySelector("#redeemAdd").addEventListener("click", newRedeem);
+document.querySelector("#giftAdd").addEventListener("click", newGift);
 
-// Create a new redeem event
-async function newRedeem()
-{
-    var redeems = await getData("redeems");
+// 添加礼物类型事件
+async function newGift() {
+    var gifts = await getData("gifts");
 
-    redeems.push({
-        "enabled": true,
-        "id": null,
-        "name": null,
-        "bonkType": "single"
-    });
+    gifts.push({
+        enabled: true,
+        name: "",
+        cooldown: 0,
+        bonkType: "single"
+    })
 
-    setData("redeems", redeems);
+    setData("gifts", gifts);
 
     openEvents();
 }
@@ -1500,8 +1565,7 @@ async function newRedeem()
 document.querySelector("#commandAdd").addEventListener("click", newCommand);
 
 // Create a new command event
-async function newCommand()
-{
+async function newCommand() {
     var commands = await getData("commands");
 
     commands.push({
@@ -1516,104 +1580,67 @@ async function newCommand()
     openEvents();
 }
 
-var gettingRedeemData = false, redeemData, cancelledGetRedeemData = false;
-async function getRedeemData()
-{
-    gettingRedeemData = true;
-    cancelledGetRedeemData = false;
-    ipcRenderer.send("listenRedeemStart");
-
-    while (gettingRedeemData)
-        await new Promise(resolve => setTimeout(resolve, 10));
-
-    return redeemData;
-}
-
-ipcRenderer.on("redeemData", (event, message) => {
-    redeemData = message;
-    gettingRedeemData = false;
-});
-
-async function openEvents()
-{
+async function openEvents() {
     const customBonks = await getData("customBonks");
 
-    // Fill redeem rows
-    var redeems = await getData("redeems");
+    // 读取礼物类型列表
+    var gifts = await getData("gifts");
 
-    document.querySelectorAll(".redeemsRow").forEach(element => { element.remove(); });
+    document.querySelectorAll(".giftsRow").forEach(element => { element.remove(); });
 
-    redeems.forEach((_, index) =>
-    {
-        var row = document.querySelector("#redeemsRow").cloneNode(true);
+    gifts.forEach((_, index) => {
+        var row = document.querySelector("#giftsRow").cloneNode(true);
         row.removeAttribute("id");
-        row.classList.add("redeemsRow");
+        row.classList.add("giftsRow");
         row.classList.remove("hidden");
-        document.querySelector("#redeemsRow").after(row);
+        document.querySelector("#giftsRow").after(row);
 
-        row.querySelector(".redeemEnabled").checked = redeems[index].enabled;
-        row.querySelector(".redeemEnabled").addEventListener("change", () => {
-            redeems[index].enabled = row.querySelector(".redeemEnabled").checked;
-            setData("redeems", redeems);
+        row.querySelector(".giftEnabled").checked = gifts[index].enabled;
+        row.querySelector(".giftEnabled").addEventListener("change", () => {
+            gifts[index].enabled = row.querySelector(".giftEnabled").checked;
+            setData("gifts", gifts);
         });
 
-        row.querySelector(".redeemName").innerHTML = redeems[index].name == null ? "<b class=\"errorText\">Unassigned</b>" : redeems[index].name;
-        
-        row.querySelector(".redeemID").addEventListener("click", async () => {
-            row.querySelector(".redeemID").classList.add("hidden");
-            row.querySelector(".redeemCancel").classList.remove("hidden");
-            row.querySelector(".redeemName").innerText = "Listening...";
-            var data = await getRedeemData();
-            if (!cancelledGetRedeemData)
-            {
-                row.querySelector(".redeemID").classList.remove("hidden");
-                row.querySelector(".redeemCancel").classList.add("hidden");
-                redeems[index].id = data[0];
-                redeems[index].name = data[1];
-                row.querySelector(".redeemName").innerText = data[1];
-                setData("redeems", redeems);
-            }
-        });
-        
-        row.querySelector(".redeemCancel").addEventListener("click", async () => {
-            row.querySelector(".redeemID").classList.remove("hidden");
-            row.querySelector(".redeemCancel").classList.add("hidden");
-            
-            row.querySelector(".redeemName").innerHTML = redeems[index].name == null ? "<b class=\"errorText\">Unassigned</b>" : redeems[index].name;
-
-            cancelledGetRedeemData = true;
-            gettingRedeemData = false;
-            ipcRenderer.send("listenRedeemCancel");
+        row.querySelector(".giftName").value = gifts[index].name;
+        row.querySelector(".giftName").addEventListener("change", () => {
+            gifts[index].name = row.querySelector(".giftName").value;
+            setData("gifts", gifts);
         });
 
-        for (var key in customBonks)
-        {
+        row.querySelector(".giftCooldown").value = gifts[index].cooldown;
+        row.querySelector(".giftCooldown").addEventListener("change", () => {
+            gifts[index].cooldown = row.querySelector(".giftCooldown").value;
+            setData("gifts", gifts);
+        });
+
+        for (var key in customBonks) {
             var customBonk = document.createElement("option");
             customBonk.value = key;
             customBonk.innerText = key;
             row.querySelector(".bonkType").appendChild(customBonk);
         }
 
-        row.querySelector(".bonkType").value = redeems[index].bonkType;
+        row.querySelector(".bonkType").value = gifts[index].bonkType;
         row.querySelector(".bonkType").addEventListener("change", () => {
-            redeems[index].bonkType = row.querySelector(".bonkType").value;
-            setData("redeems", redeems);
+            gifts[index].bonkType = row.querySelector(".bonkType").value;
+            setData("gifts", gifts);
         });
 
-        row.querySelector(".redeemRemove").addEventListener("click", () => {
-            redeems.splice(index, 1);
-            setData("redeems", redeems);
+        row.querySelector(".giftRemove").addEventListener("click", () => {
+            gifts.splice(index, 1);
+            setData("gifts", gifts);
             openEvents();
         });
-    });
+
+    })
+
 
     // Fill command rows
     var commands = await getData("commands");
 
     document.querySelectorAll(".commandsRow").forEach(element => { element.remove(); });
-    
-    commands.forEach((_, index) =>
-    {
+
+    commands.forEach((_, index) => {
         var row = document.querySelector("#commandsRow").cloneNode(true);
         row.removeAttribute("id");
         row.classList.add("commandsRow");
@@ -1638,8 +1665,7 @@ async function openEvents()
             setData("commands", commands);
         });
 
-        for (var key in customBonks)
-        {
+        for (var key in customBonks) {
             var customBonk = document.createElement("option");
             customBonk.value = key;
             customBonk.innerText = key;
@@ -1663,33 +1689,7 @@ async function openEvents()
     while (node.childElementCount > 4)
         node.removeChild(node.lastChild);
 
-    for (var key in customBonks)
-    {
-        var customBonk = document.createElement("option");
-        customBonk.value = key;
-        customBonk.innerText = key;
-        node.appendChild(customBonk);
-    }
-
-    // Update Sub and Gift Sub drop-downs
-    node = document.querySelector("#subType");
-    while (node.childElementCount > 4)
-        node.removeChild(node.lastChild);
-
-    for (var key in customBonks)
-    {
-        var customBonk = document.createElement("option");
-        customBonk.value = key;
-        customBonk.innerText = key;
-        node.appendChild(customBonk);
-    }
-
-    node = document.querySelector("#subGiftType");
-    while (node.childElementCount > 4)
-        node.removeChild(node.lastChild);
-
-    for (var key in customBonks)
-    {
+    for (var key in customBonks) {
         var customBonk = document.createElement("option");
         customBonk.value = key;
         customBonk.innerText = key;
@@ -1713,8 +1713,7 @@ ipcRenderer.on("doneWriting", () => {
 });
 
 // Get requested data, waiting for any current writes to finish first
-async function getData(field)
-{
+async function getData(field) {
     while (isWriting > 0)
         await new Promise(resolve => setTimeout(resolve, 10));
 
@@ -1724,69 +1723,59 @@ async function getData(field)
     var data;
     // An error should only be thrown if the other process is in the middle of writing to the file.
     // If so, it should finish shortly and this loop will exit.
-    while (data == null)
-    {
+    while (data == null) {
         try {
             data = JSON.parse(fs.readFileSync(userDataPath + "/data.json", "utf8"));
-        } catch {}
+        } catch { }
     }
     data = JSON.parse(fs.readFileSync(userDataPath + "/data.json", "utf8"));
     return data[field];
 }
 
 // Send new data to the main process to write to file
-function setData(field, value)
-{
+function setData(field, value) {
     isWriting++;
-    ipcRenderer.send("setData", [ field, value ]);
-    
+    ipcRenderer.send("setData", [field, value]);
+
     if (field == "portThrower" || field == "portVTubeStudio")
         setPorts();
 }
 
 // If ports change, write them to the file read by the Browser Source file
-async function setPorts()
-{
+async function setPorts() {
     fs.writeFileSync(__dirname + "/ports.js", "const ports = [ " + await getData("portThrower") + ", " + await getData("portVTubeStudio") + " ];");
 }
 
 // Load the requested data and apply it to the relevant settings field
-async function loadData(field)
-{
+async function loadData(field) {
     // Enable physics simulation for all users upon updating to 1.19
-    if (field == "physicsSim")
-    {
+    if (field == "physicsSim") {
         var didPhysicsUpdate = await getData("didPhysicsUpdate");
-        if (didPhysicsUpdate == null)
-        {
+        if (didPhysicsUpdate == null) {
             setData("physicsSim", true);
             setData("didPhysicsUpdate", true);
         }
     }
 
     const thisData = await getData(field);
-    if (thisData != null)
-    {
+    if (thisData != null) {
         if (document.querySelector("#" + field).type == "checkbox")
             document.querySelector("#" + field).checked = thisData;
-        else
-        {
+        else {
             document.querySelector("#" + field).value = thisData;
             if (field == "portThrower" || field == "portVTubeStudio")
                 setPorts();
         }
     }
-    else
-    {
+    else {
         const node = document.querySelector("#" + field);
         const val = node.type == "checkbox" ? node.checked : (node.type == "number" ? parseFloat(node.value) : node.value);
         setData(field, val);
     }
 }
 
-const folders = [ "throws", "impacts", "decals", "windups" ];
-function copyFilesToDirectory()
-{
+const folders = ["throws", "impacts", "decals", "windups"];
+function copyFilesToDirectory() {
     folders.forEach((folder) => {
         if (!fs.existsSync(__dirname + "/" + folder))
             fs.mkdirSync(__dirname + "/" + folder);
@@ -1798,24 +1787,21 @@ function copyFilesToDirectory()
 }
 
 // Place all settings from data into the proper location on load
-window.onload = async function()
-{
+window.onload = async function () {
     // UPDATE 1.19 (or new installation)
     if (!fs.existsSync(userDataPath))
         fs.mkdirSync(userDataPath);
 
     if (!fs.existsSync(userDataPath + "/data.json") && fs.existsSync(__dirname + "/data.json"))
         fs.copyFileSync(__dirname + "/data.json", userDataPath + "/data.json");
-    
+
+    ///没有当前文件夹则创建
     folders.forEach((folder) => {
         if (!fs.existsSync(userDataPath + "/" + folder))
             fs.mkdirSync(userDataPath + "/" + folder);
 
-        // Fix: fixed a dictionary not found crash.
-        // When directly launch kbonk after packaging without folders "decals" or "windups" would cause this crash.
-        // by adding this condition would fix (or just simply add those two folders)
         if (!fs.existsSync(__dirname + "/" + folder))
-        fs.mkdirSync(__dirname + "/" + folder);
+            fs.mkdirSync(__dirname + "/" + folder);
 
         fs.readdirSync(__dirname + "/" + folder).forEach(file => {
             if (!fs.existsSync(userDataPath + "/" + folder + "/" + file))
@@ -1823,12 +1809,15 @@ window.onload = async function()
         });
     })
 
+    //获取房间号
+    var roomid = await getData("roomid");
+    document.querySelector("#roomid").value = roomid;
+    setData("roomid", roomid);
+
     // UPDATING FROM 1.0.1 OR EARLIER
     var throws = await getData("throws");
-    for (var i = 0; i < throws.length; i++)
-    {
-        if (Array.isArray(throws[i]))
-        {
+    for (var i = 0; i < throws.length; i++) {
+        if (Array.isArray(throws[i])) {
             throws[i] = {
                 "location": throws[i][0],
                 "weight": throws[i][1],
@@ -1842,112 +1831,24 @@ window.onload = async function()
     }
     setData("throws", throws);
 
-    var impacts = await getData("impacts");
-    var bitImpacts = await getData("bitImpacts");
-    var hasBitImpacts = bitImpacts != null && bitImpacts.length > 0;
-    for (var i = 0; i < impacts.length; i++)
-    {
-        if (Array.isArray(impacts[i]))
-        {
-            impacts[i] = {
-                "location": impacts[i][0],
-                "volume": impacts[i][1],
-                "enabled": true,
-                "bits": !hasBitImpacts,
-                "customs": []
-            };
-        }
-    }
-    setData("impacts", impacts);
-
-    if (bitImpacts != null)
-    {
-        var impacts = await getData("impacts");
-        for (var i = 0; i < bitImpacts.length; i++)
-        {
-            impacts.push({
-                "location": bitImpacts[i][0],
-                "volume": bitImpacts[i][1],
-                "enabled": false,
-                "bits": true,
-                "customs": []
-            });
-        }
-
-        setData("bitImpacts", null);
-        setData("impacts", impacts);
-    }
-
-    var redeems = await getData("redeems");
-    if (redeems == null)
-    {
-        redeems = [];
-
-        var oldId = await getData("singleRedeemID");
-        var oldEnabled = await getData("singleRedeemEnabled");
-        if (oldId != null && oldId != "")
-        {
-            redeems.push({
-                "enabled": oldEnabled == null || !oldEnabled ? false : true,
-                "id": oldId,
-                "name": "Single",
-                "bonkType": "single"
-            });
-        }
-
-        oldId = await getData("barrageRedeemID");
-        oldEnabled = await getData("barrageRedeemEnabled");
-        if (oldId != null && oldId != "")
-        {
-            redeems.push({
-                "enabled": oldEnabled == null || !oldEnabled ? false : true,
-                "id": oldId,
-                "name": "Barrage",
-                "bonkType": "barrage"
-            });
-        }
-
-        setData("redeems", redeems);
-    }
-
     var commands = await getData("commands");
-    if (commands == null)
-    {
+    if (commands == null) {
         commands = [];
-
-        var oldCommand = await getData("singleCommandTitle");
-        var oldEnabled = await getData("singleCommandEnabled");
-        if (oldCommand != null && oldCommand != "")
-        {
-            commands.push({
-                "enabled": oldEnabled == null || !oldEnabled ? false : true,
-                "name": oldCommand,
-                "cooldown": await getData("singleCommandCooldown"),
-                "bonkType": "single"
-            });
-        }
-
-        oldCommand = await getData("barrageCommandTitle");
-        oldEnabled = await getData("barrageCommandEnabled");
-        if (oldCommand != null && oldCommand != "")
-        {
-            commands.push({
-                "enabled": oldEnabled == null || !oldEnabled ? false : true,
-                "name": oldCommand,
-                "cooldown": await getData("singleCommandCooldown"),
-                "bonkType": "barrage"
-            });
-        }
 
         setData("commands", commands);
     }
 
+    var gifts = await getData("gifts");
+    if (gifts == null) {
+        gifts = [];
+
+        setData("gifts", gifts);
+    }
+
     // UPDATE 1.12
     var customBonks = await getData("customBonks");
-    if (customBonks != null)
-    {
-        for (const key in customBonks)
-        {
+    if (customBonks != null) {
+        for (const key in customBonks) {
             if (customBonks[key].spinSpeedOverride == null)
                 customBonks[key].spinSpeedOverride = false;
             if (customBonks[key].spinSpeedMin == null)
@@ -1959,35 +1860,39 @@ window.onload = async function()
         setData("customBonks", customBonks);
     }
 
-    // UPDATE 1.13
     var tray = await getData("minimizeToTray");
     if (tray == null)
         setData("minimizeToTray", false);
 
-    // END UPDATING
+    // 最少电池和瓜子设置
+    loadData("coinMinBattery");
+    loadData("coinMinSilver");
 
+    // 投掷电池和瓜子设置
+    loadData("coinsThrowEnabled");
+    loadData("coinsThrowMaxCount");
+    loadData("coinsThrowUnit");
+    loadData("coinsThrowCooldown");
+
+    // 复数礼物限制
+    loadData("multiGiftsEnabled");
+    loadData("multiGiftsMaxCount");
+
+    // 关注
     loadData("followEnabled");
-    loadData("subEnabled");
-    loadData("subGiftEnabled");
-    loadData("bitsEnabled");
-    loadData("raidEnabled");
-
     loadData("followType");
-    loadData("subType");
-    loadData("subGiftType");
-    loadData("bitsMinDonation");
-    loadData("bitsMaxBarrageCount");
-    loadData("raidMinRaiders");
-    loadData("raidMinBarrageCount");
-    loadData("raidMaxBarrageCount");
-
     loadData("followCooldown");
-    loadData("subCooldown");
-    loadData("subGiftCooldown");
-    loadData("bitsCooldown");
-    loadData("raidCooldown");
-    loadData("bitsOnlySingle");
-    loadData("raidEmotes");
+
+    // 醒目留言
+    loadData("superChatEnabled");
+    loadData("superChatMinBattery");
+    loadData("superChatMaxCount");
+    loadData("superChatCoinUnit");
+    loadData("superChatCooldown");
+
+    // 大航海
+    loadData("guardEnabled");
+    loadData("guardCooldown");
 
     loadData("barrageCount");
     loadData("barrageFrequency");
@@ -2013,43 +1918,50 @@ window.onload = async function()
     loadData("portThrower");
     loadData("portVTubeStudio");
     loadData("minimizeToTray");
-    
+
     openImages();
-    openBitImages();
+    openGuardImages();
+    openCoinImages();
     copyFilesToDirectory();
 
-    checkVersion();
+    // checkVersion();
     document.title += " " + version;
     setData("version", version);
 }
 
 // Event listeners for changing settings
+
+// 单个礼物最少价值
+document.querySelector("#coinMinBattery").addEventListener("change", () => setData("coinMinBattery", parseInt(document.querySelector("#coinMinBattery").value)));
+document.querySelector("#coinMinSilver").addEventListener("change", () => setData("coinMinSilver", parseInt(document.querySelector("#coinMinSilver").value)));
+
+// 投掷瓜子电池
+document.querySelector("#coinsThrowEnabled").addEventListener("change", () => setData("coinsThrowEnabled", document.querySelector("#coinsThrowEnabled").checked));
+document.querySelector("#coinsThrowMaxCount").addEventListener("change", () => setData("coinsThrowMaxCount", parseInt(document.querySelector("#coinsThrowMaxCount").value)));
+document.querySelector("#coinsThrowUnit").addEventListener("change", () => setData("coinsThrowUnit", parseInt(document.querySelector("#coinsThrowUnit").value)));
+document.querySelector("#coinsThrowCooldown").addEventListener("change", () => setData("coinsThrowCooldown", parseFloat(document.querySelector("#coinsThrowCooldown").value)));
+
+// 复数礼物
+document.querySelector("#multiGiftsEnabled").addEventListener("change", () => setData("multiGiftsEnabled", document.querySelector("#multiGiftsEnabled").checked));
+document.querySelector("#multiGiftsMaxCount").addEventListener("change", () => setData("multiGiftsMaxCount", parseInt(document.querySelector("#multiGiftsMaxCount").value)));
+
+// 关注
 document.querySelector("#followEnabled").addEventListener("change", () => setData("followEnabled", document.querySelector("#followEnabled").checked));
-document.querySelector("#subEnabled").addEventListener("change", () => setData("subEnabled", document.querySelector("#subEnabled").checked));
-document.querySelector("#subGiftEnabled").addEventListener("change", () => setData("subGiftEnabled", document.querySelector("#subGiftEnabled").checked));
-document.querySelector("#bitsEnabled").addEventListener("change", () => setData("bitsEnabled", document.querySelector("#bitsEnabled").checked));
-document.querySelector("#raidEnabled").addEventListener("change", () => setData("raidEnabled", document.querySelector("#raidEnabled").checked));
-
 document.querySelector("#followType").addEventListener("change", () => setData("followType", document.querySelector("#followType").value));
-document.querySelector("#subType").addEventListener("change", () => setData("subType", document.querySelector("#subType").value));
-document.querySelector("#subGiftType").addEventListener("change", () => setData("subGiftType", document.querySelector("#subGiftType").value));
-document.querySelector("#bitsMinDonation").addEventListener("change", () => { clampValue(document.querySelector("#bitsMinDonation"), 0, null); setData("bitsMinDonation", parseInt(document.querySelector("#bitsMinDonation").value)) });
-document.querySelector("#bitsMaxBarrageCount").addEventListener("change", () => { clampValue(document.querySelector("#bitsMaxBarrageCount"), 0, null); setData("bitsMaxBarrageCount", parseInt(document.querySelector("#bitsMaxBarrageCount").value)) });
-
-document.querySelector("#raidMinRaiders").addEventListener("change", () => { setData("raidMinRaiders", parseInt(document.querySelector("#raidMinRaiders").value)) });
-document.querySelector("#raidMinBarrageCount").addEventListener("change", () => { clampValue(document.querySelector("#raidMinBarrageCount"), 0, parseFloat(document.querySelector("#raidMaxBarrageCount").value)); setData("raidMinBarrageCount", parseInt(document.querySelector("#raidMinBarrageCount").value)) });
-document.querySelector("#raidMaxBarrageCount").addEventListener("change", () => { clampValue(document.querySelector("#raidMaxBarrageCount"), parseFloat(document.querySelector("#raidMinBarrageCount").value), null); setData("raidMaxBarrageCount", parseInt(document.querySelector("#raidMaxBarrageCount").value)) });
-
 document.querySelector("#followCooldown").addEventListener("change", () => { clampValue(document.querySelector("#followCooldown"), 0, null); setData("followCooldown", parseFloat(document.querySelector("#followCooldown").value)) });
-document.querySelector("#subCooldown").addEventListener("change", () => { clampValue(document.querySelector("#subCooldown"), 0, null); setData("subCooldown", parseFloat(document.querySelector("#subCooldown").value)) });
-document.querySelector("#subGiftCooldown").addEventListener("change", () => { clampValue(document.querySelector("#subGiftCooldown"), 0, null); setData("subGiftCooldown", parseFloat(document.querySelector("#subGiftCooldown").value)) });
-document.querySelector("#bitsCooldown").addEventListener("change", () => { clampValue(document.querySelector("#bitsCooldown"), 0, null); setData("bitsCooldown", parseFloat(document.querySelector("#bitsCooldown").value)) });
-document.querySelector("#raidCooldown").addEventListener("change", () => { clampValue(document.querySelector("#raidCooldown"), 0, null); setData("raidCooldown", parseFloat(document.querySelector("#raidCooldown").value)) });
-document.querySelector("#raidEnabled").addEventListener("change", () => setData("raidEnabled", document.querySelector("#raidEnabled").checked));
 
-document.querySelector("#bitsOnlySingle").addEventListener("change", () => setData("bitsOnlySingle", document.querySelector("#bitsOnlySingle").checked));
-document.querySelector("#raidEmotes").addEventListener("change", () => setData("raidEmotes", document.querySelector("#raidEmotes").checked));
+// 醒目留言
+document.querySelector("#superChatEnabled").addEventListener("change", () => setData("superChatEnabled", document.querySelector("#superChatEnabled").checked));
+document.querySelector("#superChatMinBattery").addEventListener("change", () => { clampValue(document.querySelector("#superChatMinBattery"), 300, null); setData("superChatMinBattery", parseInt(document.querySelector("#superChatMinBattery").value)) });
+document.querySelector("#superChatMaxCount").addEventListener("change", () => { clampValue(document.querySelector("#superChatMaxCount"), 1, null); setData("superChatMaxCount", parseInt(document.querySelector("#superChatMaxCount").value)) });
+document.querySelector("#superChatCoinUnit").addEventListener("change", () => { clampValue(document.querySelector("#superChatCoinUnit"), 1, null); setData("superChatCoinUnit", parseInt(document.querySelector("#superChatCoinUnit").value)) });
+document.querySelector("#superChatCooldown").addEventListener("change", () => { clampValue(document.querySelector("#superChatCooldown"), 0, null); setData("superChatCooldown", parseInt(document.querySelector("#superChatCooldown").value)) });
 
+// 大航海
+document.querySelector("#guardEnabled").addEventListener("change", () => setData("guardEnabled", document.querySelector("#guardEnabled").checked));
+document.querySelector("#guardCooldown").addEventListener("change", () => { clampValue(document.querySelector("#guardCooldown"), 0, null); setData("guardCooldown", parseFloat(document.querySelector("#guardCooldown").value)) });
+
+// 设置
 document.querySelector("#barrageCount").addEventListener("change", () => { clampValue(document.querySelector("#barrageCount"), 0, null); setData("barrageCount", parseInt(document.querySelector("#barrageCount").value)) });
 document.querySelector("#barrageFrequency").addEventListener("change", () => { clampValue(document.querySelector("#barrageFrequency"), 0, null); setData("barrageFrequency", parseFloat(document.querySelector("#barrageFrequency").value)) });
 document.querySelector("#throwDuration").addEventListener("change", () => { clampValue(document.querySelector("#throwDuration"), 0.1, null); setData("throwDuration", parseFloat(document.querySelector("#throwDuration").value)) });
@@ -2069,8 +1981,7 @@ document.querySelector("#physicsVertical").addEventListener("change", () => { se
 document.querySelector("#closeEyes").addEventListener("change", () => {
     const val = document.querySelector("#closeEyes").checked;
     setData("closeEyes", val);
-    if (val)
-    {
+    if (val) {
         document.querySelector("#openEyes").checked = false;
         setData("openEyes", false);
     }
@@ -2079,8 +1990,7 @@ document.querySelector("#closeEyes").addEventListener("change", () => {
 document.querySelector("#openEyes").addEventListener("change", () => {
     const val = document.querySelector("#openEyes").checked;
     setData("openEyes", val);
-    if (val)
-    {
+    if (val) {
         document.querySelector("#closeEyes").checked = false;
         setData("closeEyes", false);
     }
@@ -2088,14 +1998,13 @@ document.querySelector("#openEyes").addEventListener("change", () => {
 
 document.querySelector("#itemScaleMin").addEventListener("change", () => { clampValue(document.querySelector("#itemScaleMin"), 0, parseFloat(document.querySelector("#itemScaleMax").value)); setData("itemScaleMin", parseFloat(document.querySelector("#itemScaleMin").value)) });
 document.querySelector("#itemScaleMax").addEventListener("change", () => { clampValue(document.querySelector("#itemScaleMax"), parseFloat(document.querySelector("#itemScaleMin").value), null); setData("itemScaleMax", parseFloat(document.querySelector("#itemScaleMax").value)) });
-document.querySelector("#delay").addEventListener("change", () => { clampValue(document.querySelector("#delay"), 0, null); setData("delay", parseInt(document.querySelector("#delay").value)) } );
+document.querySelector("#delay").addEventListener("change", () => { clampValue(document.querySelector("#delay"), 0, null); setData("delay", parseInt(document.querySelector("#delay").value)) });
 document.querySelector("#volume").addEventListener("change", () => { clampValue(document.querySelector("#volume"), 0, 1); setData("volume", parseFloat(document.querySelector("#volume").value)) });
 document.querySelector("#portThrower").addEventListener("change", () => setData("portThrower", parseInt(document.querySelector("#portThrower").value)));
 document.querySelector("#portVTubeStudio").addEventListener("change", () => setData("portVTubeStudio", parseInt(document.querySelector("#portVTubeStudio").value)));
 document.querySelector("#minimizeToTray").addEventListener("change", () => setData("minimizeToTray", document.querySelector("#minimizeToTray").checked));
 
-function clampValue(node, min, max)
-{
+function clampValue(node, min, max) {
     var val = node.value;
     if (min != null && val < min)
         val = min;
@@ -2123,20 +2032,23 @@ document.querySelector("#soundsButton").addEventListener("click", () => { showPa
 document.querySelector("#customButton").addEventListener("click", () => { showPanel("customBonks"); });
 document.querySelector("#eventsButton").addEventListener("click", () => { showPanel("events"); });
 
-document.querySelector("#imagesDefaultTab").addEventListener("click", () => { showTab("imageTable", [ "bitImageTable" ], "imagesDefaultTab", [ "imagesBitsTab" ]); });
-document.querySelector("#imagesBitsTab").addEventListener("click", () => { showTab("bitImageTable", [ "imageTable" ], "imagesBitsTab", [ "imagesDefaultTab" ]); });
+document.querySelector("#imagesDefaultTab").addEventListener("click", () => { showTab("imageTable", ["guardImageTable", "coinImageTable"], "imagesDefaultTab", ["imagesGuardTab", "imagesCoinTab"]); });
+document.querySelector("#imagesGuardTab").addEventListener("click", () => { showTab("guardImageTable", ["imageTable", "coinImageTable"], "imagesGuardTab", ["imagesDefaultTab", "imagesCoinTab"]); });
+document.querySelector("#imagesCoinTab").addEventListener("click", () => { showTab("coinImageTable", ["imageTable", "guardImageTable"], "imagesCoinTab", ["imagesDefaultTab", "imagesGuardTab"]); });
 
-document.querySelector("#soundsDefaultTab").addEventListener("click", () => { showTab("soundTable", [ "bitSoundTable" ], "soundsDefaultTab", [ "soundsBitsTab" ]); });
-document.querySelector("#soundsBitsTab").addEventListener("click", () => { showTab("bitSoundTable", [ "soundTable" ], "soundsBitsTab", [ "soundsDefaultTab" ]); });
+document.querySelector("#soundsDefaultTab").addEventListener("click", () => { showTab("soundTable", ["guardSoundTable", "coinSoundTable"], "soundsDefaultTab", ["soundsGuardTab", "soundsCoinTab"]); });
+document.querySelector("#soundsGuardTab").addEventListener("click", () => { showTab("guardSoundTable", ["soundTable", "coinSoundTable"], "soundsGuardTab", ["soundsDefaultTab", "soundsCoinTab"]); });
+document.querySelector("#soundsCoinTab").addEventListener("click", () => { showTab("coinSoundTable", ["soundTable", "guardSoundTable"], "soundsCoinTab", ["soundsDefaultTab", "soundsGuardTab"]) });
 
 document.querySelectorAll(".windowBack").forEach((element) => { element.addEventListener("click", () => { back(); }) });
 
-function showTab(show, hide, select, deselect)
-{
+function showTab(show, hide, select, deselect) {
     if (show == "soundTable")
         openSounds();
-    else if (show == "bitSoundTable")
-        openBitSounds();
+    else if (show == "guardSoundTable")
+        openGuardSounds();
+    else if (show == "coinSoundTable")
+        openCoinSounds();
 
     for (var i = 0; i < hide.length; i++)
         document.querySelector("#" + hide[i]).classList.add("hidden");
@@ -2149,8 +2061,7 @@ function showTab(show, hide, select, deselect)
     document.querySelector("#" + select).classList.add("selectedTab");
 }
 
-function removeAll(panel)
-{
+function removeAll(panel) {
     panel.classList.remove("leftIn");
     panel.classList.remove("rightIn");
     panel.classList.remove("upIn");
@@ -2164,15 +2075,12 @@ function removeAll(panel)
 
 var panelStack = [];
 
-function back()
-{
-    if (!playingLarge && openPanelLarge)
-    {
+function back() {
+    if (!playingLarge && openPanelLarge) {
         openPanelLarge = false;
 
         var anim = Math.floor(Math.random() * 4);
-        switch (anim)
-        {
+        switch (anim) {
             case 0:
                 anim = "left";
                 break;
@@ -2190,8 +2098,7 @@ function back()
         removeAll(document.querySelector("#wideWindow"));
         document.querySelector("#wideWindow").classList.add(anim + "Out");
 
-        if (currentPanelLarge.id == "statusWindow" && (status == 3 || status == 4 || status == 7))
-        {
+        if (currentPanelLarge.id == "statusWindow" && (status == 3 || status == 4 || status == 7)) {
             cancelCalibrate = true;
             ipcRenderer.send("cancelCalibrate");
         }
@@ -2209,17 +2116,13 @@ function back()
         showPanel(panelStack.pop(), false);
 }
 
-function showPanel(panel, stack)
-{
-    if (!playing)
-    {
-        if (document.querySelector("#" + panel) != currentPanel)
-        {
+function showPanel(panel, stack) {
+    if (!playing) {
+        if (document.querySelector("#" + panel) != currentPanel) {
             playing = true;
 
             var anim = Math.floor(Math.random() * 4);
-            switch (anim)
-            {
+            switch (anim) {
                 case 0:
                     anim = "left";
                     break;
@@ -2237,7 +2140,7 @@ function showPanel(panel, stack)
             var oldPanel = currentPanel;
             removeAll(oldPanel);
             oldPanel.classList.add(anim + "Out");
-            
+
             setTimeout(() => {
                 oldPanel.classList.add("hidden");
             }, 500);
@@ -2245,29 +2148,25 @@ function showPanel(panel, stack)
             if (stack == null)
                 panelStack = [];
 
-            if (stack == null || !stack)
-            {
+            if (stack == null || !stack) {
 
                 document.querySelector("#sideBar").querySelectorAll(".overlayButton").forEach((element) => { element.classList.remove("buttonSelected"); });
-    
-                if (panel == "bonkImages")
-                {
+
+                if (panel == "bonkImages") {
                     document.querySelector("#imagesButton").querySelector(".overlayButton").classList.add("buttonSelected");
                     openImages();
                 }
-                else if (panel == "bonkSounds")
-                {
+                else if (panel == "bonkSounds") {
                     document.querySelector("#soundsButton").querySelector(".overlayButton").classList.add("buttonSelected");
                     openSounds();
-                    openBitSounds();
+                    openGuardSounds();
+                    openCoinSounds();
                 }
-                else if (panel == "customBonks")
-                {
+                else if (panel == "customBonks") {
                     document.querySelector("#customButton").querySelector(".overlayButton").classList.add("buttonSelected");
                     openBonks();
                 }
-                else if (panel == "events")
-                {
+                else if (panel == "events") {
                     document.querySelector("#eventsButton").querySelector(".overlayButton").classList.add("buttonSelected");
                     openEvents();
                 }
@@ -2289,15 +2188,11 @@ function showPanel(panel, stack)
 
 var currentPanelLarge, playingLarge = false, openPanelLarge = false, cancelCalibrate = false;
 
-function showPanelLarge(panel)
-{
-    if (!playingLarge)
-    {
-        if (document.querySelector("#" + panel) != currentPanelLarge)
-        {
+function showPanelLarge(panel) {
+    if (!playingLarge) {
+        if (document.querySelector("#" + panel) != currentPanelLarge) {
             var anim = Math.floor(Math.random() * 4);
-            switch (anim)
-            {
+            switch (anim) {
                 case 0:
                     anim = "left";
                     break;
@@ -2320,17 +2215,14 @@ function showPanelLarge(panel)
             removeAll(currentPanelLarge);
             currentPanelLarge.classList.remove("hidden");
 
-            if (!openPanelLarge)
-            {
+            if (!openPanelLarge) {
                 openPanelLarge = true;
                 removeAll(document.querySelector("#wideWindow"));
                 document.querySelector("#wideWindow").classList.remove("hidden");
                 document.querySelector("#wideWindow").classList.add(anim + "In");
             }
-            else
-            {
-                if (oldPanel != null)
-                {
+            else {
+                if (oldPanel != null) {
                     if (oldPanel.id == "statusWindow" && (status == 3 || status == 4 || status == 7))
                         ipcRenderer.send("cancelCalibrate");
 
@@ -2340,7 +2232,7 @@ function showPanelLarge(panel)
                         oldPanel.classList.add("hidden");
                     }, 500);
                 }
-    
+
                 currentPanelLarge.classList.add(anim + "In");
             }
 
@@ -2354,32 +2246,10 @@ function showPanelLarge(panel)
     }
 }
 
-// In response to raid event from main process.
-// Do the HTTP request here, since it"s already a browser of sorts, and send the response back.
-ipcRenderer.on("raid", (event, message) => { getRaidEmotes(event, message); });
-function getRaidEmotes(_, data)
-{
-  var channelEmotes = new XMLHttpRequest();
-  channelEmotes.onreadystatechange = function() {
-      if (this.readyState == 4 && this.status == 200)
-      {
-          const emotes = JSON.parse(this.responseText);
-          ipcRenderer.send("emotes", emotes);
-      }
-  };
-  // Open the request and send it.
-  channelEmotes.open("GET", "https://api.twitch.tv/helix/chat/emotes?broadcaster_id=" + data[0], true);
-  channelEmotes.setRequestHeader("Authorization", "Bearer " + data[1]);
-  channelEmotes.setRequestHeader("Client-Id", "u4rwa52hwkkgyoyow0t3gywxyv54pg");
-  channelEmotes.send();
-}
-
-function checkVersion()
-{
+function checkVersion() {
     var versionRequest = new XMLHttpRequest();
-    versionRequest.onreadystatechange = function() {
-        if (this.readyState == 4 && this.status == 200)
-        {
+    versionRequest.onreadystatechange = function () {
+        if (this.readyState == 4 && this.status == 200) {
             const latestVersion = JSON.parse(this.responseText);
             if (latestVersion.latest > version)
                 document.querySelector("#newVersion").classList.remove("hidden");
@@ -2396,25 +2266,20 @@ function checkVersion()
 
 document.querySelector("#testSingle").addEventListener("click", () => { ipcRenderer.send("single"); });
 document.querySelector("#testBarrage").addEventListener("click", () => { ipcRenderer.send("barrage"); });
-document.querySelector("#testSub").addEventListener("click", () => { ipcRenderer.send("sub"); });
-document.querySelector("#testSubGift").addEventListener("click", () => { ipcRenderer.send("subGift"); });
-document.querySelector("#testBits").addEventListener("click", () => { ipcRenderer.send("bits"); });
+document.querySelector("#testGuard").addEventListener("click", () => { ipcRenderer.send("guard"); });
 document.querySelector("#testFollow").addEventListener("click", () => { ipcRenderer.send("follow"); });
-document.querySelector("#testEmote").addEventListener("click", () => { ipcRenderer.send("emote"); });
-document.querySelector("#testRaid").addEventListener("click", () => { ipcRenderer.send("raid"); });
+document.querySelector("#testSuperChat").addEventListener("click", () => { ipcRenderer.send("superChat"); });
 
 document.querySelector("#calibrateButton").addEventListener("click", () => { if (!cancelCalibrate) ipcRenderer.send("startCalibrate"); });
 document.querySelector("#nextCalibrate").addEventListener("click", () => { ipcRenderer.send("nextCalibrate"); });
 document.querySelector("#cancelCalibrate").addEventListener("click", () => { ipcRenderer.send("cancelCalibrate"); back(); });
 
 // Test a specific item
-async function testItem(index)
-{
+async function testItem(index) {
     const throws = await getData("throws");
     ipcRenderer.send("testItem", throws[index]);
 }
 
-function testCustomBonk(customName)
-{
+function testCustomBonk(customName) {
     ipcRenderer.send("testCustomBonk", customName);
 }

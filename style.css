@@ -1,33 +1,38 @@
-@font-face {
+/* @font-face {
     font-family: 'Cascadia Mono';
     font-display: swap;
     unicode-range: U+000-5FF;
     src: url('CascadiaMono.woff2') format('woff2');
-}
-
+} */
+/* 
 @font-face {
     font-family: 'Noto Sans';
     font-display: swap;
     unicode-range: U+000-5FF;
     src: url('NotoSans-Regular.woff2') format('woff2');
+} */
+
+:root {
+    --color-orange: #ff8800;
+    --color-light-orange: #ffbb6d;
+    --color-orange-tab-2: #ff9925;
+    --color-orange-tab-3: #ffa743;
 }
 
 body {
     padding: 0;
     margin: 0;
-    font-family: 'Noto Sans', Verdana, Geneva, Tahoma, sans-serif;
+    /* font-family: 'Noto Sans', Verdana, Geneva, Tahoma, sans-serif; */
     color: white;
 }
 
-::-webkit-scrollbar
-{
+::-webkit-scrollbar {
     width: 8px;
     background-color: black;
 }
 
-::-webkit-scrollbar-thumb
-{
-    background-color: #5BFF8F;
+::-webkit-scrollbar-thumb {
+    background-color: var(--color-orange);
 }
 
 input[type='range'] {
@@ -38,21 +43,21 @@ input[type='range'] {
     -webkit-appearance: none;
     background-color: black;
 }
-  
+
 input[type='range']::-webkit-slider-thumb {
     width: 10px;
     -webkit-appearance: none;
     height: 10px;
-    background: #E10098;
-    box-shadow: -100vw 0 0 100vw #FF5BCE;
+    background: var(--color-orange);
+    box-shadow: -100vw 0 0 100vw var(--color-light-orange);
     transition: background-color 0.25s;
 }
-  
+
 input[type='range']::-webkit-slider-thumb:hover {
     background-color: #5BFF8F;
 }
 
-body > div {
+body>div {
     margin: 0;
     padding: 0;
 }
@@ -61,8 +66,8 @@ body > div {
     height: 63px;
     line-height: 63px;
     display: grid;
-    grid-template-columns: 320px auto;
-    border-bottom: 1px solid #E10098;
+    grid-template-columns: 416px auto;
+    border-bottom: 1px solid var(--color-orange);
     background-color: #0C0C0C;
     transition: background-color 0.25s;
     cursor: pointer;
@@ -72,28 +77,30 @@ body > div {
     background-color: #1F1F1F;
 }
 
-#headerLogo, #headerWhite, #headerPink {
+#headerLogo,
+#headerWhite,
+#headerPink {
     position: absolute;
     grid-column: 1;
 }
 
 #headerLogo {
     display: flex;
-    width: 296px;
+    width: 400px;
     height: 63px;
     background-color: black;
     clip-path: polygon(0% 0%, 100% 0%, calc(100% - 69px) 100%, 0% 100%);
 }
 
 #headerPink {
-    width: 304px;
+    width: 408px;
     height: 63px;
-    background-color: #E10098;
+    background-color: var(--color-orange);
     clip-path: polygon(0% 0%, 100% 0%, calc(100% - 69px) 100%, 0% 100%);
 }
 
 #headerWhite {
-    width: 320px;
+    width: 424px;
     height: 63px;
     background-color: white;
     clip-path: polygon(calc(100% - 8px) 0%, 100% 0%, calc(100% - 69px) 100%, calc(100% - 77px) 100%);
@@ -105,7 +112,7 @@ body > div {
     height: 48px;
 }
 
-#headerLogo > h1 {
+#headerLogo>h1 {
     margin: 0;
     font-size: 40px;
 }
@@ -115,20 +122,22 @@ body > div {
     color: white;
 }
 
-#headerStatus > h2 {
+#headerStatus>h2 {
     font-size: 30px;
     margin: 0;
     font-weight: normal;
-    font-family: 'Cascadia Mono', 'Consolas', 'Courier New', Courier, monospace;
+    /* font-family: 'Cascadia Mono', 'Consolas', 'Courier New', Courier, monospace; */
 }
 
 @keyframes ready {
     0% {
         color: white;
     }
+
     50% {
         color: #5BFF8F;
     }
+
     100% {
         color: white;
     }
@@ -142,9 +151,11 @@ body > div {
     0% {
         color: white;
     }
+
     50% {
         color: #AFAFAF;
     }
+
     100% {
         color: white;
     }
@@ -158,9 +169,11 @@ body > div {
     0% {
         color: white;
     }
+
     50% {
         color: #FF5B79;
     }
+
     100% {
         color: white;
     }
@@ -175,6 +188,14 @@ body > div {
     position: absolute;
     bottom: 0;
     width: 100%;
+}
+
+#bottomLogo {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    margin: 8px;
+    height: 40px;
 }
 
 #logoTypeou {
@@ -205,7 +226,7 @@ a {
 }
 
 .topButton {
-    font-family: 'Cascadia Mono', 'Consolas', 'Courier New', Courier, monospace;
+    /* font-family: 'Cascadia Mono', 'Consolas', 'Courier New', Courier, monospace; */
     font-size: 28px;
     width: 192px;
     height: 64px;
@@ -234,12 +255,12 @@ a {
 .cornerTopButton {
     grid-column: 1;
     grid-row: 1;
-    background-color: #E10098;
+    background-color: var(--color-orange);
     clip-path: polygon(0% 0%, 32px 0%, 0% 32px);
 }
 
 .overlayButton {
-    background-color: #E10098;
+    background-color: var(--color-orange);
     opacity: 0;
     z-index: 1;
     transition: opacity 0.2s;
@@ -295,19 +316,20 @@ a {
     position: relative;
 }
 
-.sideButtonInner > h2,  .sideButtonInner > p {
+.sideButtonInner>h2,
+.sideButtonInner>p {
     margin: 0;
 }
 
-.sideButtonInner > h2 {
+.sideButtonInner>h2 {
     font-size: 28px;
 }
 
-.sideButtonInner > hr {
+.sideButtonInner>hr {
     margin-top: -4px;
 }
 
-.sideButtonInner > p {
+.sideButtonInner>p {
     margin-top: -8px;
     font-size: 14px;
 }
@@ -318,7 +340,7 @@ a {
     margin-top: -32px;
     position: absolute;
     clip-path: polygon(0% 0%, 100% 0%, 0% 100%);
-    background-color: #E10098;
+    background-color: var(--color-orange);
 }
 
 #mainWindow {
@@ -338,14 +360,14 @@ a {
     display: grid;
 }
 
-#mainWindowInner > div {
+#mainWindowInner>div {
     height: 100%;
     overflow-y: scroll;
     grid-row: 1;
     grid-column: 1;
 }
 
-#mainWindowInner > div > div {
+#mainWindowInner>div>div {
     padding: 32px 16px;
     padding-right: 8px;
 }
@@ -358,7 +380,7 @@ a {
     margin-top: -32px;
     right: 0;
     position: absolute;
-    background-color: #FF5B79;
+    background-color: var(--color-light-orange);
     font-weight: bold;
     color: black;
     font-size: 20px;
@@ -370,7 +392,7 @@ a {
     background-color: #5BFF8F;
 }
 
-.sideButtonInner > .overlayButton {
+.sideButtonInner>.overlayButton {
     margin: -4px -16px;
 }
 
@@ -390,7 +412,7 @@ a {
     box-shadow: -8px 8px 16px rgba(0, 0, 0, 0.5);
 }
 
-.imageRowInner  {
+.imageRowInner {
     width: calc(100% - 4px);
     height: calc(100% - 4px);
     clip-path: polygon(0% 0%, calc(100% - 16px) 0%, 100% 16px, 100% 100%, 0% 100%);
@@ -401,7 +423,9 @@ a {
     position: relative;
 }
 
-.soundRow .imageRowInner, .bitSoundRow .imageRowInner  {
+.soundRow .imageRowInner,
+.guardSoundRow .imageRowInner,
+.coinSoundRow .imageRowInner {
     grid-template-columns: 30px auto 30px;
 }
 
@@ -409,7 +433,7 @@ a {
     position: absolute;
     width: 100%;
     height: 100%;
-    background-color: #E10098;
+    background-color: var(--color-orange);
     transition: opacity 0.25s;
     opacity: 0;
     z-index: -1;
@@ -420,7 +444,7 @@ a {
     cursor: pointer;
 }
 
-.new > * {
+.new>* {
     cursor: pointer;
 }
 
@@ -428,12 +452,12 @@ a {
     opacity: 0.15;
 }
 
-.imageRowInner > .checkbox {
+.imageRowInner>.checkbox {
     grid-row: 1;
     grid-column: 1;
 }
 
-.imageRowInner > .cogwheel {
+.imageRowInner>.cogwheel {
     grid-row: 2;
     grid-column: 1;
 }
@@ -453,7 +477,7 @@ a {
     transform: scale(1.1);
 }
 
-.imageRowInner > *:hover ~ .imageRowHover {
+.imageRowInner>*:hover~.imageRowHover {
     opacity: 0.15;
 }
 
@@ -467,33 +491,41 @@ a {
     white-space: nowrap;
 }
 
-.imageRowInner > .imageLabel {
+.imageRowInner>.imageLabel {
     grid-row: 1 / 3;
     grid-column: 3;
 }
 
-.soundRow .imageRowInner > .imageLabel, .bitSoundRow .imageRowInner > .imageLabel {
+.soundRow .imageRowInner>.imageLabel,
+.guardSoundRow .imageRowInner>.imageLabel,
+.coinSoundRow .imageRowInner>.imageLabel {
     grid-row: 1;
     grid-column: 2;
 }
 
-.soundRow .imageRowInner > .soundVolume, .bitSoundRow .imageRowInner > .bitSoundVolume {
+.soundRow .imageRowInner>.soundVolume,
+.guardSoundRow .imageRowInner>.guardSoundVolume,
+.coinSoundRow .imageRowInner>.guardSoundVolume {
     grid-row: 2;
     grid-column: 2;
     max-height: 29px;
 }
 
-.imageRowInner > .delete {
+.imageRowInner>.delete {
     grid-row: 2;
     grid-column: 4;
 }
 
-.soundRow .imageRowInner > .delete, .bitSoundRow .imageRowInner > .delete {
+.soundRow .imageRowInner>.delete,
+.guardSoundRow .imageRowInner>.delete,
+.coinSoundRow .imageRowInner>.delete {
     grid-row: 2;
     grid-column: 3;
 }
 
-.soundRow input, .bitSoundRow input {
+.soundRow input,
+.guardSoundRow input,
+.coinSoundRow input {
     position: relative;
     z-index: 0;
 }
@@ -506,7 +538,7 @@ a {
     background-size: contain;
 }
 
-.checkbox > input {
+.checkbox>input {
     position: absolute;
     width: 100%;
     height: 100%;
@@ -514,18 +546,18 @@ a {
     margin: 0;
 }
 
-.checkbox > img {
+.checkbox>img {
     position: absolute;
     pointer-events: none;
     width: 100%;
     display: none;
 }
 
-.checkbox > input:checked ~ .checkmark {
+.checkbox>input:checked~.checkmark {
     display: initial;
 }
 
-.checkbox > input:checked ~ .checkHover {
+.checkbox>input:checked~.checkHover {
     opacity: 0.25;
 }
 
@@ -554,7 +586,7 @@ a {
     cursor: pointer;
 }
 
-.cogwheel > button {
+.cogwheel>button {
     position: absolute;
     margin: 0;
     width: 100%;
@@ -562,18 +594,21 @@ a {
     display: none;
 }
 
-.cogwheel > img {
+.cogwheel>img {
     position: absolute;
     width: 100%;
     height: 100%;
     transition: transform 0.25s;
 }
 
-#bitImageTable .cogwheel > img:hover, #bonkSounds .cogwheel > img:hover {
+#guardImageTable .cogwheel>img:hover,
+#coinImageTable .cogwheel>img:hover,
+#bonkSounds .cogwheel>img:hover {
     transform: scale(1.1);
 }
 
-.cogwheel > img:hover, .customBonkRow .imageImage:hover {
+.cogwheel>img:hover,
+.customBonkRow .imageImage:hover {
     transform: rotate(90deg);
 }
 
@@ -584,7 +619,7 @@ a {
     cursor: pointer;
 }
 
-.delete > button {
+.delete>button {
     position: absolute;
     width: 100%;
     height: 100%;
@@ -592,7 +627,7 @@ a {
     display: none;
 }
 
-.delete > img {
+.delete>img {
     position: absolute;
     width: 100%;
     height: 100%;
@@ -600,7 +635,7 @@ a {
     transition: transform 0.25s;
 }
 
-.delete > img:hover {
+.delete>img:hover {
     transform: scale(1.1);
 }
 
@@ -624,16 +659,21 @@ a {
 
 .firstTab {
     padding-left: 16px;
-    background-color: #E10098;
+    background-color: var(--color-orange);
 }
 
 .secondTab {
     padding-left: 144px;
-    background-color: #E900C0;
+    background-color: var(--color-orange-tab-2);
+}
+
+.thirdTab {
+    padding-left: 272px;
+    background-color: var(--color-orange-tab-3);
 }
 
 .selectedTab {
-    background-color: #FF5BCE;
+    background-color: var(--color-light-orange);
     color: white;
 }
 
@@ -647,14 +687,14 @@ a {
     height: calc(100% - 32px);
 }
 
-#imageDetailsInner > p {
+#imageDetailsInner>p {
     width: max-content;
     min-width: 128px;
     position: relative;
     z-index: 1;
 }
 
-#imageDetailsInner > img {
+#imageDetailsInner>img {
     position: absolute;
     margin: auto;
     left: -9999px;
@@ -673,7 +713,7 @@ a {
     z-index: 1;
 }
 
-#imageSettings > div {
+#imageSettings>div {
     flex-grow: 1;
 }
 
@@ -683,17 +723,15 @@ a {
     box-shadow: -8px 8px 16px rgba(0, 0, 0, 0.5);
 }
 
-#imageSettings1 > .imageDetailsShadow
-{
+#imageSettings1>.imageDetailsShadow {
     width: 192px;
 }
 
-#imageSettings2 > .imageDetailsShadow
-{
+#imageSettings2>.imageDetailsShadow {
     width: 288px;
 }
 
-.imageDetailsInner  {
+.imageDetailsInner {
     height: calc(100% - 16px);
     clip-path: polygon(0% 0%, calc(100% - 16px) 0%, 100% 16px, 100% 100%, 0% 100%);
     background-color: #2A2A2A;
@@ -710,7 +748,7 @@ a {
     transform: translateY(-50%);
 }
 
-.settingsTable > p {
+.settingsTable>p {
     grid-column: 1;
     margin: 0;
 }
@@ -734,36 +772,40 @@ a {
 }
 
 #bonkDetailsTable {
-    grid-template-columns: 64px auto auto;;
+    display: grid;
+    grid-template-columns: 64px auto auto;
+    ;
 }
 
-#bonkDetailsTable, #eventsTable {
-    display: grid;
+#bonkDetailsTable,
+#eventsTable {
+    /* display: grid; */
     line-height: 30px;
     gap: 8px;
 }
 
-#bonkDetailsTable > .header {
+#bonkDetailsTable>.header {
     grid-column: 1 / 4;
 }
 
-#eventsTable > .header {
+#eventsTable>.header {
     grid-column: 1 / 5;
 }
 
-#bonkDetailsTable > p, #eventsTable > p {
+#bonkDetailsTable>p,
+#eventsTable>p {
     margin: 0;
 }
 
-#bonkDetailsTable > input {
+#bonkDetailsTable>input {
     width: 64px;
 }
 
-#eventsTable > input {
+#eventsTable>input {
     width: 96px;
 }
 
-#bonkDetailsTable > button {
+#bonkDetailsTable>button {
     width: 64px;
 }
 
@@ -783,13 +825,13 @@ a {
     clip-path: polygon(0% 0%, calc(100% - 16px) 0%, 100% 16px, 100% 100%, 0% 100%);
 }
 
-.headerInner > img {
+.headerInner>img {
     float: right;
     margin: 1px;
     transition: transform 0.25s;
 }
 
-.headerInner > img:hover {
+.headerInner>img:hover {
     transform: scale(1.1);
 }
 
@@ -859,7 +901,7 @@ a {
     clip-path: polygon(0% 0%, calc(100% - 16px) 0%, 100% 16px, 100% 100%, 0% 100%);
 }
 
-#wideWindowInner > div {
+#wideWindowInner>div {
     height: calc(100% - 64px);
     width: calc(100% - 24px);
     padding: 32px 16px;
@@ -904,6 +946,10 @@ mark {
 
 #settings {
     position: absolute;
+    margin: auto;
+}
+
+#settings .settingsInner {
     margin: auto;
     display: grid;
     line-height: 30px;
@@ -1083,22 +1129,35 @@ mark {
     margin: 0 16px;
 }
 
-.redeemsRow, .commandsRow {
+.commandsRow,
+.giftsRow,
+.eventGrid {
     grid-column: 1 / 6;
     display: grid;
     gap: 8px;
 }
 
-#eventsTable, .redeemsRow, .commandsRow {
-    grid-template-columns: 70px 228px 104px 104px 32px;
+/* #eventsTable, */
+.commandsRow,
+.giftsRow,
+.eventGrid {
+    grid-template-columns: 7% 34% 20% 26% 7%;
 }
 
-.redeemsRow p, .commandsRow p {
+.giftsRow p,
+.commandsRow p,
+.eventGrid p {
     margin: 0;
     line-height: 30px;
 }
 
-.checkbox, .delete {
+.eventList {
+    max-height: 256px;
+    overflow: auto;
+}
+
+.checkbox,
+.delete {
     display: block;
     margin: auto;
 }
@@ -1127,7 +1186,8 @@ mark {
     cursor: pointer;
 }
 
-#bitImageTable .imageRowInner > div {
+#guardImageTable .imageRowInner>div,
+#coinImageTable .imageRowInner>div {
     display: grid;
     grid-column: 3 / 5;
     grid-row: 2;
@@ -1135,12 +1195,14 @@ mark {
     width: min-content;
 }
 
-#bitImageTable .imageRowInner > div > p {
+#guardImageTable .imageRowInner>div>p,
+#coinImageTable .imageRowInner>div>p {
     grid-column: 1;
     margin: 0;
 }
 
-.bitImageScale {
+.guardImageScale,
+.coinImageScale {
     grid-column: 2;
     height: 16px;
     width: 64px;
@@ -1155,29 +1217,34 @@ mark {
     gap: 8px;
 }
 
-.decalSettings > * {
+.decalSettings>* {
     grid-row: 1;
 }
 
-.decalSettings > img, #bitImageTable .imageRowInner > div > img {
+.decalSettings>img,
+#guardImageTable .imageRowInner>div>img,
+#coinImageTable .imageRowInner>div>img {
     margin: auto;
     display: block;
     height: 16px;
 }
 
-.decalSettings > input, #bitImageTable .imageRowInner > div > input {
+.decalSettings>input,
+#guardImageTable .imageRowInner>div>input,
+#coinImageTable .imageRowInner>div>input {
     margin: auto 0;
     display: block;
     height: 16px;
 }
 
-.decalSettings > input::-webkit-outer-spin-button,
-.decalSettings > input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
+.decalSettings>input::-webkit-outer-spin-button,
+.decalSettings>input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
 }
 
-#redeemAdd, #commandAdd {
+#redeemAdd,
+#commandAdd {
     cursor: pointer;
 }
 
@@ -1187,7 +1254,7 @@ mark {
     margin-top: -32px;
 }
 
-.selectAll > div {
+.selectAll>div {
     position: absolute;
     top: 0;
     right: 0;
@@ -1197,7 +1264,7 @@ mark {
     line-height: 32px;
 }
 
-.selectAll > div > * {
+.selectAll>div>* {
     grid-row: 1;
     margin: 0;
 }
@@ -1209,7 +1276,7 @@ mark {
     z-index: 1;
 }
 
-#user {
+#room {
     position: absolute;
     right: 0;
     bottom: 0;
@@ -1217,28 +1284,68 @@ mark {
     gap: 8px;
 }
 
-#user > * {
+#room>* {
     grid-row: 1;
     margin: auto;
 }
 
-#user > button {
+#room>button {
     padding: 4px 8px;
 }
 
 #logout {
-    background-color: #0C0C0C ;
+    background-color: #0C0C0C;
     border: 2px solid #1D1D1D;
     color: white;
     cursor: pointer;
     padding: 0 8px;
 }
 
-#itchLink {
+#logout.disabled {
+    opacity: 0.5;
+}
+
+#githubLink {
     background-color: black;
     padding: 8px 16px;
 }
 
 .right {
     text-align: right;
+}
+
+.credit {
+    padding: 16px;
+    width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+}
+
+.divider {
+    height: 1px;
+    width: 100%;
+    margin: 8px;
+    background-color: white;
+}
+
+.creditInner {
+    display: flex;
+    flex-direction: row;
+}
+
+.author {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 24px;
+}
+
+.creditLogo {
+    height: 64px;
+}
+
+#bonkerLink.topButton {
+    width: initial;
+    font-size: 18px;
 }
