@@ -1,154 +1,161 @@
 {
     "portThrower": 8080,
     "portVTubeStudio": 8001,
+    "roomid": "372206",
     "throws": [
         {
             "enabled": true,
-            "location": "throws/water_bottle.png",
+            "location": "throws/牛哇牛哇.png",
             "weight": 1,
             "scale": 1,
             "sound": null,
             "volume": 1,
             "customs": [
-                "Hydrate"
+                "牛哇牛哇"
             ]
         },
         {
             "enabled": true,
-            "location": "throws/K_Energy.png",
+            "location": "throws/给大佬递茶.png",
             "weight": 1,
             "scale": 1,
             "sound": null,
             "volume": 1,
             "customs": [
-                "Hydrate"
+                "给大佬递茶"
             ]
         },
         {
             "enabled": true,
-            "location": "throws/I_C_Watermellon.png",
+            "location": "throws/粉丝团灯牌.png",
             "weight": 1,
-            "scale": 3,
+            "scale": 1,
             "sound": null,
             "volume": 1,
-            "customs": []
+            "customs": [
+                "粉丝团灯牌"
+            ]
         },
         {
             "enabled": true,
-            "location": "throws/I_C_Strawberry.png",
+            "location": "throws/打call.png",
             "weight": 1,
-            "scale": 3,
+            "scale": 1,
             "sound": null,
             "volume": 1,
-            "customs": []
+            "customs": [
+                "打call"
+            ]
         },
         {
             "enabled": true,
-            "location": "throws/I_C_Pineapple.png",
+            "location": "throws/冰阔乐.png",
             "weight": 1,
-            "scale": 3,
+            "scale": 1,
             "sound": null,
             "volume": 1,
-            "customs": []
+            "customs": [
+                "冰阔乐"
+            ]
         },
         {
             "enabled": true,
-            "location": "throws/I_C_Pie.png",
+            "location": "throws/比心.png",
             "weight": 1,
-            "scale": 3,
+            "scale": 1,
             "sound": null,
             "volume": 1,
-            "customs": []
+            "customs": [
+                "比心"
+            ]
         },
         {
             "enabled": true,
-            "location": "throws/I_C_Pear.png",
-            "weight": 1,
-            "scale": 3,
+            "location": "throws/i了i了.png",
+            "weight": 0.5,
+            "scale": 1,
             "sound": null,
             "volume": 1,
-            "customs": []
+            "customs": [
+                "i了i了"
+            ]
         },
         {
             "enabled": true,
-            "location": "throws/I_C_Orange.png",
+            "location": "throws/flag.png",
             "weight": 1,
-            "scale": 3,
+            "scale": 1,
             "sound": null,
             "volume": 1,
-            "customs": []
+            "customs": [
+                "flag"
+            ]
         },
         {
             "enabled": true,
-            "location": "throws/I_C_Nut.png",
-            "weight": 1,
-            "scale": 3,
+            "location": "throws/D言D语.png",
+            "weight": 0.3,
+            "scale": 1,
             "sound": null,
             "volume": 1,
-            "customs": []
+            "customs": [
+                "D言D语"
+            ]
         },
         {
             "enabled": true,
-            "location": "throws/I_C_Mulberry.png",
-            "weight": 1,
-            "scale": 3,
+            "location": "throws/B坷垃.png",
+            "weight": 0.6,
+            "scale": 2,
             "sound": null,
             "volume": 1,
-            "customs": []
+            "customs": [
+                "B坷垃"
+            ]
         },
         {
             "enabled": true,
-            "location": "throws/I_C_Lemon.png",
-            "weight": 1,
-            "scale": 3,
+            "location": "throws/吃瓜.png",
+            "weight": 0.6,
+            "scale": 1,
             "sound": null,
             "volume": 1,
-            "customs": []
+            "customs": [
+                "吃瓜"
+            ]
         },
         {
             "enabled": true,
-            "location": "throws/I_C_GreenGrapes.png",
-            "weight": 1,
-            "scale": 3,
+            "location": "throws/233.png",
+            "weight": 0.2,
+            "scale": 1.5,
             "sound": null,
             "volume": 1,
-            "customs": []
+            "customs": [
+                "233"
+            ]
         },
         {
             "enabled": true,
-            "location": "throws/I_C_Grapes.png",
-            "weight": 1,
-            "scale": 3,
+            "location": "throws/小花花.png",
+            "weight": 0.1,
+            "scale": 0.8,
             "sound": null,
             "volume": 1,
-            "customs": []
+            "customs": [
+                "小花花"
+            ]
         },
         {
             "enabled": true,
-            "location": "throws/I_C_Cherry.png",
-            "weight": 1,
-            "scale": 3,
+            "location": "throws/辣条.png",
+            "weight": 0.2,
+            "scale": 0.8,
             "sound": null,
             "volume": 1,
-            "customs": []
-        },
-        {
-            "enabled": true,
-            "location": "throws/I_C_Banana.png",
-            "weight": 1,
-            "scale": 3,
-            "sound": null,
-            "volume": 1,
-            "customs": []
-        },
-        {
-            "enabled": true,
-            "location": "throws/gnome.png",
-            "weight": 1,
-            "scale": 0.5,
-            "sound": "impacts/gnome.mp3",
-            "volume": 1,
-            "customs": []
+            "customs": [
+                "辣条"
+            ]
         }
     ],
     "impacts": [
@@ -158,8 +165,23 @@
             "enabled": true,
             "bits": true,
             "customs": [
-                "Hydrate"
-            ]
+                "辣条",
+                "小花花",
+                "233",
+                "吃瓜",
+                "B坷垃",
+                "D言D语",
+                "flag",
+                "i了i了",
+                "比心",
+                "冰阔乐",
+                "打call",
+                "粉丝团灯牌",
+                "给大佬递茶",
+                "牛哇牛哇"
+            ],
+            "guards": false,
+            "coins": true
         },
         {
             "location": "impacts/Seq1.15 Hit #2 96 HK1.wav",
@@ -167,8 +189,23 @@
             "enabled": true,
             "bits": true,
             "customs": [
-                "Hydrate"
-            ]
+                "辣条",
+                "小花花",
+                "233",
+                "吃瓜",
+                "B坷垃",
+                "D言D语",
+                "flag",
+                "i了i了",
+                "比心",
+                "冰阔乐",
+                "打call",
+                "粉丝团灯牌",
+                "给大佬递茶",
+                "牛哇牛哇"
+            ],
+            "guards": true,
+            "coins": true
         },
         {
             "location": "impacts/Seq1.15 Hit #1 96 HK1.wav",
@@ -176,8 +213,23 @@
             "enabled": true,
             "bits": true,
             "customs": [
-                "Hydrate"
-            ]
+                "辣条",
+                "小花花",
+                "233",
+                "吃瓜",
+                "B坷垃",
+                "D言D语",
+                "flag",
+                "i了i了",
+                "比心",
+                "冰阔乐",
+                "打call",
+                "粉丝团灯牌",
+                "给大佬递茶",
+                "牛哇牛哇"
+            ],
+            "guards": true,
+            "coins": true
         },
         {
             "location": "impacts/Seq 2.27 Hit #3 96 HK1.wav",
@@ -185,8 +237,23 @@
             "enabled": true,
             "bits": true,
             "customs": [
-                "Hydrate"
-            ]
+                "辣条",
+                "小花花",
+                "233",
+                "吃瓜",
+                "B坷垃",
+                "D言D语",
+                "flag",
+                "i了i了",
+                "比心",
+                "冰阔乐",
+                "打call",
+                "粉丝团灯牌",
+                "给大佬递茶",
+                "牛哇牛哇"
+            ],
+            "guards": true,
+            "coins": true
         },
         {
             "location": "impacts/Seq 2.27 Hit #2 96 HK1.wav",
@@ -194,8 +261,23 @@
             "enabled": true,
             "bits": true,
             "customs": [
-                "Hydrate"
-            ]
+                "辣条",
+                "小花花",
+                "233",
+                "吃瓜",
+                "B坷垃",
+                "D言D语",
+                "flag",
+                "i了i了",
+                "比心",
+                "冰阔乐",
+                "打call",
+                "粉丝团灯牌",
+                "给大佬递茶",
+                "牛哇牛哇"
+            ],
+            "guards": true,
+            "coins": true
         },
         {
             "location": "impacts/Seq 2.27 Hit #1 96 HK1.wav",
@@ -203,8 +285,23 @@
             "enabled": true,
             "bits": true,
             "customs": [
-                "Hydrate"
-            ]
+                "辣条",
+                "小花花",
+                "233",
+                "吃瓜",
+                "B坷垃",
+                "D言D语",
+                "flag",
+                "i了i了",
+                "比心",
+                "冰阔乐",
+                "打call",
+                "粉丝团灯牌",
+                "给大佬递茶",
+                "牛哇牛哇"
+            ],
+            "guards": true,
+            "coins": true
         },
         {
             "location": "impacts/Seq 2.1 Hit #3 96 HK1.wav",
@@ -212,8 +309,23 @@
             "enabled": true,
             "bits": true,
             "customs": [
-                "Hydrate"
-            ]
+                "辣条",
+                "小花花",
+                "233",
+                "吃瓜",
+                "B坷垃",
+                "D言D语",
+                "flag",
+                "i了i了",
+                "比心",
+                "冰阔乐",
+                "打call",
+                "粉丝团灯牌",
+                "给大佬递茶",
+                "牛哇牛哇"
+            ],
+            "guards": true,
+            "coins": true
         },
         {
             "location": "impacts/Seq 2.1 Hit #2 96 HK1.wav",
@@ -221,8 +333,23 @@
             "enabled": true,
             "bits": true,
             "customs": [
-                "Hydrate"
-            ]
+                "辣条",
+                "小花花",
+                "233",
+                "吃瓜",
+                "B坷垃",
+                "D言D语",
+                "flag",
+                "i了i了",
+                "比心",
+                "冰阔乐",
+                "打call",
+                "粉丝团灯牌",
+                "给大佬递茶",
+                "牛哇牛哇"
+            ],
+            "guards": true,
+            "coins": true
         },
         {
             "location": "impacts/Seq 2.1 Hit #1 96 HK1.wav",
@@ -230,39 +357,57 @@
             "enabled": true,
             "bits": true,
             "customs": [
-                "Hydrate"
-            ]
+                "辣条",
+                "小花花",
+                "233",
+                "吃瓜",
+                "B坷垃",
+                "D言D语",
+                "flag",
+                "i了i了",
+                "比心",
+                "冰阔乐",
+                "打call",
+                "粉丝团灯牌",
+                "给大佬递茶",
+                "牛哇牛哇"
+            ],
+            "guards": true,
+            "coins": true
         }
     ],
-    "bitThrows": {
-        "one": {
-            "location": "throws/1.png",
-            "scale": 1.5
+    "coinThrows": {
+        "battery": {
+            "location": "throws/battery.png",
+            "scale": 0.9
         },
-        "oneHundred": {
-            "location": "throws/100.png",
-            "scale": 1.5
-        },
-        "oneThousand": {
-            "location": "throws/1000.png",
-            "scale": 1.5
-        },
-        "fiveThousand": {
-            "location": "throws/5000.png",
-            "scale": 1.5
-        },
-        "tenThousand": {
-            "location": "throws/10000.png",
-            "scale": 1.5
+        "silver": {
+            "location": "throws/silver.png",
+            "scale": 0.8
         }
     },
+    "guardThrows": {
+        "guard3": {
+            "location": "throws/舰长.png",
+            "scale": 1
+        },
+        "guard2": {
+            "location": "throws/提督.png",
+            "scale": 1
+        },
+        "guard1": {
+            "location": "throws/总督.png",
+            "scale": 1
+        }
+    },
+    "superChatEnabled": true,
+    "superChatMinBattery": 300,
+    "superChatMaxCount": 50,
+    "superChatCoinUnit": 10,
+    "superChatCooldown": 0,
     "followEnabled": true,
-    "subEnabled": true,
-    "subGiftEnabled": true,
     "bitsEnabled": true,
     "followType": "single",
-    "subType": "barrage",
-    "subGiftType": "barrage",
     "bitsMaxBarrageCount": 50,
     "followCooldown": 0,
     "subCooldown": 0,
@@ -280,22 +425,260 @@
     "throwDuration": 1,
     "throwAngleMin": -45,
     "throwAngleMax": 45,
-    "raidEnabled": true,
-    "raidMaxBarrageCount": 50,
-    "raidCooldown": 0,
     "customBonks": {
-        "Hydrate": {
-            "barrageCount": 10,
+        "233": {
+            "barrageCountManual": false,
+            "barrageCount": 1,
             "barrageFrequencyOverride": false,
             "barrageFrequency": 0.1,
             "throwDurationOverride": false,
-            "throwDuration": 0.8,
-            "spinSpeedOverride": false,
-            "spinSpeedMin": 5,
-            "spinSpeedMax": 10,
+            "throwDuration": 1,
             "throwAngleOverride": false,
             "throwAngleMin": -45,
             "throwAngleMax": 45,
+            "spinSpeedMin": 5,
+            "spinSpeedMax": 10,
+            "itemsOverride": true,
+            "soundsOverride": false,
+            "impactDecals": [],
+            "windupSounds": [],
+            "windupDelay": 0,
+            "spinSpeedOverride": false
+        },
+        "辣条": {
+            "barrageCountManual": false,
+            "barrageCount": 1,
+            "barrageFrequencyOverride": false,
+            "barrageFrequency": 0.1,
+            "throwDurationOverride": false,
+            "throwDuration": 1,
+            "throwAngleOverride": false,
+            "throwAngleMin": -45,
+            "throwAngleMax": 45,
+            "spinSpeedMin": 5,
+            "spinSpeedMax": 10,
+            "itemsOverride": true,
+            "soundsOverride": false,
+            "impactDecals": [],
+            "windupSounds": [],
+            "windupDelay": 0,
+            "spinSpeedOverride": false
+        },
+        "小花花": {
+            "barrageCountManual": false,
+            "barrageCount": 1,
+            "barrageFrequencyOverride": false,
+            "barrageFrequency": 0.1,
+            "throwDurationOverride": false,
+            "throwDuration": 1,
+            "throwAngleOverride": false,
+            "throwAngleMin": -45,
+            "throwAngleMax": 45,
+            "spinSpeedMin": 5,
+            "spinSpeedMax": 10,
+            "itemsOverride": true,
+            "soundsOverride": false,
+            "impactDecals": [],
+            "windupSounds": [],
+            "windupDelay": 0,
+            "spinSpeedOverride": false
+        },
+        "吃瓜": {
+            "barrageCountManual": false,
+            "barrageCount": 1,
+            "barrageFrequencyOverride": false,
+            "barrageFrequency": 0.1,
+            "throwDurationOverride": true,
+            "throwDuration": 1.5,
+            "throwAngleOverride": false,
+            "throwAngleMin": -45,
+            "throwAngleMax": 45,
+            "spinSpeedMin": 5,
+            "spinSpeedMax": 10,
+            "itemsOverride": true,
+            "soundsOverride": false,
+            "impactDecals": [],
+            "windupSounds": [],
+            "windupDelay": 0,
+            "spinSpeedOverride": false
+        },
+        "B坷垃": {
+            "barrageCountManual": false,
+            "barrageCount": 1,
+            "barrageFrequencyOverride": false,
+            "barrageFrequency": 0.1,
+            "throwDurationOverride": false,
+            "throwDuration": 1,
+            "throwAngleOverride": false,
+            "throwAngleMin": -45,
+            "throwAngleMax": 45,
+            "spinSpeedMin": 5,
+            "spinSpeedMax": 10,
+            "itemsOverride": true,
+            "soundsOverride": false,
+            "impactDecals": [],
+            "windupSounds": [],
+            "windupDelay": 0,
+            "spinSpeedOverride": false
+        },
+        "D言D语": {
+            "barrageCountManual": false,
+            "barrageCount": 1,
+            "barrageFrequencyOverride": false,
+            "barrageFrequency": 0.1,
+            "throwDurationOverride": false,
+            "throwDuration": 1,
+            "throwAngleOverride": false,
+            "throwAngleMin": -45,
+            "throwAngleMax": 45,
+            "spinSpeedMin": 0,
+            "spinSpeedMax": 2,
+            "itemsOverride": true,
+            "soundsOverride": false,
+            "impactDecals": [],
+            "windupSounds": [],
+            "windupDelay": 0,
+            "spinSpeedOverride": true
+        },
+        "flag": {
+            "barrageCountManual": false,
+            "barrageCount": 1,
+            "barrageFrequencyOverride": false,
+            "barrageFrequency": 0.1,
+            "throwDurationOverride": false,
+            "throwDuration": 1,
+            "throwAngleOverride": false,
+            "throwAngleMin": -45,
+            "throwAngleMax": 45,
+            "spinSpeedMin": 5,
+            "spinSpeedMax": 10,
+            "itemsOverride": true,
+            "soundsOverride": false,
+            "impactDecals": [],
+            "windupSounds": [],
+            "windupDelay": 0,
+            "spinSpeedOverride": false
+        },
+        "i了i了": {
+            "barrageCountManual": false,
+            "barrageCount": 1,
+            "barrageFrequencyOverride": false,
+            "barrageFrequency": 0.1,
+            "throwDurationOverride": false,
+            "throwDuration": 1,
+            "throwAngleOverride": false,
+            "throwAngleMin": -45,
+            "throwAngleMax": 45,
+            "spinSpeedMin": 5,
+            "spinSpeedMax": 10,
+            "itemsOverride": true,
+            "soundsOverride": false,
+            "impactDecals": [],
+            "windupSounds": [],
+            "windupDelay": 0
+        },
+        "比心": {
+            "barrageCountManual": false,
+            "barrageCount": 1,
+            "barrageFrequencyOverride": false,
+            "barrageFrequency": 0.1,
+            "throwDurationOverride": false,
+            "throwDuration": 1,
+            "throwAngleOverride": false,
+            "throwAngleMin": -45,
+            "throwAngleMax": 45,
+            "spinSpeedMin": 5,
+            "spinSpeedMax": 10,
+            "itemsOverride": true,
+            "soundsOverride": false,
+            "impactDecals": [],
+            "windupSounds": [],
+            "windupDelay": 0
+        },
+        "冰阔乐": {
+            "barrageCountManual": false,
+            "barrageCount": 1,
+            "barrageFrequencyOverride": false,
+            "barrageFrequency": 0.1,
+            "throwDurationOverride": false,
+            "throwDuration": 1,
+            "throwAngleOverride": false,
+            "throwAngleMin": -45,
+            "throwAngleMax": 45,
+            "spinSpeedMin": 5,
+            "spinSpeedMax": 10,
+            "itemsOverride": true,
+            "soundsOverride": false,
+            "impactDecals": [],
+            "windupSounds": [],
+            "windupDelay": 0
+        },
+        "打call": {
+            "barrageCountManual": false,
+            "barrageCount": 1,
+            "barrageFrequencyOverride": false,
+            "barrageFrequency": 0.1,
+            "throwDurationOverride": false,
+            "throwDuration": 1,
+            "throwAngleOverride": false,
+            "throwAngleMin": -45,
+            "throwAngleMax": 45,
+            "spinSpeedMin": 5,
+            "spinSpeedMax": 10,
+            "itemsOverride": true,
+            "soundsOverride": false,
+            "impactDecals": [],
+            "windupSounds": [],
+            "windupDelay": 0
+        },
+        "粉丝团灯牌": {
+            "barrageCountManual": false,
+            "barrageCount": 1,
+            "barrageFrequencyOverride": false,
+            "barrageFrequency": 0.1,
+            "throwDurationOverride": false,
+            "throwDuration": 1,
+            "throwAngleOverride": false,
+            "throwAngleMin": -45,
+            "throwAngleMax": 45,
+            "spinSpeedMin": 5,
+            "spinSpeedMax": 10,
+            "itemsOverride": true,
+            "soundsOverride": false,
+            "impactDecals": [],
+            "windupSounds": [],
+            "windupDelay": 0
+        },
+        "给大佬递茶": {
+            "barrageCountManual": false,
+            "barrageCount": 1,
+            "barrageFrequencyOverride": false,
+            "barrageFrequency": 0.1,
+            "throwDurationOverride": false,
+            "throwDuration": 1,
+            "throwAngleOverride": false,
+            "throwAngleMin": -45,
+            "throwAngleMax": 45,
+            "spinSpeedMin": 5,
+            "spinSpeedMax": 10,
+            "itemsOverride": true,
+            "soundsOverride": false,
+            "impactDecals": [],
+            "windupSounds": [],
+            "windupDelay": 0
+        },
+        "牛哇牛哇": {
+            "barrageCountManual": false,
+            "barrageCount": 1,
+            "barrageFrequencyOverride": false,
+            "barrageFrequency": 0.1,
+            "throwDurationOverride": false,
+            "throwDuration": 1,
+            "throwAngleOverride": false,
+            "throwAngleMin": -45,
+            "throwAngleMax": 45,
+            "spinSpeedMin": 5,
+            "spinSpeedMax": 10,
             "itemsOverride": true,
             "soundsOverride": false,
             "impactDecals": [],
@@ -303,48 +686,96 @@
             "windupDelay": 0
         }
     },
-    "redeems": [
+    "commands": [],
+    "gifts": [
         {
             "enabled": true,
-            "name": null,
+            "name": "辣条",
             "cooldown": 0,
-            "bonkType": "single",
-            "id": null
+            "bonkType": "辣条"
         },
         {
             "enabled": true,
-            "id": null,
-            "name": null,
-            "bonkType": "barrage"
+            "name": "小花花",
+            "cooldown": 0,
+            "bonkType": "小花花"
         },
         {
             "enabled": true,
-            "id": null,
-            "name": null,
-            "bonkType": "Hydrate"
-        }
-    ],
-    "commands": [
-        {
-            "enabled": false,
-            "name": "!bonk",
-            "cooldown": "10",
-            "bonkType": "single"
+            "name": "233",
+            "cooldown": 0,
+            "bonkType": "233"
         },
         {
-            "enabled": false,
-            "name": "!manybonk",
-            "cooldown": "60",
-            "bonkType": "barrage"
+            "enabled": true,
+            "name": "吃瓜",
+            "cooldown": 0,
+            "bonkType": "吃瓜"
+        },
+        {
+            "enabled": true,
+            "name": "B坷垃",
+            "cooldown": 0,
+            "bonkType": "B坷垃"
+        },
+        {
+            "enabled": true,
+            "name": "D言D语",
+            "cooldown": 0,
+            "bonkType": "D言D语"
+        },
+        {
+            "enabled": true,
+            "name": "flag",
+            "cooldown": 0,
+            "bonkType": "flag"
+        },
+        {
+            "enabled": true,
+            "name": "i了i了",
+            "cooldown": 0,
+            "bonkType": "i了i了"
+        },
+        {
+            "enabled": true,
+            "name": "比心",
+            "cooldown": 0,
+            "bonkType": "比心"
+        },
+        {
+            "enabled": true,
+            "name": "冰阔乐",
+            "cooldown": 0,
+            "bonkType": "冰阔乐"
+        },
+        {
+            "enabled": true,
+            "name": "打call",
+            "cooldown": 0,
+            "bonkType": "打call"
+        },
+        {
+            "enabled": true,
+            "name": "粉丝团灯牌",
+            "cooldown": 0,
+            "bonkType": "粉丝团灯牌"
+        },
+        {
+            "enabled": true,
+            "name": "给大佬递茶",
+            "cooldown": 0,
+            "bonkType": "给大佬递茶"
+        },
+        {
+            "enabled": true,
+            "name": "牛哇牛哇",
+            "cooldown": 0,
+            "bonkType": "牛哇牛哇"
         }
     ],
-    "raidEmotes": true,
     "spinSpeedMin": 5,
     "spinSpeedMax": 10,
-    "minimizeToTray": false,
-    "bitsMinDonation": 0,
-    "raidMinBarrageCount": 10,
-    "bitsOnlySingle": false,
+    "minimizeToTray": true,
     "physicsSim": true,
     "physicsFPS": 60,
     "physicsGravity": 1,
@@ -352,5 +783,16 @@
     "physicsRotate": false,
     "physicsHorizontal": 1,
     "physicsVertical": 1,
-    "raidMinRaiders": 1
+    "version": "1.0",
+    "didPhysicsUpdate": true,
+    "coinMinBattery": 0,
+    "coinMinSilver": 0,
+    "coinsThrowEnabled": true,
+    "coinsThrowMaxCount": 50,
+    "coinsThrowUnit": 10,
+    "coinsThrowCooldown": 5,
+    "multiGiftsEnabled": true,
+    "multiGiftsMaxCount": 50,
+    "guardEnabled": true,
+    "guardCooldown": 0
 }
