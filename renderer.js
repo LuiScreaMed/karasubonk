@@ -1214,10 +1214,10 @@ async function addBonk() {
     if (customBonks == null)
         customBonks = {};
 
-    while (customBonks["Custom Bonk " + newBonkNumber] != null)
+    while (customBonks["自定义投掷 " + newBonkNumber] != null)
         newBonkNumber++;
 
-    customBonks["Custom Bonk " + newBonkNumber] = {
+    customBonks["自定义投掷 " + newBonkNumber] = {
         "barrageCountManual": true,
         "barrageCount": 1,
         "barrageFrequencyOverride": false,
@@ -1241,13 +1241,13 @@ async function addBonk() {
     var throws = await getData("throws");
     for (var i = 0; i < throws.length; i++)
         if (throws[i].enabled)
-            throws[i].customs.push("Custom Bonk " + newBonkNumber);
+            throws[i].customs.push("自定义投掷 " + newBonkNumber);
     setData("throws", throws);
 
     var impacts = await getData("impacts");
     for (var i = 0; i < impacts.length; i++)
         if (impacts[i].enabled)
-            impacts[i].customs.push("Custom Bonk " + newBonkNumber);
+            impacts[i].customs.push("自定义投掷 " + newBonkNumber);
     setData("impacts", impacts);
 
     openBonks();
