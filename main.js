@@ -1,42 +1,17 @@
 const { app, Menu, Tray, BrowserWindow, ipcMain, session } = require("electron");
-const { ApiClient } = require("@twurple/api");
-const { PubSubClient } = require("@twurple/pubsub");
-const { ChatClient } = require("@twurple/chat");
-//const { ElectronAuthProvider } = require("@twurple/auth-electron");
-const { StaticAuthProvider  } = require("@twurple/auth");
-const { EventSubWsListener } = require("@twurple/eventsub-ws");
 const fs = require("fs");
-const http = require("http");
+const { KeepLiveWS, getRoomid } = require("bilibili-live-ws");
 
-// Previous versions of twurple had node_modules folders in some of the sub-packages.
-// These, for some reason, cause the event listeners to fail to create themselves.
-// Thus, we search the folders for these folders and delete them.
-// This allows users to overwrite their old files without issue.
-var deletedFolder = false;
-fs.readdirSync(__dirname + "/node_modules/@twurple").forEach(file => {
-  if (fs.existsSync(__dirname + "/node_modules/@twurple/" + file + "/node_modules"))
-  {
-    deletedFolder = true;
-    fs.rmSync(__dirname + "/node_modules/@twurple/" + file + "/node_modules", { recursive: true, force: true });
-  }
-});
-if (deletedFolder)
-{
-  app.relaunch()
-  app.exit()
-}
 
 var mainWindow;
 
 const isPrimary = app.requestSingleInstanceLock();
-    
+
 if (!isPrimary)
   app.quit()
-else
-{
+else {
   app.on("second-instance", () => {
-    if (mainWindow)
-    {
+    if (mainWindow) {
       if (mainWindow.isMinimized())
         mainWindow.restore();
       mainWindow.focus();
@@ -59,20 +34,19 @@ const createWindow = () => {
     autoHideMenuBar: true,
     useContentSize: true
   })
-  
+
+  // mainWindow.webContents.openDevTools();
+
   mainWindow.loadFile("index.html")
 
   // Minimizing to and restoring from tray
   mainWindow.on("minimize", () => {
-    if (data.minimizeToTray)
-    {
+    if (data.minimizeToTray) {
       setTray();
       mainWindow.setSkipTaskbar(true);
     }
-    else
-    {
-      if (tray != null)
-      {
+    else {
+      if (tray != null) {
         setTimeout(() => {
           tray.destroy()
         }, 100);
@@ -83,8 +57,7 @@ const createWindow = () => {
   });
 
   mainWindow.on("restore", () => {
-    if (tray != null)
-    {
+    if (tray != null) {
       setTimeout(() => {
         tray.destroy()
       }, 100);
@@ -98,8 +71,7 @@ const createWindow = () => {
   });
 }
 
-function setTray()
-{
+function setTray() {
   tray = new Tray(__dirname + "/icon.ico");
   contextMenu = Menu.buildFromTemplate([
     { label: "Open", click: () => { mainWindow.restore(); } },
@@ -130,176 +102,104 @@ ipcMain.on("getUserDataPath", () => {
 // Authentication
 // --------------
 
-var authProvider, token, apiClient, pubSubClient, eventClient, chatClient, user, authenticated = false, authenticating = false, listenersActive = false;
+var biliClient, connected = false, connecting = false, listenersActive = false;
 
-const clientId = "u4rwa52hwkkgyoyow0t3gywxyv54pg";
-const redirectUri = "http://localhost:28396";
-const scope = "chat%3Aread%20channel%3Aread%3Aredemptions%20channel%3Aread%3Asubscriptions%20bits%3Aread%20moderator%3Aread%3Afollowers";
-const authURI = "https://id.twitch.tv/oauth2/authorize?response_type=token&client_id=" + clientId + "&redirect_uri=" + redirectUri + "&scope=" + scope;
+//连接至房间
+async function connect(roomid) {
+  connecting = true;
+  if (!biliClient && roomid) {
+    mainWindow.webContents.send("connectInputDisabled", { input: true, button: true });
+    roomid = Number(roomid);
+    roomid = await getRoomid(roomid);
+    biliClient = new KeepLiveWS(roomid);
 
-http.createServer(function (req, res) {
-  if (req.url.includes("access_token"))
-  {
-    setData("accessToken", req.url.substring(req.url.indexOf("=") + 1));
-    login();
+    biliClient.on("open", connectOpen);
+    biliClient.on("heartbeat", onHeartBeat);
+    biliClient.on("msg", onMessage);
+  } else {
+    disconnect();
   }
-  else
-  {
-    res.writeHead(200, {'Content-Type': 'text/html'});
-    res.write('<script>var access_token = document.location.hash.substring(1, document.location.hash.indexOf(\'&\'));var request = new XMLHttpRequest();request.open("GET", "http://localhost:28396?" + access_token, true);request.send();</script>');
-    res.write('You may now close this window and return to KBonk.');
-    res.end();
-  }
-}).listen(28396, "localhost");
-
-// Attempt authorization
-function authenticate() {
-  authenticating = true;
-  require('electron').shell.openExternal(authURI);
 }
 
-async function login()
-{
-  // Prevent retrying authentication while signing in
-  authProvider = new StaticAuthProvider(clientId, data.accessToken);
-
-  // Ensure token was successfully acquired
-  token = await authProvider.getAnyAccessToken();
-  if (token != null)
-  {
-    authenticated = true;
-    apiClient = new ApiClient({ authProvider });
-    var tokenInfo = await apiClient.getTokenInfo();
-    user = await apiClient.users.getUserByName(tokenInfo.userName);
-    mainWindow.webContents.send("username", user.name);
-    pubSub();
-  }
-
-  authenticating = false;
+// 连接开启时
+function connectOpen() {
+  renderConsole("opened");
+  connected = true;
+  connecting = false;
+  mainWindow.webContents.send("connected");
+  mainWindow.webContents.send("connectInputDisabled", { input: true, button: undefined });
+  listenersActive = true;
 }
 
-// When the "Log out" or "Log in" button is clicked
-ipcMain.on("reauthenticate", async () => {
-  if (authenticated)
-    logOut();
-  else
-    authenticate();
-});
-
-var pubSubListeners = [], eventListeners = [], chatListeners = [];
-
-// Event listeners
-async function pubSub() {
-  // PubSub
-  pubSubClient = new PubSubClient({ authProvider });
-
-  // PubSub Event Listeners
-  if (authenticated)
-  {
-    console.log("Listening to Redemptions");
-    pubSubListeners.push(await pubSubClient.onRedemption(user.id, onRedeemHandler));
-  }
-  else
-    removeListeners();
-
-  if (authenticated)
-  {
-    console.log("Listening to Subs");
-    pubSubListeners.push(await pubSubClient.onSubscription(user.id, onSubHandler));
-  }
-  else
-    removeListeners();
-
-  if (authenticated)
-  {
-    console.log("Listening to Bits");
-    pubSubListeners.push(await pubSubClient.onBits(user.id, onBitsHandler));
-  }
-  else
-    removeListeners();
-
-  // EventSub
-  eventClient = new EventSubWsListener({ apiClient });
-  eventClient.start();
-
-  // EventSub Event Listeners
-  if (authenticated)
-  {
-    console.log("Listening to Follows");
-    eventListeners.push(await eventClient.onChannelFollow(user.id, user.id, onFollowHandler));
-  }
-  else
-    removeListeners();
-
-  // Chat
-  chatClient = new ChatClient({ channels: [user.name] });
-  chatClient.connect();
-
-  // Chat Event Listeners
-  if (authenticated)
-  {
-    console.log("Listening to Messages");
-    chatListeners.push(chatClient.onMessage(onMessageHandler));
-  }
-  else
-    removeListeners();
-  
-  if (authenticated)
-  {
-    console.log("Listening to Raids");
-    chatListeners.push(chatClient.onRaid(onRaidHandler));
-  }
-  else
-    removeListeners();
-
-  // Done enabling listeners
-  if (pubSubListeners.length > 0 || eventListeners.length > 0 || chatListeners.length > 0)
-    listenersActive = true;
-}
-
-function logOut()
-{
-  // Clear cookies to allow reauthentication
-  session.defaultSession.clearStorageData([], () => {});
-  setData("accessToken", null);
-
-  // Remove all authentication and listener clients
-  authProvider = null;
-  apiClient = null;
-  pubSubClient = null;
-  eventClient = null;
-  chatClient = null;
-
-  // Reset window protection variables
-  authenticated = false;
-  authenticating = false;
-
-  // Delete all existing listeners
-  for (var i = 0; i < pubSubListeners.length; i++)
-    pubSubListeners[i].remove();
-  pubSubListeners = [];
-  for (var i = 0; i < eventListeners.length; i++)
-    eventListeners[i].stop();
-  eventListeners = [];
-  for (var i = 0; i < chatListeners.length; i++)
-    chatClient.removeListener(chatListeners[i]);
-  chatListeners = [];
-
+// 断开连接
+function disconnect() {
+  connected = false;
+  connecting = false;
+  biliClient.off("open", connectOpen);
+  biliClient.off("heartbeat", onHeartBeat);
+  biliClient.off("msg", onMessage);
+  biliClient.close();
+  biliClient = undefined;
   listenersActive = false;
+  mainWindow.webContents.send("connectInputDisabled", { input: undefined, button: undefined });
+}
+
+// 心跳
+function onHeartBeat(online) {
+  // renderConsole(`online: ${online}`);
+}
+
+// 当点击了连接/断开连接按钮后
+ipcMain.on("connect", (event, roomid) => {
+  if (connected)
+    disconnect();
+  else
+    connect(roomid);
+})
+
+// 添加事件listener
+// 弹幕、广播等全部信息
+function onMessage(data) {
+  let cmd = data.cmd;
+  switch (cmd) {
+    case 'DANMU_MSG': // 弹幕
+      onDanmakuHandler(data);
+      break;
+    case 'SUPER_CHAT_MESSAGE_JPN':
+    case 'SUPER_CHAT_MESSAGE':  // 醒目留言
+      onSuperChatHandler(data);
+      break;
+    case 'SEND_GIFT': // 礼物
+      onGiftHandler(data);
+      break;
+    case 'GUARD_BUY': // 上舰
+      onGuardBuyHandler(data);
+      break;
+    case 'INTERACT_WORD': // 用户进入直播间，判断关注
+      onFollowHandler(data);
+      break;
+    default:
+      break;
+  }
+}
+
+// 处理弹幕中的command
+function onDanmakuHandler({ info: [, message, [, uname]] }) {
+  console.log(`${uname}: ${message}`);
 }
 
 // Periodically reporting status back to renderer
+// 状态监听
 var exiting = false;
 setInterval(() => {
-  if (mainWindow != null)
-  {
+  if (mainWindow != null) {
     var status = 0;
     if (portInUse)
-      status = 9;
-    else if (!authenticated)
+      status = 8;
+    else if (!connected)
       status = 1;
     else if (!listenersActive)
-      status = 8;
+      status = 7;
     else if (socket == null)
       status = 2;
     else if (calibrateStage == 0 || calibrateStage == 1)
@@ -308,17 +208,13 @@ setInterval(() => {
       status = 4;
     else if (!connectedVTube)
       status = 5;
-    else if (listening)
-      status = 6;
     else if (calibrateStage == -1)
-      status = 7;
+      status = 6;
     else if (badVersion)
-      status = 10;
+      status = 9;
     else if (noResponse)
-      status = 11;
-    else if (authenticating)
-      status = 12;
-  
+      status = 10;
+
     if (!exiting)
       mainWindow.webContents.send("status", status);
   }
@@ -329,8 +225,7 @@ setInterval(() => {
 const defaultData = JSON.parse(fs.readFileSync(__dirname + "/defaultData.json", "utf8"));
 if (!fs.existsSync(app.getPath("userData")))
   fs.mkdirSync(app.getPath("userData"));
-if (!fs.existsSync(app.getPath("userData") + "/data.json"))
-{
+if (!fs.existsSync(app.getPath("userData") + "/data.json")) {
   if (fs.existsSync(__dirname + "/data.json"))
     fs.copyFileSync(__dirname + "/data.json", app.getPath("userData") + "/data.json");
   else
@@ -338,11 +233,16 @@ if (!fs.existsSync(app.getPath("userData") + "/data.json"))
 }
 var data = JSON.parse(fs.readFileSync(app.getPath("userData") + "/data.json", "utf8"));
 
-if (data.accessToken != null)
-  login();
+// if (data.accessToken != null)
+//   login();
 
-ipcMain.on("help", () => require('electron').shell.openExternal("https://typeou.dev/kbonk"));
-ipcMain.on("link", () => require('electron').shell.openExternal("https://typeou.itch.io/kbonk"));
+// ipcMain.on("help", () => require('electron').shell.openExternal("https://typeou.dev/kbonk"));
+ipcMain.on("link", () => require('electron').shell.openExternal("https://github.com/LuiScreaMed/karasubonk_bilibili"));
+ipcMain.on("originalItchLink", () => require('electron').shell.openExternal("https://typeou.itch.io/karasubonk"));
+ipcMain.on("originalAuthorLink", () => require('electron').shell.openExternal("https://www.typeou.dev"));
+ipcMain.on("creditGithubLink", () => require('electron').shell.openExternal("https://github.com/LuiScreaMed/karasubonk_bilibili"));
+ipcMain.on("bilibiliLink", () => require('electron').shell.openExternal("https://space.bilibili.com/3837681"));
+
 
 // ----------------
 // Websocket Server
@@ -352,10 +252,8 @@ const WebSocket = require("ws");
 
 var wss, portInUse = false, socket, connectedVTube = false, badVersion = false, noResponse = false;
 
-function checkVersion()
-{
-  if (socket != null)
-  {
+function checkVersion() {
+  if (socket != null) {
     socket.send(JSON.stringify({
       "type": "versionReport",
       "version": data.version
@@ -371,8 +269,7 @@ function checkVersion()
 
 createServer();
 
-function createServer()
-{
+function createServer() {
   portInUse = false;
 
   wss = new WebSocket.Server({ port: data.portThrower });
@@ -385,51 +282,41 @@ function createServer()
     }, 3000);
   });
 
-  if (!portInUse)
-  {
-    wss.on("connection", function connection(ws)
-    {
+  if (!portInUse) {
+    wss.on("connection", function connection(ws) {
       portInUse = false;
       socket = ws;
 
       if (data.version != null)
         checkVersion();
-      
-      socket.on("message", function message(request)
-      {
+
+      socket.on("message", function message(request) {
         request = JSON.parse(request);
-    
-        if (request.type == "versionReport")
-        {
+
+        if (request.type == "versionReport") {
           noResponse = false;
           badVersion = parseFloat(request.version) != data.version;
         }
-        if (request.type == "calibrating")
-        {
-          switch (request.stage)
-          {
+        if (request.type == "calibrating") {
+          switch (request.stage) {
             case "min":
-              if (request.size > -99)
-              {
+              if (request.size > -99) {
                 calibrateStage = 0;
                 calibrate();
               }
-              else
-              {
-                setData(request.modelID + "Min", [ request.positionX, request.positionY ], false);
+              else {
+                setData(request.modelID + "Min", [request.positionX, request.positionY], false);
                 calibrateStage = 2;
                 calibrate();
               }
               break;
             case "max":
-              if (request.size < 99)
-              {
+              if (request.size < 99) {
                 calibrateStage = 2;
                 calibrate();
               }
-              else
-              {
-                setData(request.modelID + "Max", [ request.positionX, request.positionY ], false);
+              else {
+                setData(request.modelID + "Max", [request.positionX, request.positionY], false);
                 calibrateStage = 4;
                 calibrate();
               }
@@ -438,27 +325,24 @@ function createServer()
         }
         else if (request.type == "status")
           connectedVTube = request.connectedVTube;
-        else if (request.type == "setAuthVTS")
-        {
+        else if (request.type == "setAuthVTS") {
           setData("authVTS", request.token);
           var request = {
-              "type": "getAuthVTS",
-              "token": request.token
+            "type": "getAuthVTS",
+            "token": request.token
           }
           socket.send(JSON.stringify(request));
         }
-        else if (request.type == "getAuthVTS")
-        {
+        else if (request.type == "getAuthVTS") {
           var request = {
-              "type": "getAuthVTS",
-              "token": data.authVTS
+            "type": "getAuthVTS",
+            "token": data.authVTS
           }
           socket.send(JSON.stringify(request));
         }
       });
-    
-      ws.on("close", function message()
-      {
+
+      ws.on("close", function message() {
         socket = null;
         calibrateStage = -2;
       });
@@ -475,35 +359,28 @@ ipcMain.on("nextCalibrate", () => nextCalibrate());
 ipcMain.on("cancelCalibrate", () => cancelCalibrate());
 
 var calibrateStage = -2;
-function startCalibrate()
-{
-  if (socket != null && connectedVTube)
-  {
+function startCalibrate() {
+  if (socket != null && connectedVTube) {
     calibrateStage = -1;
     calibrate();
   }
 }
 
-function nextCalibrate()
-{
-  if (socket != null && connectedVTube)
-  {
+function nextCalibrate() {
+  if (socket != null && connectedVTube) {
     calibrateStage++;
     calibrate();
   }
 }
 
-function cancelCalibrate()
-{
-  if (socket != null && connectedVTube)
-  {
+function cancelCalibrate() {
+  if (socket != null && connectedVTube) {
     calibrateStage = 4;
     calibrate();
   }
 }
 
-function calibrate()
-{
+function calibrate() {
   var request = {
     "type": "calibrating",
     "stage": calibrateStage
@@ -516,16 +393,14 @@ function calibrate()
 // -----
 
 // Acquire a random image, sound, and associated properties
-function getImageWeightScaleSoundVolume()
-{
+function getImageWeightScaleSoundVolume() {
   var index;
   do {
     index = Math.floor(Math.random() * data.throws.length);
   } while (!data.throws[index].enabled);
 
   var soundIndex = -1;
-  if (hasActiveSound())
-  {
+  if (hasActiveSound()) {
     do {
       soundIndex = Math.floor(Math.random() * data.impacts.length);
     } while (!data.impacts[soundIndex].enabled);
@@ -541,8 +416,7 @@ function getImageWeightScaleSoundVolume()
 }
 
 // Acquire a set of images, sounds, and associated properties for a default barrage
-function getImagesWeightsScalesSoundsVolumes(customAmount)
-{
+function getImagesWeightsScalesSoundsVolumes(customAmount) {
   var getImagesWeightsScalesSoundsVolumes = [];
 
   var count = customAmount == null ? data.barrageCount : customAmount;
@@ -555,29 +429,23 @@ function getImagesWeightsScalesSoundsVolumes(customAmount)
 // Test Events
 ipcMain.on("single", () => single());
 ipcMain.on("barrage", () => barrage());
-ipcMain.on("sub", () => onSubHandler({ isGift: false }));
-ipcMain.on("subGift", () => onSubHandler({ isGift: true }));
-ipcMain.on("bits", () => onBitsHandler());
-ipcMain.on("follow", () => onFollowHandler());
-ipcMain.on("emote", () => onRaidHandler(null, null, null, true));
-ipcMain.on("raid", () => onRaidHandler());
+ipcMain.on("follow", () => onFollowHandler({ data: { msg_type: 2 } }));
+ipcMain.on("guard", () => onGuardBuyHandler({ data: { guard_level: Math.ceil(Math.random() * 3), num: Math.ceil(Math.random() * 10) } }))
+ipcMain.on("superChat", () => onSuperChatHandler({ data: { price: (Math.ceil(Math.random() * 30)) + 30 } }))
 
 // Testing a specific item
 ipcMain.on("testItem", (event, message) => testItem(event, message));
 
-function testItem(_, item)
-{
+function testItem(_, item) {
   console.log("Testing Item");
-  if (socket != null)
-  {
+  if (socket != null) {
     var soundIndex = -1;
-    if (hasActiveSound())
-    {
+    if (hasActiveSound()) {
       do {
         soundIndex = Math.floor(Math.random() * data.impacts.length);
       } while (!data.impacts[soundIndex].enabled);
     }
-    
+
     var request =
     {
       "type": "single",
@@ -593,8 +461,7 @@ function testItem(_, item)
 }
 
 // A single random bonk
-function single()
-{
+function single() {
   console.log("Sending Single");
   if (socket != null && hasActiveImage()) {
     const imageWeightScaleSoundVolume = getImageWeightScaleSoundVolume();
@@ -614,8 +481,7 @@ function single()
 }
 
 // A random barrage of bonks
-function barrage(customAmount)
-{
+function barrage(customAmount) {
   console.log("Sending Barrage");
   if (socket != null && hasActiveImage()) {
     const imagesWeightsScalesSoundsVolumes = getImagesWeightsScalesSoundsVolumes(customAmount);
@@ -642,47 +508,40 @@ function barrage(customAmount)
 }
 
 // Acquire an image, sound, and associated properties for a custom bonk
-function getCustomImageWeightScaleSoundVolume(customName)
-{
+function getCustomImageWeightScaleSoundVolume(customName) {
   var index;
-  if (data.customBonks[customName].itemsOverride && hasActiveImageCustom(customName))
-  {
+  if (data.customBonks[customName].itemsOverride && hasActiveImageCustom(customName)) {
     do {
       index = Math.floor(Math.random() * data.throws.length);
     } while (!data.throws[index].customs.includes(customName));
   }
-  else
-  {
+  else {
     do {
       index = Math.floor(Math.random() * data.throws.length);
     } while (!data.throws[index].enabled);
   }
 
   var soundIndex = -1;
-  if (data.customBonks[customName].soundsOverride && hasActiveSoundCustom(customName))
-  {
+  if (data.customBonks[customName].soundsOverride && hasActiveSoundCustom(customName)) {
     do {
       soundIndex = Math.floor(Math.random() * data.impacts.length);
     } while (!data.impacts[soundIndex].customs.includes(customName));
   }
-  else if (hasActiveSound())
-  {
+  else if (hasActiveSound()) {
     do {
       soundIndex = Math.floor(Math.random() * data.impacts.length);
     } while (!data.impacts[soundIndex].enabled);
   }
 
   var impactDecalIndex = -1;
-  if (hasActiveImpactDecal(customName))
-  {
+  if (hasActiveImpactDecal(customName)) {
     do {
       impactDecalIndex = Math.floor(Math.random() * data.customBonks[customName].impactDecals.length);
     } while (!data.customBonks[customName].impactDecals[impactDecalIndex].enabled);
   }
 
   var windupSoundIndex = -1;
-  if (hasActiveWindupSound(customName))
-  {
+  if (hasActiveWindupSound(customName)) {
     do {
       windupSoundIndex = Math.floor(Math.random() * data.customBonks[customName].windupSounds.length);
     } while (!data.customBonks[customName].windupSounds[windupSoundIndex].enabled);
@@ -700,11 +559,12 @@ function getCustomImageWeightScaleSoundVolume(customName)
 }
 
 // Acquire a set of images, sounds, and associated properties for a custom bonk
-function getCustomImagesWeightsScalesSoundsVolumes(customName)
-{
+// update: 添加自动计数
+function getCustomImagesWeightsScalesSoundsVolumes(customName, count) {
   var getImagesWeightsScalesSoundsVolumes = [];
-
-  for (var i = 0; i < data.customBonks[customName].barrageCount; i++)
+  count = data.customBonks[customName].barrageCountManual ? data.customBonks[customName].barrageCount : count;
+  for (var i = 0; i < count; i++)
+    // update end
     getImagesWeightsScalesSoundsVolumes.push(getCustomImageWeightScaleSoundVolume(customName));
 
   return getImagesWeightsScalesSoundsVolumes;
@@ -713,11 +573,12 @@ function getCustomImagesWeightsScalesSoundsVolumes(customName)
 ipcMain.on("testCustomBonk", (_, message) => { custom(message); });
 
 // A custom bonk test
-function custom(customName)
-{
+// update: 添加自动计数
+function custom(customName, count = 1) {
   console.log("Sending Custom");
   if (socket != null && hasActiveImageCustom(customName)) {
-    const imagesWeightsScalesSoundsVolumes = getCustomImagesWeightsScalesSoundsVolumes(customName);
+    // update end
+    const imagesWeightsScalesSoundsVolumes = getCustomImagesWeightsScalesSoundsVolumes(customName, count);
     var images = [], weights = [], scales = [], sounds = [], volumes = [], impactDecals = [], windupSounds = [];
     for (var i = 0; i < imagesWeightsScalesSoundsVolumes.length; i++) {
       images[i] = imagesWeightsScalesSoundsVolumes[i].location;
@@ -748,32 +609,27 @@ function custom(customName)
 // Data
 // ----
 
-ipcMain.on("setData", (_, arg) =>
-{
+ipcMain.on("setData", (_, arg) => {
   setData(arg[0], arg[1], true);
 });
 
-function setData(field, value, external)
-{
+function setData(field, value, external) {
   data[field] = value;
   fs.writeFileSync(app.getPath("userData") + "/data.json", JSON.stringify(data));
   if (external)
     mainWindow.webContents.send("doneWriting");
-  
+
   if (field == "version")
     checkVersion();
 }
 
-function hasActiveImage()
-{
+function hasActiveImage() {
   if (data.throws == null || data.throws.length == 0)
     return false;
 
   var active = false;
-  for (var i = 0; i < data.throws.length; i++)
-  {
-    if (data.throws[i].enabled)
-    {
+  for (var i = 0; i < data.throws.length; i++) {
+    if (data.throws[i].enabled) {
       active = true;
       break;
     }
@@ -781,8 +637,7 @@ function hasActiveImage()
   return active;
 }
 
-function hasActiveImageCustom(customName)
-{
+function hasActiveImageCustom(customName) {
   if (!data.customBonks[customName].itemsOverride)
     return hasActiveImage();
 
@@ -790,10 +645,8 @@ function hasActiveImageCustom(customName)
     return false;
 
   var active = false;
-  for (var i = 0; i < data.throws.length; i++)
-  {
-    if (data.throws[i].customs.includes(customName))
-    {
+  for (var i = 0; i < data.throws.length; i++) {
+    if (data.throws[i].customs.includes(customName)) {
       active = true;
       break;
     }
@@ -801,16 +654,13 @@ function hasActiveImageCustom(customName)
   return active;
 }
 
-function hasActiveImpactDecal(customName)
-{
+function hasActiveImpactDecal(customName) {
   if (data.customBonks[customName].impactDecals == null || data.customBonks[customName].impactDecals.length == 0)
     return false;
 
   var active = false;
-  for (var i = 0; i < data.customBonks[customName].impactDecals.length; i++)
-  {
-    if (data.customBonks[customName].impactDecals[i].enabled)
-    {
+  for (var i = 0; i < data.customBonks[customName].impactDecals.length; i++) {
+    if (data.customBonks[customName].impactDecals[i].enabled) {
       active = true;
       break;
     }
@@ -818,16 +668,13 @@ function hasActiveImpactDecal(customName)
   return active;
 }
 
-function hasActiveWindupSound(customName)
-{
+function hasActiveWindupSound(customName) {
   if (data.customBonks[customName].windupSounds == null || data.customBonks[customName].windupSounds.length == 0)
     return false;
 
   var active = false;
-  for (var i = 0; i < data.customBonks[customName].windupSounds.length; i++)
-  {
-    if (data.customBonks[customName].windupSounds[i].enabled)
-    {
+  for (var i = 0; i < data.customBonks[customName].windupSounds.length; i++) {
+    if (data.customBonks[customName].windupSounds[i].enabled) {
       active = true;
       break;
     }
@@ -835,16 +682,13 @@ function hasActiveWindupSound(customName)
   return active;
 }
 
-function hasActiveSound()
-{
+function hasActiveSound() {
   if (data.impacts == null || data.impacts.length == 0)
     return false;
 
   var active = false;
-  for (var i = 0; i < data.impacts.length; i++)
-  {
-    if (data.impacts[i].enabled)
-    {
+  for (var i = 0; i < data.impacts.length; i++) {
+    if (data.impacts[i].enabled) {
       active = true;
       break;
     }
@@ -852,8 +696,7 @@ function hasActiveSound()
   return active;
 }
 
-function hasActiveSoundCustom(customName)
-{
+function hasActiveSoundCustom(customName) {
   if (!data.customBonks[customName].soundsOverride)
     return hasActiveSound();
 
@@ -861,10 +704,8 @@ function hasActiveSoundCustom(customName)
     return false;
 
   var active = false;
-  for (var i = 0; i < data.impacts.length; i++)
-  {
-    if (data.impacts[i].customs.includes(customName))
-    {
+  for (var i = 0; i < data.impacts.length; i++) {
+    if (data.impacts[i].customs.includes(customName)) {
       active = true;
       break;
     }
@@ -872,51 +713,70 @@ function hasActiveSoundCustom(customName)
   return active;
 }
 
-function hasActiveBitSound()
-{
+/// 电池和瓜子音效判断
+function hasActiveCoinSound() {
   if (data.impacts == null || data.impacts.length == 0)
     return false;
 
   var active = false;
-  for (var i = 0; i < data.impacts.length; i++)
-  {
-    if (data.impacts[i].bits)
-    {
+  for (var i = 0; i < data.impacts.length; i++) {
+    if (data.impacts[i].coins) {
       active = true;
       break;
     }
   }
   return active;
+}
+
+// 大航海音效判断
+function hasActiveGuardSound() {
+  if (data.impacts == null || data.impacts.length == 0)
+    return false;
+
+  var active = false;
+  for (var i = 0; i < data.impacts.length; i++) {
+    if (data.impacts[i].guards) {
+      active = true;
+      break;
+    }
+  }
+  return active;
+}
+
+// --------------
+// coinType
+// --------------
+
+const CoinType = {
+  silver: 'silver',
+  battery: 'battery',
+}
+
+function getCoinType(coin_type) {
+  if (coin_type === CoinType.silver) return coin_type;
+  else return CoinType.battery;
 }
 
 // --------------
 // Event Handlers
 // --------------
 
+// 处理弹幕command
 var commandCooldowns = {};
-function onMessageHandler(_, _, message)
-{
-  console.log("Received Message");
+function onDanmakuHandler({ info: [, message] }) {
+  console.log("Received Danmaku");
 
-  if (data.commands != null)
-  {
-    for (var i = 0; i < data.commands.length; i++)
-    {
-      if (data.commands[i].name != "" && data.commands[i].name.toLowerCase() == message.toLowerCase() && commandCooldowns[data.commands[i].name.toLowerCase()] == null)
-      {
-        switch (data.commands[i].bonkType)
-        {
+  if (data.commands != null) {
+    for (var i = 0; i < data.commands.length; i++) {
+      if (data.commands[i].name != "" &&
+        data.commands[i].name.toLowerCase() == message.toLowerCase() &&
+        commandCooldowns[data.commands[i].name.toLowerCase()] == null && data.commands[i].enabled) {
+        switch (data.commands[i].bonkType) {
           case "single":
             single();
             break;
           case "barrage":
             barrage();
-            break;
-          case "emote":
-            onRaidHandler(null, null, null, true);
-            break;
-          case "emotes":
-            onRaidHandler();
             break;
           default:
             custom(data.commands[i].bonkType);
@@ -931,334 +791,194 @@ function onMessageHandler(_, _, message)
   }
 }
 
-ipcMain.on("listenRedeemStart", () => { listening = true; });
-ipcMain.on("listenRedeemCancel", () => { listening = false; });
-
-var listening = false;
-async function onRedeemHandler(redemptionMessage)
-{
-  const reward = await apiClient.channelPoints.getCustomRewardById(redemptionMessage.channelId, redemptionMessage.rewardId);
-
-  if (listening)
-  {
-    mainWindow.webContents.send("redeemData", [ redemptionMessage.rewardId, reward.title ] );
-    listening = false;
+// 处理SC
+var canSuperChat = true;
+function onSuperChatHandler({ data: { price } }) {
+  // console.log(`${uname} 花费了 ${price * 10} 电池发布了一条SC`);
+  price = price * 10;
+  if (canSuperChat && data.superChatEnabled && price >= data.superChatMinBattery) {
+    throwCoins({ coinType: CoinType.battery, num: price, max: data.superChatMaxCount, unit: data.superChatCoinUnit });
+    canSuperChat = false;
+    setTimeout(() => { canSuperChat = true }, data.superChatCooldown * 1000);
   }
-  else if (data.redeems != null)
-  {
-    for (var i = 0; i < data.redeems.length; i++)
-    {
-      if (data.redeems[i].id == redemptionMessage.rewardId)
-      {
-        switch (data.redeems[i].bonkType)
-        {
-          case "single":
-            single();
-            break;
-          case "barrage":
-            barrage();
-            break;
-          case "emotes":
-            onRaidHandler();
-            break;
-          default:
-            custom(data.redeems[i].bonkType);
-            break;
-        }
+}
 
+// 处理礼物
+var giftCooldowns = {};
+function onGiftHandler({ data: { coin_type, giftName, num, price } }) {
+  // 判断价值
+  let canThrow = coin_type === "silver" ? price >= data.coinMinSilver : price >= data.coinMinBattery;
+  if (!canThrow) return;
+
+  // 查找与该礼物名称相同的事件
+  let giftEventIndex = -1;
+  if (data.gifts != null) {
+    for (let i = 0; i < data.gifts.length; i++) {
+      if (data.gifts[i].name === giftName && data.gifts[i].enabled) {
+        giftEventIndex = i;
         break;
       }
     }
   }
-}
 
-var canFollow = true;
-function onFollowHandler()
-{
-  if (canFollow && data.followEnabled)
-  {
-    switch (data.followType)
-    {
+  // 如果查找不到该礼物的事件，则判断是否投掷电池和瓜子
+  if (giftEventIndex === -1) {
+    if (data.coinsThrowEnabled) {
+      handleGiftToCoins({ coin_type, num, price });
+    }
+    return;
+  }
+
+  // 如果查找到，则投掷绑定好的投掷
+  if (giftCooldowns[data.gifts[giftEventIndex].name] == null && data.gifts[giftEventIndex].enabled) {
+    if (data.multiGiftsEnabled) {
+      num = num > data.multiGiftsMaxCount ? data.multiGiftsMaxCount : num;
+    }
+    switch (data.gifts[giftEventIndex].bonkType) {
       case "single":
         single();
         break;
       case "barrage":
         barrage();
         break;
-      case "emote":
-        onRaidHandler(null, null, null, true);
+      default:
+        custom(data.gifts[giftEventIndex].bonkType, num);
         break;
-      case "emotes":
-        onRaidHandler();
+    }
+
+    giftCooldowns[data.gifts[giftEventIndex].name] = true;
+    setTimeout(() => { delete giftCooldowns[data.gifts[giftEventIndex].name] }, data.gifts[giftEventIndex].cooldown * 1000);
+  }
+
+}
+
+// 礼物通过电池和瓜子投掷
+var canThrowGiftToCoins = true;
+function handleGiftToCoins({ coin_type, num, price }) {
+  if (!canThrowGiftToCoins) return;
+
+  canThrowGiftToCoins = false;
+  setTimeout(() => { canThrowGiftToCoins = true }, data.coinsThrowCooldown * 1000);
+  throwCoins({
+    coinType: getCoinType(coin_type),
+    num: num * price,
+    max:
+      data.coinsThrowMaxCount,
+    unit: data.coinsThrowUnit
+  });
+}
+
+// 投掷电池或瓜子
+function throwCoins({ coinType, num, max, unit }) {
+  num = Math.ceil(num / unit);
+  if (max) {
+    num = num > max ? max : num;
+  }
+  if (socket != null) {
+    var images = [], weights = [], scales = [], sounds = [], volumes = [];
+    while (num > 0) {
+      num--;
+      images.push(data.coinThrows[coinType].location);
+      weights.push(coinType === CoinType.battery ? 0.5 : 0.2);
+      scales.push(data.coinThrows[coinType].scale);
+
+      if (hasActiveCoinSound()) {
+        var soundIndex;
+        do {
+          soundIndex = Math.floor(Math.random() * data.impacts.length);
+        } while (!data.impacts[soundIndex].coins);
+
+        sounds.push(data.impacts[soundIndex].location);
+        volumes.push(data.impacts[soundIndex].volume);
+      } else {
+        sounds.push(null);
+        volumes.push(0);
+      }
+    }
+
+    var request = {
+      "type": "barrage",
+      "image": images,
+      "weight": weights,
+      "scale": scales,
+      "sound": sounds,
+      "volume": volumes,
+      "data": data
+    }
+
+    console.log('Sending Coins');
+
+    socket.send(JSON.stringify(request));
+  }
+}
+
+// 处理大航海
+var canGuard = true;
+function onGuardBuyHandler({ data: { guard_level, num } }) {
+  if (!canGuard || !data.guardEnabled) return;
+  canGuard = false;
+  setTimeout(() => { canGuard = true }, data.guardCooldown * 1000);
+  let giftName = `guard${guard_level}`;
+
+  if (socket != null && data.guardThrows[giftName]) {
+    var images = [], weights = [], scales = [], sounds = [], volumes = [];
+    while (num > 0) {
+      num--;
+      images.push(data.guardThrows[giftName].location);
+      weights.push(1.0);
+      scales.push(data.guardThrows[giftName].scale);
+
+      if (hasActiveGuardSound()) {
+        var soundIndex;
+        do {
+          soundIndex = Math.floor(Math.random() * data.impacts.length);
+        } while (!data.impacts[soundIndex].guards);
+
+        sounds.push(data.impacts[soundIndex].location);
+        volumes.push(data.impacts[soundIndex].volume);
+      } else {
+        sounds.push(null);
+        volumes.push(0);
+      }
+    }
+
+    var request = {
+      "type": "barrage",
+      "image": images,
+      "weight": weights,
+      "scale": scales,
+      "sound": sounds,
+      "volume": volumes,
+      "data": data
+    }
+    socket.send(JSON.stringify(request));
+  }
+}
+
+// 处理关注
+var canFollow = true;
+function onFollowHandler({ data: { msg_type } }) {
+  if (msg_type !== 2) return;
+  if (canFollow && data.followEnabled) {
+    switch (data.followType) {
+      case "single":
+        single();
+        break;
+      case "barrage":
+        barrage();
         break;
       default:
         custom(data.followType);
         break;
     }
 
-    if (data.followCooldown > 0)
-    {
+    if (data.followCooldown > 0) {
       canFollow = false;
       setTimeout(() => { canFollow = true; }, data.followCooldown * 1000);
     }
   }
 }
 
-var canSub = true, canSubGift = true;
-function onSubHandler(subMessage)
-{
-  if (canSub && data.subEnabled && !subMessage.isGift)
-  {
-    switch (data.subType)
-    {
-      case "single":
-        single();
-        break;
-      case "barrage":
-        barrage();
-        break;
-      case "emote":
-        onRaidHandler(null, null, null, true);
-        break;
-      case "emotes":
-        onRaidHandler();
-        break;
-      default:
-        custom(data.subType);
-        break;
-    }
-
-    if (data.subCooldown > 0)
-    {
-      canSub = false;
-      setTimeout(() => { canSub = true; }, data.subCooldown * 1000);
-    }
-  }
-  else if (canSubGift && data.subGiftEnabled && subMessage.isGift)
-  {
-    switch (data.subGiftType)
-    {
-
-      case "single":
-        single();
-        break;
-      case "barrage":
-        barrage();
-        break;
-      case "emote":
-        onRaidHandler(null, null, null, true);
-        break;
-      case "emotes":
-        onRaidHandler();
-        break;
-      default:
-        custom(data.subGiftType);
-        break;
-    }
-
-    if (data.subGiftCooldown > 0)
-    {
-      canSubGift = false;
-      setTimeout(() => { canSubGift = true; }, data.subGiftCooldown * 1000);
-    }
-  }
-}
-
-const bitTiers = [ 100, 1000, 5000, 10000 ];
-
-var canBits = true;
-function onBitsHandler(bitsMessage)
-{
-  if (bitsMessage == null || canBits && data.bitsEnabled && bitsMessage.bits >= data.bitsMinDonation) {
-    if (bitsMessage != null && data.bitsCooldown > 0)
-    {
-      canBits = false;
-      setTimeout(() => { canBits = true; }, data.bitsCooldown * 1000);
-    }
-
-    var totalBits = bitsMessage == null ? bitTiers[Math.floor(Math.random() * bitTiers.length)] : bitsMessage.bits;
-
-    var numBits = [0, 0, 0, 0], canAdd = true;
-    while (!data.bitsOnlySingle && totalBits >= 100 && totalBits + numBits[0] + numBits[1] + numBits[2] + numBits[3] > data.bitsMaxBarrageCount && canAdd)
-    {
-      canAdd = false;
-      for (var i = bitTiers.length - 1; i >= 0; i--)
-      {
-        var max = totalBits / bitTiers[i];
-        if (max > 1)
-        {
-          max--;
-          canAdd = true;
-          numBits[i]++;
-          totalBits -= bitTiers[i];
-        }
-        var temp = Math.floor(Math.random() * max);
-        numBits[i] += temp;
-        totalBits -= temp * bitTiers[i];
-      }
-    }
-
-    if (totalBits + numBits[0] + numBits[1] + numBits[2] + numBits[3] > data.bitsMaxBarrageCount)
-      totalBits = data.bitsMaxBarrageCount - (numBits[0] + numBits[1] + numBits[2] + numBits[3]);
-
-    var bitThrows = [];
-    for (var i = 0; i < bitTiers.length; i++)
-    {
-      while (bitThrows.length < data.bitsMaxBarrageCount && numBits[i]-- > 0)
-        bitThrows.push(bitTiers[i]);
-    }
-    while (totalBits-- > 0)
-      bitThrows.push(1);
-    
-    if (socket != null) {
-      var images = [], weights = [], scales = [], sounds = [], volumes = [];
-      while (bitThrows.length > 0)
-      {
-        switch (bitThrows.splice(Math.floor(Math.random() * bitThrows.length), 1)[0])
-        {
-          case 1:
-            images.push(data.bitThrows.one.location);
-            weights.push(0.2);
-            scales.push(data.bitThrows.one.scale);
-            break;
-          case 100:
-            images.push(data.bitThrows.oneHundred.location);
-            weights.push(0.4);
-            scales.push(data.bitThrows.oneHundred.scale);
-            break;
-          case 1000:
-            images.push(data.bitThrows.oneThousand.location);
-            weights.push(0.6);
-            scales.push(data.bitThrows.oneThousand.scale);
-            break;
-          case 5000:
-            images.push(data.bitThrows.fiveThousand.location);
-            weights.push(0.8);
-            scales.push(data.bitThrows.fiveThousand.scale);
-            break;
-          case 10000:
-            images.push(data.bitThrows.tenThousand.location);
-            weights.push(1);
-            scales.push(data.bitThrows.tenThousand.scale);
-            break;
-        }
-        
-        if (hasActiveBitSound())
-        {
-          var soundIndex;
-          do {
-            soundIndex = Math.floor(Math.random() * data.impacts.length);
-          } while (!data.impacts[soundIndex].bits);
-
-          sounds.push(data.impacts[soundIndex].location);
-          volumes.push(data.impacts[soundIndex].volume);
-        }
-        else
-        {
-          sounds.push(null);
-          volumes.push(0);
-        }
-      }
-
-      var request = {
-        "type": "barrage",
-        "image": images,
-        "weight": weights,
-        "scale": scales,
-        "sound": sounds,
-        "volume": volumes,
-        "data": data
-      }
-      socket.send(JSON.stringify(request));
-    }
-  }
-}
-
-var canRaid = true, numRaiders = 0;
-async function onRaidHandler(_, raider, raidInfo, isSingleEmote)
-{
-  if (data.raidEnabled && canRaid)
-  {
-    if (raider != null && data.raidCooldown > 0)
-    {
-      canRaid = false;
-      setTimeout(() => { canRaid = true; }, data.raidCooldown * 1000);
-    }
-
-    if (raider == null)
-    {
-      raider = user.id
-      numRaiders = isSingleEmote ? 1 : data.barrageCount;
-      mainWindow.webContents.send("raid", [ raider, token.accessToken ]);
-    }
-    else
-    {
-      numRaiders = raidInfo.viewerCount;
-      raider = await apiClient.users.getUserByName(raider);
-      raider = raider.id;
-
-      if (numRaiders >= data.raidMinRaiders)
-      {
-        if (numRaiders < data.raidMinBarrageCount)
-          numRaiders = data.raidMinBarrageCount;
-      
-        if (numRaiders > data.raidMaxBarrageCount)
-          numRaiders = data.raidMaxBarrageCount;
-      
-        if (data.raidEmotes)
-          mainWindow.webContents.send("raid", [ raider, token.accessToken ]);
-        else
-          barrage(numRaiders);
-      }
-    }
-  }
-}
-
-ipcMain.on("emotes", (event, message) => handleRaidEmotes(event, message));
-
-function handleRaidEmotes(_, emotes)
-{
-  if (socket != null)
-  {
-    if (emotes.data.length > 0)
-    {
-      var images = [], weights = [], scales = [], sounds = [], volumes = [];
-      for (var i = 0; i < numRaiders; i++)
-      {
-        images.push("https://static-cdn.jtvnw.net/emoticons/v1/" + emotes.data[Math.floor(Math.random() * emotes.data.length)].id + "/3.0");
-  
-        weights.push(1);
-        scales.push(1);
-  
-        if (hasActiveSound())
-        {
-          var soundIndex;
-          do {
-            soundIndex = Math.floor(Math.random() * data.impacts.length);
-          } while (!data.impacts[soundIndex].enabled);
-  
-          sounds.push(data.impacts[soundIndex].location);
-          volumes.push(data.impacts[soundIndex].volume);
-        }
-        else
-        {
-          sounds.push(null);
-          volumes.push(0);
-        }
-      }
-  
-      var request = {
-        "type": "barrage",
-        "image": images,
-        "weight": weights,
-        "scale": scales,
-        "sound": sounds,
-        "volume": volumes,
-        "data": data
-      }
-      socket.send(JSON.stringify(request));
-    }
-    else
-      barrage(numRaiders);
-  }
+function renderConsole(...args) {
+  mainWindow.webContents.send("consoleLog", ...args);
 }

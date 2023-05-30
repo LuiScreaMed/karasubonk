@@ -1,20 +1,16 @@
 {
-  "name": "karasubonk",
-  "version": "1.2.1",
-  "description": "Lightweight item thrower for Live2D models.",
+  "name": "karasubonk_bilibili",
+  "version": "1.0.0",
+  "description": "Lightweight item thrower for Live2D models - bilibili edition.",
   "repository": {
     "type": "git",
-    "url": "git://github.com/typeou/karasubonk"
+    "url": "git://github.com/LuiScreaMed/karasubonk_bilibili"
   },
   "main": "main.js",
   "dependencies": {
-    "@twurple/api": "^6.1.1",
-    "@twurple/auth-electron": "^6.1.1",
-    "@twurple/auth-ext": "^6.1.1",
-    "@twurple/chat": "^6.1.1",
-    "@twurple/eventsub-ws": "^6.1.1",
-    "@twurple/pubsub": "^6.1.1",
-    "electron-squirrel-startup": "^1.0.0"
+    "bilibili-live-ws": "^6.2.2",
+    "electron-squirrel-startup": "^1.0.0",
+    "ws": "^8.13.0"
   },
   "devDependencies": {
     "@electron-forge/cli": "^6.1.1",
@@ -22,6 +18,7 @@
     "@electron-forge/maker-rpm": "^6.1.1",
     "@electron-forge/maker-squirrel": "^6.1.1",
     "@electron-forge/maker-zip": "^6.1.1",
+    "@types/ws": "^8.5.4",
     "electron": "^24.1.1"
   },
   "scripts": {
@@ -29,18 +26,19 @@
     "package": "electron-forge package",
     "make": "electron-forge make"
   },
-  "author": "typeou",
+  "author": "LuiScreaMed",
   "license": "MIT",
   "config": {
     "forge": {
       "packagerConfig": {
-        "icon": "./icon.ico"
+        "icon": "./icon.ico",
+        "prune": true
       },
       "makers": [
         {
           "name": "@electron-forge/maker-squirrel",
           "config": {
-            "name": "karasubonk"
+            "name": "karasubonk_bilibili"
           }
         },
         {
