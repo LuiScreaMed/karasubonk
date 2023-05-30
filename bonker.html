@@ -1,21 +1,28 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="UTF-8">
-        <script src="ports.js"></script>
-        <script src="bonker.js"></script>
-        <link rel="stylesheet" type="text/css" href="bonkerStyle.css"></style>
-    </head>
-    <body>
-        <div id="guide" hidden><div id="guideH"></div><div id="guideV"></div></div>
-        <div id="guideText" hidden>
-            <p>Position the impact area under the target.</p>
-            <p>Please do not resize the model.</p>
-            <p>You may also move the target by right-clicking on the KBonk Source in OBS, choosing "Interact," clicking in the window that appears.</p>
-        </div>
-        <div id="warnVersion" hidden>
-            <p>ERROR: Version Mismatch<br/>KBonk: <span id="mainVersion"></span> | Browser Source: <span id="bonkerVersion"></span></p>
-            <p>Please ensure KBonk and the Browser Source<br/>are both running from the same folder.</p>
-        </div>
-    </body>
+
+<head>
+    <meta charset="UTF-8">
+    <script src="ports.js"></script>
+    <script src="bonker.js"></script>
+    <link rel="stylesheet" type="text/css" href="bonkerStyle.css">
+    </style>
+</head>
+
+<body>
+    <div id="guide" hidden>
+        <div id="guideH"></div>
+        <div id="guideV"></div>
+    </div>
+    <div id="guideText" hidden>
+        <p>请将模型的受击区域（头部）移至目标下。</p>
+        <p>请不要缩放模型。</p>
+        <p>您也可以通过在OBS中右键浏览器源 -> 互动 -> 在新窗口中点击，对中间的目标进行移动。</p>
+    </div>
+    <div id="warnVersion" hidden>
+        <p>错误：版本不一致<br />KBonk: <span id="mainVersion"></span> | 浏览器源: <span id="bonkerVersion"></span></p>
+        <p>请确保该浏览器源的本地文件位于KBonk本体的子目录内。</p>
+    </div>
+</body>
+
 </html>
