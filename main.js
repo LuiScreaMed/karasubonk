@@ -237,11 +237,16 @@ var data = JSON.parse(fs.readFileSync(app.getPath("userData") + "/data.json", "u
 //   login();
 
 // ipcMain.on("help", () => require('electron').shell.openExternal("https://typeou.dev/kbonk"));
-ipcMain.on("link", () => require('electron').shell.openExternal("https://github.com/LuiScreaMed/karasubonk_bilibili"));
+ipcMain.on("link", () => require('electron').shell.openExternal("https://github.com/LuiScreaMed/karasubonk"));
 ipcMain.on("originalItchLink", () => require('electron').shell.openExternal("https://typeou.itch.io/karasubonk"));
 ipcMain.on("originalAuthorLink", () => require('electron').shell.openExternal("https://www.typeou.dev"));
-ipcMain.on("creditGithubLink", () => require('electron').shell.openExternal("https://github.com/LuiScreaMed/karasubonk_bilibili"));
+ipcMain.on("creditGithubLink", () => require('electron').shell.openExternal("https://github.com/LuiScreaMed/karasubonk"));
 ipcMain.on("bilibiliLink", () => require('electron').shell.openExternal("https://space.bilibili.com/3837681"));
+
+ipcMain.on("toBonkerFile", () => {
+  // console.log(__dirname);
+  require('electron').shell.showItemInFolder(__dirname + '\\bonker.html');
+});
 
 
 // ----------------

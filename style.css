@@ -1344,3 +1344,8 @@ mark {
 .creditLogo {
     height: 64px;
 }
+
+#bonkerLink.topButton {
+    width: initial;
+    font-size: 18px;
+}

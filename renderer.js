@@ -26,7 +26,11 @@ const statusTitle = [
 const statusDesc = [
     "",
     "<p>点击下方的“连接”按钮连接B站直播间。</p>",
-    "<p>如果这条提示没有消失，请在OBS中刷新浏览器源。</p><p>提示：请在OBS中添加该路径下的本地文件为浏览器源： </p><p><mark>karasubonk_bilibili/resources/app/bonker.html</mark></p>",
+    `<p>如果这条提示没有消失，请在OBS中刷新浏览器源。</p><p>提示：请在OBS中添加该路径下的本地文件为浏览器源： </p><p><mark>karasubonk_bilibili/resources/app/bonker.html</mark></p><p><div id="bonkerLink" class="topButton">
+    <div class="overlayButton"></div>
+    <div class="innerTopButton">点击跳转至该文件所在文件夹</div>
+    <div class="cornerTopButton"></div>
+    </div></p>`,
     "<p>请将VTS模型的头部移动至OBS浏览器源的标志上。</p><p>提示：您有可能因为将VTS源置于浏览器源上方导致无法看到标志。</p><p>单击 <mark>下一步</mark> 进行下一步校准</p>",
     "<p>请将VTS模型的头部移动至OBS浏览器源的标志上。</p><p>提示：您有可能因为将VTS源置于浏览器源上方导致无法看到标志。</p><p>单击 <mark>完成</mark> 完成校准</p>",
     ["<p>如果这条提示没有消失，请在OBS中刷新浏览器源。</p><p>如果刷新了浏览器源后仍然无效，请确认VTS中的API已经开启，并且端口为<mark>", "</mark>。</p>"],
@@ -52,6 +56,10 @@ ipcRenderer.on("userDataPath", (event, message) => {
     userDataPath = message;
 })
 ipcRenderer.send("getUserDataPath");
+
+function toBonkerFile() {
+    ipcRenderer.send("toBonkerFile");
+}
 
 // 仅允许输入数字
 document.querySelector("#roomid").oninput = function () {
@@ -87,6 +95,9 @@ ipcRenderer.on("status", (event, message) => { setStatus(event, message); });
 
 async function setStatus(_, message) {
     if (status == message) return;
+    if (status == 2) {
+        document.querySelector("#bonkerLink").removeEventListener("click", toBonkerFile);
+    }
     status = message;
     document.querySelector("#status").innerHTML = statusTitle[status];
     document.querySelector("#headerStatusInner").innerHTML = statusTitle[status] + (status != 0 ? " (单击查看详情)" : "");
@@ -113,6 +124,10 @@ async function setStatus(_, message) {
         document.querySelector("#statusDesc").innerHTML = statusDesc[status][0] + await getData("portThrower") + statusDesc[status][1];
     else
         document.querySelector("#statusDesc").innerHTML = statusDesc[status];
+
+    if (status == 2) {
+        document.querySelector("#bonkerLink").addEventListener("click", toBonkerFile)
+    }
 
     if (status == 3 || status == 4 || status == 6) {
         if (status == 6)
