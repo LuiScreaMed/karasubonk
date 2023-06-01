@@ -820,7 +820,7 @@ function onGiftHandler({ data: { coin_type, giftName, num, price } }) {
   let giftEventIndex = -1;
   if (data.gifts != null) {
     for (let i = 0; i < data.gifts.length; i++) {
-      if (data.gifts[i].name === giftName && data.gifts[i].enabled) {
+      if (data.gifts[i].name.toLowerCase() === giftName.toLowerCase() && data.gifts[i].enabled) {
         giftEventIndex = i;
         break;
       }
