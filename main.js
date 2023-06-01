@@ -40,10 +40,6 @@ const createWindow = () => {
 
   mainWindow.loadFile("index.html")
 
-  // 防止按下ALT显示菜单，以及通过快捷键显示devtool
-  let menu = new Menu();
-  Menu.setApplicationMenu(menu);
-
   // Minimizing to and restoring from tray
   mainWindow.on("minimize", () => {
     if (data.minimizeToTray) {
