@@ -1,7 +1,7 @@
 const { ipcRenderer } = require("electron");
 const fs = require("fs");
 
-const version = "1.0";
+const version = 1.01;
 
 // ------
 // Status
@@ -1924,7 +1924,7 @@ window.onload = async function () {
     openCoinImages();
     copyFilesToDirectory();
 
-    // checkVersion();
+    checkVersion();
     document.title += " " + version;
     setData("version", version);
 }
@@ -2246,17 +2246,18 @@ function showPanelLarge(panel) {
     }
 }
 
+// 检查版本
 function checkVersion() {
     var versionRequest = new XMLHttpRequest();
     versionRequest.onreadystatechange = function () {
         if (this.readyState == 4 && this.status == 200) {
             const latestVersion = JSON.parse(this.responseText);
-            if (latestVersion.latest > version)
+            if (parseFloat(latestVersion.tag_name) > version)
                 document.querySelector("#newVersion").classList.remove("hidden");
         }
     };
     // Open the request and send it.
-    versionRequest.open("GET", "https://itch.io/api/1/x/wharf/latest?game_id=1387406&channel_name=win32", true);
+    versionRequest.open("GET", "https://api.github.com/repos/LuiScreaMed/karasubonk/releases/latest", true);
     versionRequest.send();
 }
 

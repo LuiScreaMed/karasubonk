@@ -783,7 +783,6 @@
     "physicsRotate": false,
     "physicsHorizontal": 1,
     "physicsVertical": 1,
-    "version": "1.0",
     "didPhysicsUpdate": true,
     "coinMinBattery": 0,
     "coinMinSilver": 0,
