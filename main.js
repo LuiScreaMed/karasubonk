@@ -241,7 +241,7 @@ var data = JSON.parse(fs.readFileSync(app.getPath("userData") + "/data.json", "u
 // if (data.accessToken != null)
 //   login();
 
-// ipcMain.on("help", () => require('electron').shell.openExternal("https://typeou.dev/kbonk"));
+ipcMain.on("help", () => require('electron').shell.openExternal("https://www.bilibili.com/read/cv24077574"));
 ipcMain.on("link", () => require('electron').shell.openExternal("https://github.com/LuiScreaMed/karasubonk"));
 ipcMain.on("originalItchLink", () => require('electron').shell.openExternal("https://typeou.itch.io/karasubonk"));
 ipcMain.on("originalAuthorLink", () => require('electron').shell.openExternal("https://www.typeou.dev"));
