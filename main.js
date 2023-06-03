@@ -184,11 +184,6 @@ function onMessage(data) {
   }
 }
 
-// 处理弹幕中的command
-function onDanmakuHandler({ info: [, message, [, uname]] }) {
-  console.log(`${uname}: ${message}`);
-}
-
 // Periodically reporting status back to renderer
 // 状态监听
 var exiting = false;
@@ -775,8 +770,8 @@ function onDanmakuHandler({ info: [, message] }) {
   if (data.commands != null) {
     for (var i = 0; i < data.commands.length; i++) {
       if (data.commands[i].name != "" &&
-        data.commands[i].name.toLowerCase() == message.toLowerCase() &&
-        commandCooldowns[data.commands[i].name.toLowerCase()] == null && data.commands[i].enabled) {
+        message.includes(data.commands[i].name) &&
+        commandCooldowns[data.commands[i].name] == null && data.commands[i].enabled) {
         switch (data.commands[i].bonkType) {
           case "single":
             single();
@@ -789,8 +784,9 @@ function onDanmakuHandler({ info: [, message] }) {
             break;
         }
 
-        commandCooldowns[data.commands[i].name.toLowerCase()] = true;
-        setTimeout(() => { delete commandCooldowns[data.commands[i].name.toLowerCase()]; }, data.commands[i].cooldown * 1000);
+        // 冷却
+        commandCooldowns[data.commands[i].name] = true;
+        setTimeout(() => { delete commandCooldowns[data.commands[i].name]; }, data.commands[i].cooldown * 1000);
         break;
       }
     }
