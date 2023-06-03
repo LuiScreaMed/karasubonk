@@ -26,11 +26,7 @@ const statusTitle = [
 const statusDesc = [
     "",
     "<p>点击下方的“连接”按钮连接B站直播间。</p>",
-    `<p>如果这条提示没有消失，请在OBS中刷新浏览器源。</p><p>提示：请在OBS中添加该路径下的本地文件为浏览器源： </p><p><mark>karasubonk_bilibili/resources/app/bonker.html</mark></p><p><div id="bonkerLink" class="topButton">
-    <div class="overlayButton"></div>
-    <div class="innerTopButton">点击跳转至该文件所在文件夹</div>
-    <div class="cornerTopButton"></div>
-    </div></p>`,
+    `<p>如果这条提示没有消失，请在OBS中刷新浏览器源。</p><p>提示：请在OBS中添加该路径下的本地文件为浏览器源（点击文本进行复制）： </p><p><input readonly id="bonkerInput"></p><p>（直播姬用户请直接粘贴在浏览器源的URL一栏）</p>`,
     "<p>请将VTS模型的头部移动至OBS浏览器源的标志上。</p><p>提示：您有可能因为将VTS源置于浏览器源上方导致无法看到标志。</p><p>单击 <mark>下一步</mark> 进行下一步校准</p>",
     "<p>请将VTS模型的头部移动至OBS浏览器源的标志上。</p><p>提示：您有可能因为将VTS源置于浏览器源上方导致无法看到标志。</p><p>单击 <mark>完成</mark> 完成校准</p>",
     ["<p>如果这条提示没有消失，请在OBS中刷新浏览器源。</p><p>如果刷新了浏览器源后仍然无效，请确认VTS中的API已经开启，并且端口为<mark>", "</mark>。</p>"],
@@ -57,8 +53,11 @@ ipcRenderer.on("userDataPath", (event, message) => {
 })
 ipcRenderer.send("getUserDataPath");
 
-function toBonkerFile() {
-    ipcRenderer.send("toBonkerFile");
+// 连接浏览器源步骤时，路径文本框的复制功能
+async function selectAndCopyBonkerPath() {
+    this.select();
+    await navigator.clipboard.writeText(this.value);
+    showToast("已成功复制路径", ToastType.success);
 }
 
 // 仅允许输入数字
@@ -96,7 +95,7 @@ ipcRenderer.on("status", (event, message) => { setStatus(event, message); });
 async function setStatus(_, message) {
     if (status == message) return;
     if (status == 2) {
-        document.querySelector("#bonkerLink").removeEventListener("click", toBonkerFile);
+        document.querySelector("#bonkerInput").removeEventListener("click", selectAndCopyBonkerPath);
     }
     status = message;
     document.querySelector("#status").innerHTML = statusTitle[status];
@@ -126,7 +125,9 @@ async function setStatus(_, message) {
         document.querySelector("#statusDesc").innerHTML = statusDesc[status];
 
     if (status == 2) {
-        document.querySelector("#bonkerLink").addEventListener("click", toBonkerFile)
+        let bonkerPathInput = document.querySelector("#bonkerInput");
+        bonkerPathInput.value = __dirname + '\\bonker.html';
+        bonkerPathInput.addEventListener("click", selectAndCopyBonkerPath);
     }
 
     if (status == 3 || status == 4 || status == 6) {
@@ -2283,4 +2284,36 @@ async function testItem(index) {
 
 function testCustomBonk(customName) {
     ipcRenderer.send("testCustomBonk", customName);
+}
+
+// Toast 气泡
+async function showToast(text = "", type = "default", duration = 1500) {
+    let toast = document.createElement("div");
+    toast.id = "toast";
+    toast.innerText = text;
+    toast.classList.add("show");
+    toast.classList.add(type);
+    document.body.prepend(toast);
+    await sleep(400);
+    setTimeout(async () => {
+        document.querySelector("#toast").classList.remove("show");
+        document.querySelector("#toast").classList.add("hide");
+
+        await sleep(400);
+        document.querySelector("#toast").remove();
+    }, duration)
+}
+
+// toast type 气泡类型
+const ToastType = {
+    success: "success",
+    error: "error",
+    default: "default"
+}
+
+// sleep function
+function sleep(duration) {
+    return new Promise(function (resolve) {
+        setTimeout(resolve, duration);
+    });
 }

@@ -1349,3 +1349,54 @@ mark {
     width: initial;
     font-size: 18px;
 }
+
+#toast {
+    padding: 8px 16px;
+    position: absolute;
+    background-color: rgb(66, 66, 66);
+    box-shadow: rgb(97, 97, 97) 0px 0px 16px;
+    color: white;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 8px;
+    z-index: 999;
+}
+
+#toast.success {
+    background-color: rgb(39, 218, 95);
+    box-shadow: rgb(48, 228, 105) 0px 0px 16px;
+}
+
+#toast.error {
+    background-color: rgb(231, 56, 56);
+    box-shadow: rgb(240, 82, 82) 0px 0px 16px;
+}
+
+.show {
+    animation: forwards showUp 0.3s;
+}
+
+.hide {
+    animation: forwards hideUp 0.3s;
+}
+
+@keyframes showUp {
+    0% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+@keyframes hideUp {
+    0% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+    }
+}
