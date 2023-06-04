@@ -139,7 +139,7 @@ function connectOpen() {
 // 连接出错时
 function onError(error) {
   Logger.error("bilibili connection error:")
-  Logger.error(toString(error));
+  Logger.error(typeof (error) == 'object' ? JSON.stringify(error) : toString(error))
   Logger.error("bilibili connection error end.")
 }
 
