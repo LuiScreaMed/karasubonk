@@ -24,7 +24,7 @@
   },
   "scripts": {
     "start": "electron-forge start",
-    "package": "electron-forge package --arch ia32 && electron-forge package --arch x64",
+    "package": "electron-forge package",
     "make": "electron-forge make",
     "dev": "electron ."
   },
