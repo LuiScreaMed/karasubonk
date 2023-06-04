@@ -1810,10 +1810,15 @@ window.onload = async function () {
         });
     })
 
-    //获取房间号
+    // 获取房间号
     var roomid = await getData("roomid");
     document.querySelector("#roomid").value = roomid;
     setData("roomid", roomid);
+
+    // 发现新版本文字添加跳转
+    document.querySelector("#newVersion").addEventListener("click", () => {
+        ipcRenderer.send("toRelease");
+    });
 
     // UPDATING FROM 1.0.1 OR EARLIER
     var throws = await getData("throws");

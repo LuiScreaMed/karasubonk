@@ -229,15 +229,15 @@ if (!fs.existsSync(app.getPath("userData") + "/data.json")) {
 }
 var data = JSON.parse(fs.readFileSync(app.getPath("userData") + "/data.json", "utf8"));
 
-// if (data.accessToken != null)
-//   login();
-
 ipcMain.on("help", () => require('electron').shell.openExternal("https://www.bilibili.com/read/cv24077574"));
 ipcMain.on("link", () => require('electron').shell.openExternal("https://github.com/LuiScreaMed/karasubonk"));
 ipcMain.on("originalItchLink", () => require('electron').shell.openExternal("https://typeou.itch.io/karasubonk"));
 ipcMain.on("originalAuthorLink", () => require('electron').shell.openExternal("https://www.typeou.dev"));
 ipcMain.on("creditGithubLink", () => require('electron').shell.openExternal("https://github.com/LuiScreaMed/karasubonk"));
 ipcMain.on("bilibiliLink", () => require('electron').shell.openExternal("https://space.bilibili.com/3837681"));
+
+// 发现新版本文字添加跳转
+ipcMain.on("toRelease", () => require('electron').shell.openExternal("https://github.com/LuiScreaMed/karasubonk/releases/latest"));
 
 ipcMain.on("toBonkerFile", () => {
   // console.log(__dirname);
