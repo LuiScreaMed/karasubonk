@@ -37,6 +37,11 @@ const statusDesc = [
     "<p>浏览器源没有返回版本号。</p><p>KBonk与浏览器源可能版本不一致。</p><p>请确认OBS中使用的浏览器源文件位于当前KBonk应用的子目录中。</p>"
 ];
 
+// consolelog
+ipcRenderer.on("consoleLog", (_, ...args) => {
+    console.log(...args);
+})
+
 ipcRenderer.on("connectInputDisabled", (_, { input, button }) => {
     document.querySelector("#roomid").disabled = input;
     document.querySelector("#logout").disabled = button;
@@ -1699,6 +1704,47 @@ async function openEvents() {
 }
 
 // ----
+// 表情
+// Expressions
+// ----
+
+document.querySelector("#expressionRefresh").addEventListener("click", () => {
+    ipcRenderer.send("getExpressions");
+});
+
+// 选择后保存已选择的表情名称
+document.querySelector("#hitExpressionSelect").addEventListener("change", function () {
+    setData("hitExpressionName", this.options[this.selectedIndex].innerText);
+});
+
+ipcRenderer.on("expressions", async (_, expressions) => {
+    let select = document.querySelector("#hitExpressionSelect");
+
+    select.options.length = 1;
+
+    // 将VTS获取的表情列表插入到select
+    for (let i = 0; i < expressions.length; i++) {
+        var expression = document.createElement("option");
+        expression.innerText = expressions[i].name;
+        expression.value = expressions[i].file;
+        select.appendChild(expression);
+    }
+
+    // 获取已经选择了的表情
+    let hitExpressionName = await getData("hitExpressionName");
+
+    if (hitExpressionName != null) {
+        const options = select.options;
+        for (let i = 0; i < options.length; i++) {
+            if (hitExpressionName == options[i].innerText) {
+                select.selectedIndex = i;
+                break;
+            }
+        }
+    }
+});
+
+// ----
 // Data
 // ----
 
@@ -1924,6 +1970,12 @@ window.onload = async function () {
     loadData("portThrower");
     loadData("portVTubeStudio");
     loadData("minimizeToTray");
+    loadData("hitExpression");
+    loadData("hitExpressionDuration");
+    loadData("giftWithCoinCountEnabled");
+    loadData("giftWithCoinCountMaxCount");
+    loadData("giftWithCoinCountUnit");
+    loadData("saveLogs");
 
     openImages();
     openGuardImages();
@@ -1938,18 +1990,23 @@ window.onload = async function () {
 // Event listeners for changing settings
 
 // 单个礼物最少价值
-document.querySelector("#coinMinBattery").addEventListener("change", () => setData("coinMinBattery", parseInt(document.querySelector("#coinMinBattery").value)));
-document.querySelector("#coinMinSilver").addEventListener("change", () => setData("coinMinSilver", parseInt(document.querySelector("#coinMinSilver").value)));
+document.querySelector("#coinMinBattery").addEventListener("change", () => { clampValue(document.querySelector("#coinMinBattery"), 0, null); setData("coinMinBattery", parseInt(document.querySelector("#coinMinBattery").value)) });
+document.querySelector("#coinMinSilver").addEventListener("change", () => { clampValue(document.querySelector("#coinMinSilver"), 0, null); setData("coinMinSilver", parseInt(document.querySelector("#coinMinSilver").value)) });
 
 // 投掷瓜子电池
 document.querySelector("#coinsThrowEnabled").addEventListener("change", () => setData("coinsThrowEnabled", document.querySelector("#coinsThrowEnabled").checked));
-document.querySelector("#coinsThrowMaxCount").addEventListener("change", () => setData("coinsThrowMaxCount", parseInt(document.querySelector("#coinsThrowMaxCount").value)));
-document.querySelector("#coinsThrowUnit").addEventListener("change", () => setData("coinsThrowUnit", parseInt(document.querySelector("#coinsThrowUnit").value)));
-document.querySelector("#coinsThrowCooldown").addEventListener("change", () => setData("coinsThrowCooldown", parseFloat(document.querySelector("#coinsThrowCooldown").value)));
+document.querySelector("#coinsThrowMaxCount").addEventListener("change", () => { clampValue(document.querySelector("#coinsThrowMaxCount"), 1, null); setData("coinsThrowMaxCount", parseInt(document.querySelector("#coinsThrowMaxCount").value)) });
+document.querySelector("#coinsThrowUnit").addEventListener("change", () => { clampValue(document.querySelector("#coinsThrowUnit"), 0, null); setData("coinsThrowUnit", parseInt(document.querySelector("#coinsThrowUnit").value)) });
+document.querySelector("#coinsThrowCooldown").addEventListener("change", () => { clampValue(document.querySelector("#coinsThrowCooldown"), 0, null); setData("coinsThrowCooldown", parseFloat(document.querySelector("#coinsThrowCooldown").value)) });
 
 // 复数礼物
 document.querySelector("#multiGiftsEnabled").addEventListener("change", () => setData("multiGiftsEnabled", document.querySelector("#multiGiftsEnabled").checked));
-document.querySelector("#multiGiftsMaxCount").addEventListener("change", () => setData("multiGiftsMaxCount", parseInt(document.querySelector("#multiGiftsMaxCount").value)));
+document.querySelector("#multiGiftsMaxCount").addEventListener("change", () => { clampValue(document.querySelector("#multiGiftsMaxCount"), 1, null); setData("multiGiftsMaxCount", parseInt(document.querySelector("#multiGiftsMaxCount").value)) });
+
+// 复数礼物跟随瓜子电池数量
+document.querySelector("#giftWithCoinCountEnabled").addEventListener("change", () => { setData("giftWithCoinCountEnabled", document.querySelector("#giftWithCoinCountEnabled").checked) });
+document.querySelector("#giftWithCoinCountMaxCount").addEventListener("change", () => { clampValue(document.querySelector("#giftWithCoinCountMaxCount"), 0, null); setData("giftWithCoinCountMaxCount", parseInt(document.querySelector("#giftWithCoinCountMaxCount").value)) });
+document.querySelector("#giftWithCoinCountUnit").addEventListener("change", () => { clampValue(document.querySelector("#giftWithCoinCountUnit"), 1, null); setData("giftWithCoinCountUnit", parseInt(document.querySelector("#giftWithCoinCountUnit").value)) });
 
 // 关注
 document.querySelector("#followEnabled").addEventListener("change", () => setData("followEnabled", document.querySelector("#followEnabled").checked));
@@ -1983,24 +2040,42 @@ document.querySelector("#physicsReverse").addEventListener("change", () => setDa
 document.querySelector("#physicsRotate").addEventListener("change", () => setData("physicsRotate", document.querySelector("#physicsRotate").checked));
 document.querySelector("#physicsHorizontal").addEventListener("change", () => { setData("physicsHorizontal", parseFloat(document.querySelector("#physicsHorizontal").value)) });
 document.querySelector("#physicsVertical").addEventListener("change", () => { setData("physicsVertical", parseFloat(document.querySelector("#physicsVertical").value)) });
+document.querySelector("#hitExpressionDuration").addEventListener("change", () => { setData("hitExpressionDuration", parseFloat(document.querySelector('#hitExpressionDuration').value)) });
+document.querySelector("#saveLogs").addEventListener("change", () => setData("saveLogs", document.querySelector("#saveLogs").checked));
 
-document.querySelector("#closeEyes").addEventListener("change", () => {
-    const val = document.querySelector("#closeEyes").checked;
+document.querySelector("#closeEyes").addEventListener("change", function () {
+    const val = this.checked;
     setData("closeEyes", val);
     if (val) {
         document.querySelector("#openEyes").checked = false;
         setData("openEyes", false);
+        document.querySelector("#hitExpression").checked = false;
+        setData("hitExpressionEnabled", false);
     }
 });
 
-document.querySelector("#openEyes").addEventListener("change", () => {
-    const val = document.querySelector("#openEyes").checked;
+document.querySelector("#openEyes").addEventListener("change", function () {
+    const val = this.checked;
     setData("openEyes", val);
     if (val) {
         document.querySelector("#closeEyes").checked = false;
         setData("closeEyes", false);
+        document.querySelector("#hitExpression").checked = false;
+        setData("hitExpressionEnabled", false);
     }
 });
+
+// 添加切换表情的监听
+document.querySelector("#hitExpression").addEventListener("change", function () {
+    const val = this.checked;
+    setData("hitExpressionEnabled", val);
+    if (val) {
+        document.querySelector("#closeEyes").checked = false;
+        setData("closeEyes", false);
+        document.querySelector("#openEyes").checked = false;
+        setData("openEyes", false);
+    }
+})
 
 document.querySelector("#itemScaleMin").addEventListener("change", () => { clampValue(document.querySelector("#itemScaleMin"), 0, parseFloat(document.querySelector("#itemScaleMax").value)); setData("itemScaleMin", parseFloat(document.querySelector("#itemScaleMin").value)) });
 document.querySelector("#itemScaleMax").addEventListener("change", () => { clampValue(document.querySelector("#itemScaleMax"), parseFloat(document.querySelector("#itemScaleMin").value), null); setData("itemScaleMax", parseFloat(document.querySelector("#itemScaleMax").value)) });

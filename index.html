@@ -155,8 +155,30 @@
               <p class="grid1">投掷角度（最小）</p>
               <input type="number" id="throwAngleMin" class="grid2" min="-90" value="-45" step="1">
 
+              <p class="grid4">被击中时切换表情</p>
+              <label class="checkbox grid5">
+                <input type="checkbox" id="hitExpression">
+                <div class="checkHover"></div>
+                <img src="ui/checkmark.png" class="checkmark">
+              </label>
+
               <p class="grid1">投掷角度（最大）</p>
               <input type="number" id="throwAngleMax" class="grid2" max="90" value="45" step="1">
+
+              <p class="grid4">击中表情</p>
+              <div class="grid5 expressionSelect">
+                <select id="hitExpressionSelect">
+                  <option style="display: none;"></option>
+                </select>
+                <div id="expressionRefresh">
+                  <img class="refreshBtn" src="ui/refresh30.png" alt="refresh">
+                </div>
+              </div>
+
+              <div class="grid2"></div>
+
+              <p class="grid4">表情持续时间（秒）</p>
+              <input type="number" id="hitExpressionDuration" class="grid5" min="0" value="0.2">
 
               <!-- EMPTY DIV FOR SPACING -->
               <div class="grid2"></div>
@@ -191,20 +213,25 @@
                 <img src="ui/checkmark.png" class="checkmark">
               </label>
 
-              <p class="grid1">延时（毫秒）</p>
-              <input type="number" id="delay" class="grid2" min="0" value="0">
+              <p class="grid1">保存运行日志</p>
+              <label class="checkbox grid2">
+                <input type="checkbox" id="saveLogs">
+                <div class="checkHover"></div>
+                <img src="ui/checkmark.png" class="checkmark">
+              </label>
 
               <p class="grid4">物理模拟帧数</p>
               <input type="number" id="physicsFPS" class="grid5" min="1" max="60" value="60" step="1">
 
-              <p class="grid1">浏览器源端口</p>
-              <input type="number" id="portThrower" class="grid2" value="8080">
+
+              <p class="grid1">延时（毫秒）</p>
+              <input type="number" id="delay" class="grid2" min="0" value="0">
 
               <p class="grid4">重力系数</p>
               <input type="number" id="physicsGravity" class="grid5" min="0.01" value="1">
 
-              <p class="grid1">VTS API端口</p>
-              <input type="number" id="portVTubeStudio" class="grid2" value="8001">
+              <p class="grid1">浏览器源端口</p>
+              <input type="number" id="portThrower" class="grid2" value="8080">
 
               <p class="grid4">重力反转</p>
               <label class="checkbox grid5">
@@ -212,6 +239,9 @@
                 <div class="checkHover"></div>
                 <img src="ui/checkmark.png" class="checkmark">
               </label>
+
+              <p class="grid1">VTS API端口</p>
+              <input type="number" id="portVTubeStudio" class="grid2" value="8001">
 
               <p class="grid4">重力跟随模型旋转</p>
               <label class="checkbox grid5">
@@ -1092,7 +1122,7 @@
                 <p class="grid3">投掷上限</p>
                 <input type="number" id="coinsThrowMaxCount" class="grid4" step="1" min="0" value="100">
 
-                <p class="grid2">(未绑定礼物类型的礼物)</p>
+                <p class="grid2">(仅未绑定礼物类型的礼物)</p>
 
                 <p class="grid3">投掷单位</p>
                 <input type="number" id="coinsThrowUnit" class="grid4" step="1" min="1" value="1">
@@ -1113,6 +1143,25 @@
 
                 <p class="grid3">投掷上限</p>
                 <input type="number" id="multiGiftsMaxCount" class="grid4" step="1" min="0" value="100">
+
+                <!-- 礼物复数时上限 -->
+                <b class="grid1">启用</b>
+                <b class="grid2">选项</b>
+
+                <label class="checkbox grid1">
+                  <input type="checkbox" id="giftWithCoinCountEnabled" checked>
+                  <div class="checkHover"></div>
+                  <img src="ui/checkmark.png" class="checkmark">
+                </label>
+                <p class="grid2">礼物按照瓜子/电池数量投掷</p>
+
+                <p class="grid3">投掷上限</p>
+                <input type="number" id="giftWithCoinCountMaxCount" class="grid4" step="1" min="0" value="100">
+
+                <p class="grid2">（覆盖复数礼物限制）</p>
+
+                <p class="grid3">投掷单位</p>
+                <input type="number" id="giftWithCoinCountUnit" class="grid4" step="1" min="0" value="1">
               </div>
 
               <br />

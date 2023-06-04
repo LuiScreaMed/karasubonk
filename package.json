@@ -9,6 +9,7 @@
   "main": "main.js",
   "dependencies": {
     "bilibili-live-ws": "^6.2.2",
+    "electron-log": "^4.4.8",
     "electron-squirrel-startup": "^1.0.0",
     "ws": "^8.13.0"
   },
@@ -24,7 +25,8 @@
   "scripts": {
     "start": "electron-forge start",
     "package": "electron-forge package --arch ia32 && electron-forge package --arch x64",
-    "make": "electron-forge make"
+    "make": "electron-forge make",
+    "dev": "electron ."
   },
   "author": "LuiScreaMed",
   "license": "MIT",

@@ -793,5 +793,11 @@
     "multiGiftsEnabled": true,
     "multiGiftsMaxCount": 50,
     "guardEnabled": true,
-    "guardCooldown": 0
+    "guardCooldown": 0,
+    "hitExpression": false,
+    "hitExpressionDuration": 0.3,
+    "giftWithCoinCountEnabled": false,
+    "giftWithCoinCountMaxCount": 50,
+    "giftWithCoinCountUnit": 1,
+    "saveLogs": false
 }

@@ -1,6 +1,7 @@
 const { app, Menu, Tray, BrowserWindow, ipcMain, session } = require("electron");
 const fs = require("fs");
 const { KeepLiveWS, getRoomid } = require("bilibili-live-ws");
+const log = require("electron-log");
 
 
 var mainWindow;
@@ -109,6 +110,7 @@ var biliClient, connected = false, connecting = false, listenersActive = false;
 async function connect(roomid) {
   connecting = true;
   if (!biliClient && roomid) {
+    Logger.info("bilibili connecting");
     mainWindow.webContents.send("connectInputDisabled", { input: true, button: true });
     roomid = Number(roomid);
     roomid = await getRoomid(roomid);
@@ -117,19 +119,28 @@ async function connect(roomid) {
     biliClient.on("open", connectOpen);
     biliClient.on("heartbeat", onHeartBeat);
     biliClient.on("msg", onMessage);
+    biliClient.on("error", onError);
   } else {
+    Logger.info("bilibili disconnecting");
     disconnect();
   }
 }
 
 // 连接开启时
 function connectOpen() {
-  renderConsole("opened");
+  Logger.info("bilibili connection opened.");
   connected = true;
   connecting = false;
   mainWindow.webContents.send("connected");
   mainWindow.webContents.send("connectInputDisabled", { input: true, button: undefined });
   listenersActive = true;
+}
+
+// 连接出错时
+function onError(error) {
+  Logger.error("bilibili connection error:")
+  Logger.error(toString(error));
+  Logger.error("bilibili connection error end.")
 }
 
 // 断开连接
@@ -139,16 +150,16 @@ function disconnect() {
   biliClient.off("open", connectOpen);
   biliClient.off("heartbeat", onHeartBeat);
   biliClient.off("msg", onMessage);
+  biliClient.off("error", onError);
   biliClient.close();
   biliClient = undefined;
   listenersActive = false;
   mainWindow.webContents.send("connectInputDisabled", { input: undefined, button: undefined });
+  Logger.info("bilibili disconnected");
 }
 
 // 心跳
-function onHeartBeat(online) {
-  // renderConsole(`online: ${online}`);
-}
+function onHeartBeat(online) { }
 
 // 当点击了连接/断开连接按钮后
 ipcMain.on("connect", (event, roomid) => {
@@ -239,10 +250,7 @@ ipcMain.on("bilibiliLink", () => require('electron').shell.openExternal("https:/
 // 发现新版本文字添加跳转
 ipcMain.on("toRelease", () => require('electron').shell.openExternal("https://github.com/LuiScreaMed/karasubonk/releases/latest"));
 
-ipcMain.on("toBonkerFile", () => {
-  // console.log(__dirname);
-  require('electron').shell.showItemInFolder(__dirname + '\\bonker.html');
-});
+ipcMain.on("getExpressions", getExpressions);
 
 
 // ----------------
@@ -251,7 +259,7 @@ ipcMain.on("toBonkerFile", () => {
 
 const WebSocket = require("ws");
 
-var wss, portInUse = false, socket, connectedVTube = false, badVersion = false, noResponse = false;
+var wss, portInUse = false, socket, connectedVTube = false, badVersion = false, noResponse = false, receivedExpressions = false, gettingExpressions = false;
 
 function checkVersion() {
   if (socket != null) {
@@ -265,6 +273,18 @@ function checkVersion() {
       if (noResponse || badVersion)
         checkVersion();
     }, 1000);
+  }
+}
+
+// 获取表情列表
+// get expressions
+function getExpressions() {
+  if (!gettingExpressions && socket != null) {
+    gettingExpressions = true;
+    var request = {
+      "type": "getExpressionList"
+    }
+    socket.send(JSON.stringify(request))
   }
 }
 
@@ -324,8 +344,16 @@ function createServer() {
               break;
           }
         }
-        else if (request.type == "status")
+        else if (request.type == "status") {
           connectedVTube = request.connectedVTube;
+
+          // 第一次连接后获取表情列表
+          // get expressions after the first time connected to VTS
+          if (connectedVTube && !receivedExpressions) {
+            Logger.info("VTS connected, getting expressions");
+            getExpressions();
+          }
+        }
         else if (request.type == "setAuthVTS") {
           setData("authVTS", request.token);
           var request = {
@@ -340,6 +368,13 @@ function createServer() {
             "token": data.authVTS
           }
           socket.send(JSON.stringify(request));
+        }
+        // 保存vts模型的表情列表
+        // save expression list from vts model
+        else if (request.type == "expressions") {
+          gettingExpressions = false;
+          receivedExpressions = true;
+          mainWindow.webContents.send("expressions", request.expressions);
         }
       });
 
@@ -429,7 +464,8 @@ function getImagesWeightsScalesSoundsVolumes(customAmount) {
 
 // Test Events
 ipcMain.on("single", () => single());
-ipcMain.on("barrage", () => barrage());
+// ipcMain.on("barrage", () => barrage());
+ipcMain.on("barrage", () => onGiftHandler({ data: { coin_type: CoinType.battery, giftName: "小花花", num: 100, price: 1 } }));
 ipcMain.on("follow", () => onFollowHandler({ data: { msg_type: 2 } }));
 ipcMain.on("guard", () => onGuardBuyHandler({ data: { guard_level: Math.ceil(Math.random() * 3), num: Math.ceil(Math.random() * 10) } }))
 ipcMain.on("superChat", () => onSuperChatHandler({ data: { price: (Math.ceil(Math.random() * 30)) + 30 } }))
@@ -833,8 +869,12 @@ function onGiftHandler({ data: { coin_type, giftName, num, price } }) {
 
   // 如果查找到，则投掷绑定好的投掷
   if (giftCooldowns[data.gifts[giftEventIndex].name] == null && data.gifts[giftEventIndex].enabled) {
-    if (data.multiGiftsEnabled) {
+    if (data.multiGiftsEnabled && !data.giftWithCoinCountEnabled) { // 如果开启复数礼物限制 且 没有开启礼物按照瓜子/电池数量投掷
       num = num > data.multiGiftsMaxCount ? data.multiGiftsMaxCount : num;
+    } else if (data.giftWithCoinCountEnabled) { // 如果开启礼物按照瓜子/电池数量投掷
+      num = num * price;
+      num = Math.ceil(num / data.giftWithCoinCountUnit);
+      num = num > data.giftWithCoinCountMaxCount ? data.giftWithCoinCountMaxCount : num;
     }
     switch (data.gifts[giftEventIndex].bonkType) {
       case "single":
@@ -983,4 +1023,17 @@ function onFollowHandler({ data: { msg_type } }) {
 
 function renderConsole(...args) {
   mainWindow.webContents.send("consoleLog", ...args);
+}
+
+// logger功能
+const Logger = {
+  info: (...args) => {
+    if (data.saveLogs) log.info(...args);
+  },
+  error: (...args) => {
+    if (data.saveLogs) log.error(...args);
+  },
+  warn: (...args) => {
+    if (data.saveLogs) log.warn(...args);
+  }
 }

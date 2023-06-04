@@ -1141,7 +1141,7 @@ mark {
 .commandsRow,
 .giftsRow,
 .eventGrid {
-    grid-template-columns: 7% 34% 20% 26% 7%;
+    grid-template-columns: 7% 38% 20% 22% 7%;
 }
 
 .giftsRow p,
@@ -1152,6 +1152,7 @@ mark {
 }
 
 .eventList {
+    background: #101010;
     max-height: 256px;
     overflow: auto;
 }
@@ -1345,13 +1346,43 @@ mark {
     height: 64px;
 }
 
-#bonkerLink.topButton {
-    width: initial;
-    font-size: 18px;
+#bonkerInput {
+    width: 100%;
 }
 
 #newVersion {
     cursor: pointer;
+}
+
+.expressionSelect {
+    display: flex;
+}
+
+.expressionSelect #hitExpressionSelect {
+    width: 100%;
+}
+
+.expressionSelect #expressionRefresh {
+    background-color: #2A2A2A;
+    width: 30px;
+    height: 30px;
+    flex-shrink: 0;
+    margin-left: 8px;
+    box-shadow: -8px 8px 16px rgba(0, 0, 0, 0.5);
+    cursor: pointer;
+    transition: background-color 0.25s;
+}
+
+#expressionRefresh .refreshBtn {
+    transition: transform 0.25s;
+}
+
+.expressionSelect #expressionRefresh:hover {
+    background-color: #494949;
+}
+
+.expressionSelect #expressionRefresh:hover .refreshBtn {
+    transform: rotate(-90deg);
 }
 
 #toast {
