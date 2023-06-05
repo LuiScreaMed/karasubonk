@@ -1244,7 +1244,7 @@
                 <p class="grid3">最低电池数</p>
                 <input type="number" id="superChatMinBattery" class="grid4" step="10" min="300" value="300">
 
-                <p class="grid3">最多投掷</p>
+                <p class="grid3">投掷上限</p>
                 <input type="number" id="superChatMaxCount" class="grid4" step="1" min="1" value="100">
 
                 <p class="grid3">投掷单位</p>
@@ -1268,8 +1268,21 @@
                 </label>
                 <p class="grid2">大航海</p>
 
+                <p class="grid3">投掷模式</p>
+                <select id="guardNumType">
+                  <option value="num">按照月数投掷</option>
+                  <option value="price">按照单月费用（元）投掷</option>
+                </select>
+
+                <p class="grid3">投掷上限</p>
+                <input type="number" id="guardMaxCount" class="grid4" step="1" min="1" value="200">
+
+                <p class="grid3">投掷单位</p>
+                <input type="number" id="guardUnit" class="grid4" step="1" min="1" value="20">
+
                 <p class="grid3">冷却时长（秒）</p>
                 <input type="number" id="guardCooldown" class="grid4" min="0" value="0">
+
               </div>
             </div>
           </div>

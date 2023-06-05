@@ -1945,6 +1945,13 @@ window.onload = async function () {
     // 大航海
     loadData("guardEnabled");
     loadData("guardCooldown");
+    loadData("guardMaxCount");
+    loadData("guardUnit");
+    getData("guardNumType").then((res) => {
+        if (res) {
+            document.querySelector("#guardNumType").value = res;
+        }
+    })
 
     loadData("barrageCount");
     loadData("barrageFrequency");
@@ -2023,6 +2030,9 @@ document.querySelector("#superChatCooldown").addEventListener("change", () => { 
 // 大航海
 document.querySelector("#guardEnabled").addEventListener("change", () => setData("guardEnabled", document.querySelector("#guardEnabled").checked));
 document.querySelector("#guardCooldown").addEventListener("change", () => { clampValue(document.querySelector("#guardCooldown"), 0, null); setData("guardCooldown", parseFloat(document.querySelector("#guardCooldown").value)) });
+document.querySelector("#guardNumType").addEventListener("change", () => setData("guardNumType", document.querySelector("#guardNumType").value));
+document.querySelector("#guardMaxCount").addEventListener("change", () => { clampValue(document.querySelector("#guardMaxCount"), 1, null); setData("guardMaxCount", parseInt(document.querySelector("#guardMaxCount").value)) });
+document.querySelector("#guardUnit").addEventListener("change", () => { clampValue(document.querySelector("#guardUnit"), 1, null); setData("guardUnit", parseInt(document.querySelector("#guardUnit").value)) });
 
 // 设置
 document.querySelector("#barrageCount").addEventListener("change", () => { clampValue(document.querySelector("#barrageCount"), 0, null); setData("barrageCount", parseInt(document.querySelector("#barrageCount").value)) });
@@ -2040,7 +2050,7 @@ document.querySelector("#physicsReverse").addEventListener("change", () => setDa
 document.querySelector("#physicsRotate").addEventListener("change", () => setData("physicsRotate", document.querySelector("#physicsRotate").checked));
 document.querySelector("#physicsHorizontal").addEventListener("change", () => { setData("physicsHorizontal", parseFloat(document.querySelector("#physicsHorizontal").value)) });
 document.querySelector("#physicsVertical").addEventListener("change", () => { setData("physicsVertical", parseFloat(document.querySelector("#physicsVertical").value)) });
-document.querySelector("#hitExpressionDuration").addEventListener("change", () => { setData("hitExpressionDuration", parseFloat(document.querySelector('#hitExpressionDuration').value)) });
+document.querySelector("#hitExpressionDuration").addEventListener("change", () => { clampValue(document.querySelector("#hitExpressionDuration"), 0, null); setData("hitExpressionDuration", parseFloat(document.querySelector('#hitExpressionDuration').value)); });
 document.querySelector("#saveLogs").addEventListener("change", () => setData("saveLogs", document.querySelector("#saveLogs").checked));
 
 document.querySelector("#closeEyes").addEventListener("change", function () {
@@ -2050,7 +2060,7 @@ document.querySelector("#closeEyes").addEventListener("change", function () {
         document.querySelector("#openEyes").checked = false;
         setData("openEyes", false);
         document.querySelector("#hitExpression").checked = false;
-        setData("hitExpressionEnabled", false);
+        setData("hitExpression", false);
     }
 });
 
@@ -2061,14 +2071,14 @@ document.querySelector("#openEyes").addEventListener("change", function () {
         document.querySelector("#closeEyes").checked = false;
         setData("closeEyes", false);
         document.querySelector("#hitExpression").checked = false;
-        setData("hitExpressionEnabled", false);
+        setData("hitExpression", false);
     }
 });
 
 // 添加切换表情的监听
 document.querySelector("#hitExpression").addEventListener("change", function () {
     const val = this.checked;
-    setData("hitExpressionEnabled", val);
+    setData("hitExpression", val);
     if (val) {
         document.querySelector("#closeEyes").checked = false;
         setData("closeEyes", false);

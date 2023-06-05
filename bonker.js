@@ -758,11 +758,13 @@ function flinch(multH, angle, mag, paramH, paramV, paramE, returnSpeed, eyeState
         socketVTube.send(JSON.stringify(request));
         if (done) {
             socketVTube.onmessage = null;
-            expressionTimer = setTimeout(() => {
-                clearTimeout(expressionTimer);
-                expressionTimer = null;
-                setExpression(hitExpressionName, false);
-            }, expressionDuration * 1000);
+            if (eyeState == 3) {
+                expressionTimer = setTimeout(() => {
+                    clearTimeout(expressionTimer);
+                    expressionTimer = null;
+                    setExpression(hitExpressionName, false);
+                }, expressionDuration * 1000);
+            }
         }
     };
     socketVTube.send(JSON.stringify(request));

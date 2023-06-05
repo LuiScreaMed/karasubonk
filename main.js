@@ -175,19 +175,34 @@ function onMessage(data) {
   let cmd = data.cmd;
   switch (cmd) {
     case 'DANMU_MSG': // 弹幕
+      Logger.info("Received Danmaku");
+      Logger.info(JSON.stringify(data));
+      Logger.info("Received Danmaku end");
       onDanmakuHandler(data);
       break;
     case 'SUPER_CHAT_MESSAGE_JPN':
     case 'SUPER_CHAT_MESSAGE':  // 醒目留言
+      Logger.info("Received Super Chat");
+      Logger.info(JSON.stringify(data));
+      Logger.info("Received Super Chat end");
       onSuperChatHandler(data);
       break;
     case 'SEND_GIFT': // 礼物
+      Logger.info("Received Gift");
+      Logger.info(JSON.stringify(data));
+      Logger.info("Received Gift end");
       onGiftHandler(data);
       break;
     case 'GUARD_BUY': // 上舰
+      Logger.info("Received Guard");
+      Logger.info(JSON.stringify(data));
+      Logger.info("Received Guard end");
       onGuardBuyHandler(data);
       break;
     case 'INTERACT_WORD': // 用户进入直播间，判断关注
+      Logger.info("Received Interact Word");
+      Logger.info(JSON.stringify(data));
+      Logger.info("Received Interact Word end");
       onFollowHandler(data);
       break;
     default:
@@ -376,6 +391,13 @@ function createServer() {
           receivedExpressions = true;
           mainWindow.webContents.send("expressions", request.expressions);
         }
+        // bonker 日志
+        // bonker logger
+        else if (request.type == "log") {
+          Logger.info("Bonker Log");
+          Logger.info(request.log);
+          Logger.info("Bonker Log end");
+        }
       });
 
       ws.on("close", function message() {
@@ -464,10 +486,12 @@ function getImagesWeightsScalesSoundsVolumes(customAmount) {
 
 // Test Events
 ipcMain.on("single", () => single());
-// ipcMain.on("barrage", () => barrage());
-ipcMain.on("barrage", () => onGiftHandler({ data: { coin_type: CoinType.battery, giftName: "小花花", num: 100, price: 1 } }));
+ipcMain.on("barrage", () => barrage());
 ipcMain.on("follow", () => onFollowHandler({ data: { msg_type: 2 } }));
-ipcMain.on("guard", () => onGuardBuyHandler({ data: { guard_level: Math.ceil(Math.random() * 3), num: Math.ceil(Math.random() * 10) } }))
+ipcMain.on("guard", () => {
+  const level = Math.ceil(Math.random() * 3);
+  onGuardBuyHandler({ data: { guard_level: level, num: Math.ceil(Math.random() * 2), price: level == 3 ? 198000 : (level == 2 ? 1998000 : 19998000) } });
+})
 ipcMain.on("superChat", () => onSuperChatHandler({ data: { price: (Math.ceil(Math.random() * 30)) + 30 } }))
 
 // Testing a specific item
@@ -801,7 +825,6 @@ function getCoinType(coin_type) {
 // 处理弹幕command
 var commandCooldowns = {};
 function onDanmakuHandler({ info: [, message] }) {
-  console.log("Received Danmaku");
 
   if (data.commands != null) {
     for (var i = 0; i < data.commands.length; i++) {
@@ -832,7 +855,6 @@ function onDanmakuHandler({ info: [, message] }) {
 // 处理SC
 var canSuperChat = true;
 function onSuperChatHandler({ data: { price } }) {
-  // console.log(`${uname} 花费了 ${price * 10} 电池发布了一条SC`);
   price = price * 10;
   if (canSuperChat && data.superChatEnabled && price >= data.superChatMinBattery) {
     throwCoins({ coinType: CoinType.battery, num: price, max: data.superChatMaxCount, unit: data.superChatCoinUnit });
@@ -844,9 +866,13 @@ function onSuperChatHandler({ data: { price } }) {
 // 处理礼物
 var giftCooldowns = {};
 function onGiftHandler({ data: { coin_type, giftName, num, price } }) {
+  price = coin_type === "silver" ? price : price / 100;
   // 判断价值
   let canThrow = coin_type === "silver" ? price >= data.coinMinSilver : price >= data.coinMinBattery;
-  if (!canThrow) return;
+  if (!canThrow) {
+    // Logger.warn("=== GIFT: Gift price lower than lowest limit, cancelled");
+    return;
+  }
 
   // 查找与该礼物名称相同的事件
   let giftEventIndex = -1;
@@ -862,6 +888,7 @@ function onGiftHandler({ data: { coin_type, giftName, num, price } }) {
   // 如果查找不到该礼物的事件，则判断是否投掷电池和瓜子
   if (giftEventIndex === -1) {
     if (data.coinsThrowEnabled) {
+      // Logger.warn("=== GIFT: Gift not found in presets");
       handleGiftToCoins({ coin_type, num, price });
     }
     return;
@@ -871,10 +898,15 @@ function onGiftHandler({ data: { coin_type, giftName, num, price } }) {
   if (giftCooldowns[data.gifts[giftEventIndex].name] == null && data.gifts[giftEventIndex].enabled) {
     if (data.multiGiftsEnabled && !data.giftWithCoinCountEnabled) { // 如果开启复数礼物限制 且 没有开启礼物按照瓜子/电池数量投掷
       num = num > data.multiGiftsMaxCount ? data.multiGiftsMaxCount : num;
+      // Logger.warn("=== GIFT: Gift with gift number, after clamping: " + num);
     } else if (data.giftWithCoinCountEnabled) { // 如果开启礼物按照瓜子/电池数量投掷
+      // Logger.warn("=== GIFT: Gift coin counts, ready to calculate");
       num = num * price;
+      // Logger.warn("=== GIFT: Gift coin counts, num * price: " + num);
       num = Math.ceil(num / data.giftWithCoinCountUnit);
+      // Logger.warn("=== GIFT: Gift coin counts, Math.ceil(num / data.giftWithCoinCountUnit): " + num);
       num = num > data.giftWithCoinCountMaxCount ? data.giftWithCoinCountMaxCount : num;
+      // Logger.warn("=== GIFT: Gift coin counts, after clamping: " + num);
     }
     switch (data.gifts[giftEventIndex].bonkType) {
       case "single":
@@ -911,7 +943,7 @@ function handleGiftToCoins({ coin_type, num, price }) {
 }
 
 // 投掷电池或瓜子
-function throwCoins({ coinType, num, max, unit }) {
+function throwCoins({ coinType, num, max, unit = 1 }) {
   num = Math.ceil(num / unit);
   if (max) {
     num = num > max ? max : num;
@@ -956,16 +988,21 @@ function throwCoins({ coinType, num, max, unit }) {
 
 // 处理大航海
 var canGuard = true;
-function onGuardBuyHandler({ data: { guard_level, num } }) {
+function onGuardBuyHandler({ data: { guard_level, num, price } }) {
   if (!canGuard || !data.guardEnabled) return;
   canGuard = false;
   setTimeout(() => { canGuard = true }, data.guardCooldown * 1000);
   let giftName = `guard${guard_level}`;
 
+  // 判断大航海投掷数量类型，如果为按月数则直接num，否则按照单月花费元数投掷
+  let count = data.guardNumType == "num" ? num : (price / 1000);
+  count = Math.ceil(count / data.guardUnit);
+  count = count > data.guardMaxCount ? data.guardMaxCount : count;
+
   if (socket != null && data.guardThrows[giftName]) {
     var images = [], weights = [], scales = [], sounds = [], volumes = [];
-    while (num > 0) {
-      num--;
+    while (count > 0) {
+      count--;
       images.push(data.guardThrows[giftName].location);
       weights.push(1.0);
       scales.push(data.guardThrows[giftName].scale);

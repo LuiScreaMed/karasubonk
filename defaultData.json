@@ -792,12 +792,15 @@
     "coinsThrowCooldown": 5,
     "multiGiftsEnabled": true,
     "multiGiftsMaxCount": 50,
-    "guardEnabled": true,
-    "guardCooldown": 0,
     "hitExpression": false,
     "hitExpressionDuration": 0.3,
     "giftWithCoinCountEnabled": false,
     "giftWithCoinCountMaxCount": 50,
     "giftWithCoinCountUnit": 1,
-    "saveLogs": false
+    "saveLogs": false,
+    "guardEnabled": true,
+    "guardNumType": "num",
+    "guardMaxCount": 200,
+    "guardUnit": 20,
+    "guardCooldown": 0
 }
