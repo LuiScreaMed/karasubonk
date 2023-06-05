@@ -1,6 +1,6 @@
 const { app, Menu, Tray, BrowserWindow, ipcMain, session } = require("electron");
 const fs = require("fs");
-const { KeepLiveWS, getRoomid } = require("bilibili-live-ws");
+const { KeepLiveWS, getRoomid, getConf } = require("bilibili-live-ws");
 const log = require("electron-log");
 
 
@@ -113,13 +113,22 @@ async function connect(roomid) {
     Logger.info("bilibili connecting");
     mainWindow.webContents.send("connectInputDisabled", { input: true, button: true });
     roomid = Number(roomid);
-    roomid = await getRoomid(roomid);
-    biliClient = new KeepLiveWS(roomid);
+    let conf = {};
+    try {
+      roomid = await getRoomid(roomid);
+      conf = await getConf(roomid);
+    } catch (e) {
+      Logger.error("Getting roomid or conf error");
+      Logger.error(e);
+      Logger.error("Getting roomid or conf error end");
+    }
+    biliClient = new KeepLiveWS(roomid, conf);
 
     biliClient.on("open", connectOpen);
     biliClient.on("heartbeat", onHeartBeat);
     biliClient.on("msg", onMessage);
     biliClient.on("error", onError);
+    biliClient.on("close", onClose);
   } else {
     Logger.info("bilibili disconnecting");
     disconnect();
@@ -141,6 +150,16 @@ function onError(error) {
   Logger.error("bilibili connection error:")
   Logger.error(typeof (error) == 'object' ? JSON.stringify(error) : toString(error))
   Logger.error("bilibili connection error end.")
+}
+
+// 连接关闭时
+function onClose(reason) {
+  Logger.error("bilibili connection closed:")
+  try {
+    Logger.error(JSON.stringify(reason))
+  } catch (e) { }
+  Logger.error(toString(reason))
+  Logger.error("bilibili connection closed end.")
 }
 
 // 断开连接
@@ -870,7 +889,7 @@ function onGiftHandler({ data: { coin_type, giftName, num, price } }) {
   // 判断价值
   let canThrow = coin_type === "silver" ? price >= data.coinMinSilver : price >= data.coinMinBattery;
   if (!canThrow) {
-    // Logger.warn("=== GIFT: Gift price lower than lowest limit, cancelled");
+    Logger.warn("=== GIFT: Gift price lower than lowest limit, cancelled");
     return;
   }
 
@@ -888,7 +907,7 @@ function onGiftHandler({ data: { coin_type, giftName, num, price } }) {
   // 如果查找不到该礼物的事件，则判断是否投掷电池和瓜子
   if (giftEventIndex === -1) {
     if (data.coinsThrowEnabled) {
-      // Logger.warn("=== GIFT: Gift not found in presets");
+      Logger.warn("=== GIFT: Gift not found in presets");
       handleGiftToCoins({ coin_type, num, price });
     }
     return;
@@ -898,15 +917,15 @@ function onGiftHandler({ data: { coin_type, giftName, num, price } }) {
   if (giftCooldowns[data.gifts[giftEventIndex].name] == null && data.gifts[giftEventIndex].enabled) {
     if (data.multiGiftsEnabled && !data.giftWithCoinCountEnabled) { // 如果开启复数礼物限制 且 没有开启礼物按照瓜子/电池数量投掷
       num = num > data.multiGiftsMaxCount ? data.multiGiftsMaxCount : num;
-      // Logger.warn("=== GIFT: Gift with gift number, after clamping: " + num);
+      Logger.warn("=== GIFT: Gift with gift number, after clamping: " + num);
     } else if (data.giftWithCoinCountEnabled) { // 如果开启礼物按照瓜子/电池数量投掷
-      // Logger.warn("=== GIFT: Gift coin counts, ready to calculate");
+      Logger.warn("=== GIFT: Gift coin counts, ready to calculate");
       num = num * price;
-      // Logger.warn("=== GIFT: Gift coin counts, num * price: " + num);
+      Logger.warn("=== GIFT: Gift coin counts, num * price: " + num);
       num = Math.ceil(num / data.giftWithCoinCountUnit);
-      // Logger.warn("=== GIFT: Gift coin counts, Math.ceil(num / data.giftWithCoinCountUnit): " + num);
+      Logger.warn("=== GIFT: Gift coin counts, Math.ceil(num / data.giftWithCoinCountUnit): " + num);
       num = num > data.giftWithCoinCountMaxCount ? data.giftWithCoinCountMaxCount : num;
-      // Logger.warn("=== GIFT: Gift coin counts, after clamping: " + num);
+      Logger.warn("=== GIFT: Gift coin counts, after clamping: " + num);
     }
     switch (data.gifts[giftEventIndex].bonkType) {
       case "single":

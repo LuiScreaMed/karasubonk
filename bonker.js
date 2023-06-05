@@ -332,7 +332,7 @@ function connectKarasu() {
 
                 switch (data.type) {
                     case "single":
-                        bonk(data.image, data.weight, data.scale, data.sound, data.volume, data.data, faceWidthMin, faceWidthMax, faceHeightMin, faceHeightMax, null);
+                        bonk(data.image, data.weight, data.scale, data.sound, data.volume, data.data, faceWidthMin, faceWidthMax, faceHeightMin, faceHeightMax, null, false);
                         break;
                     case "barrage":
                         var i = 0;
@@ -343,11 +343,11 @@ function connectKarasu() {
                         const volumes = data.volume;
                         const max = Math.min(images.length, sounds.length, weights.length);
 
-                        bonk(images[i], weights[i], scales[i], sounds[i], volumes[i], data.data, faceWidthMin, faceWidthMax, faceHeightMin, faceHeightMax, null);
+                        bonk(images[i], weights[i], scales[i], sounds[i], volumes[i], data.data, faceWidthMin, faceWidthMax, faceHeightMin, faceHeightMax, null, false);
                         i++;
                         if (i < max) {
                             var bonker = setInterval(function () {
-                                bonk(images[i], weights[i], scales[i], sounds[i], volumes[i], data.data, faceWidthMin, faceWidthMax, faceHeightMin, faceHeightMax, null);
+                                bonk(images[i], weights[i], scales[i], sounds[i], volumes[i], data.data, faceWidthMin, faceWidthMax, faceHeightMin, faceHeightMax, null, false);
                                 if (++i >= max)
                                     clearInterval(bonker);
                             }, data.data.barrageFrequency * 1000);
@@ -368,6 +368,8 @@ function connectKarasu() {
                             data.data.spinSpeedMin = data.data.customBonks[data.type].spinSpeedMin;
                             data.data.spinSpeedMax = data.data.customBonks[data.type].spinSpeedMax;
                         }
+                        // 击中后隐藏
+                        const hideOnHit = data.data.customBonks[data.type].hideOnHit;
 
                         var i = 0;
                         const cImages = data.image;
@@ -397,11 +399,11 @@ function connectKarasu() {
                             windup.play();
 
                         setTimeout(() => {
-                            bonk(cImages[i], cWeights[i], cScales[i], cSounds[i], cVolumes[i], data.data, faceWidthMin, faceWidthMax, faceHeightMin, faceHeightMax, cImpactDecals[i]);
+                            bonk(cImages[i], cWeights[i], cScales[i], cSounds[i], cVolumes[i], data.data, faceWidthMin, faceWidthMax, faceHeightMin, faceHeightMax, cImpactDecals[i], hideOnHit);
                             i++;
                             if (i < cMax) {
                                 var bonker = setInterval(function () {
-                                    bonk(cImages[i], cWeights[i], cScales[i], cSounds[i], cVolumes[i], data.data, faceWidthMin, faceWidthMax, faceHeightMin, faceHeightMax, cImpactDecals[i]);
+                                    bonk(cImages[i], cWeights[i], cScales[i], cSounds[i], cVolumes[i], data.data, faceWidthMin, faceWidthMax, faceHeightMin, faceHeightMax, cImpactDecals[i], hideOnHit);
                                     if (++i >= cMax)
                                         clearInterval(bonker);
                                 }, data.data.barrageFrequency * 1000);
@@ -516,7 +518,7 @@ setInterval(() => {
     }
 }, 1000);
 
-function bonk(image, weight, scale, sound, volume, data, faceWidthMin, faceWidthMax, faceHeightMin, faceHeightMax, impactDecal) {
+function bonk(image, weight, scale, sound, volume, data, faceWidthMin, faceWidthMax, faceHeightMin, faceHeightMax, impactDecal, hideOnHit) {
     if (vTubeIsOpen) {
         var request = {
             "apiName": "VTubeStudioPublicAPI",
@@ -633,7 +635,9 @@ function bonk(image, weight, scale, sound, volume, data, faceWidthMin, faceWidth
                             setTimeout(function () { hit.remove(); }, impactDecal.duration * 1000);
                         }, (data.throwDuration * 500) + data.delay);
 
-                    if (!data.physicsSim)
+                    if (hideOnHit) {    // 击中后消失
+                        setTimeout(function () { document.querySelector("body").removeChild(root); }, (data.throwDuration * 500) + data.delay);
+                    } else if (!data.physicsSim)
                         setTimeout(function () { document.querySelector("body").removeChild(root); }, (data.throwDuration * 1000) + data.delay);
                     else {
                         setTimeout(function () {

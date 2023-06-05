@@ -443,7 +443,8 @@
             "impactDecals": [],
             "windupSounds": [],
             "windupDelay": 0,
-            "spinSpeedOverride": false
+            "spinSpeedOverride": false,
+            "hideOnHit": false
         },
         "辣条": {
             "barrageCountManual": false,
@@ -462,7 +463,8 @@
             "impactDecals": [],
             "windupSounds": [],
             "windupDelay": 0,
-            "spinSpeedOverride": false
+            "spinSpeedOverride": false,
+            "hideOnHit": false
         },
         "小花花": {
             "barrageCountManual": false,
@@ -481,7 +483,8 @@
             "impactDecals": [],
             "windupSounds": [],
             "windupDelay": 0,
-            "spinSpeedOverride": false
+            "spinSpeedOverride": false,
+            "hideOnHit": false
         },
         "吃瓜": {
             "barrageCountManual": false,
@@ -500,7 +503,8 @@
             "impactDecals": [],
             "windupSounds": [],
             "windupDelay": 0,
-            "spinSpeedOverride": false
+            "spinSpeedOverride": false,
+            "hideOnHit": false
         },
         "B坷垃": {
             "barrageCountManual": false,
@@ -519,7 +523,8 @@
             "impactDecals": [],
             "windupSounds": [],
             "windupDelay": 0,
-            "spinSpeedOverride": false
+            "spinSpeedOverride": false,
+            "hideOnHit": false
         },
         "D言D语": {
             "barrageCountManual": false,
@@ -538,7 +543,8 @@
             "impactDecals": [],
             "windupSounds": [],
             "windupDelay": 0,
-            "spinSpeedOverride": true
+            "spinSpeedOverride": true,
+            "hideOnHit": false
         },
         "flag": {
             "barrageCountManual": false,
@@ -557,7 +563,8 @@
             "impactDecals": [],
             "windupSounds": [],
             "windupDelay": 0,
-            "spinSpeedOverride": false
+            "spinSpeedOverride": false,
+            "hideOnHit": false
         },
         "i了i了": {
             "barrageCountManual": false,
@@ -575,7 +582,8 @@
             "soundsOverride": false,
             "impactDecals": [],
             "windupSounds": [],
-            "windupDelay": 0
+            "windupDelay": 0,
+            "hideOnHit": false
         },
         "比心": {
             "barrageCountManual": false,
@@ -593,7 +601,8 @@
             "soundsOverride": false,
             "impactDecals": [],
             "windupSounds": [],
-            "windupDelay": 0
+            "windupDelay": 0,
+            "hideOnHit": false
         },
         "冰阔乐": {
             "barrageCountManual": false,
@@ -611,7 +620,8 @@
             "soundsOverride": false,
             "impactDecals": [],
             "windupSounds": [],
-            "windupDelay": 0
+            "windupDelay": 0,
+            "hideOnHit": false
         },
         "打call": {
             "barrageCountManual": false,
@@ -629,7 +639,8 @@
             "soundsOverride": false,
             "impactDecals": [],
             "windupSounds": [],
-            "windupDelay": 0
+            "windupDelay": 0,
+            "hideOnHit": false
         },
         "粉丝团灯牌": {
             "barrageCountManual": false,
@@ -647,7 +658,8 @@
             "soundsOverride": false,
             "impactDecals": [],
             "windupSounds": [],
-            "windupDelay": 0
+            "windupDelay": 0,
+            "hideOnHit": false
         },
         "给大佬递茶": {
             "barrageCountManual": false,
@@ -665,7 +677,8 @@
             "soundsOverride": false,
             "impactDecals": [],
             "windupSounds": [],
-            "windupDelay": 0
+            "windupDelay": 0,
+            "hideOnHit": false
         },
         "牛哇牛哇": {
             "barrageCountManual": false,
@@ -683,7 +696,8 @@
             "soundsOverride": false,
             "impactDecals": [],
             "windupSounds": [],
-            "windupDelay": 0
+            "windupDelay": 0,
+            "hideOnHit": false
         }
     },
     "commands": [],

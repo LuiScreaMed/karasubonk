@@ -33,8 +33,8 @@ const statusDesc = [
     "<p>这项设置用于校准扔出物体的目标方位。</p><p>请点击 \"开始校准\" 进行校准。</p>",
     "",
     ["<p>端口：<mark>", "</mark> 被占用。</p><p>您可以尝试在 <mark>设置 -> 高级设置</mark> 中修改浏览器源的端口。</p><p>端口应在 1024 至 65535 的范围内。</p>"],
-    "<p>KBonk 与浏览器源的版本不一致。</p><p>请确认OBS中使用的浏览器源文件位于当前KBonk应用的子目录中。</p>",
-    "<p>浏览器源没有返回版本号。</p><p>KBonk与浏览器源可能版本不一致。</p><p>请确认OBS中使用的浏览器源文件位于当前KBonk应用的子目录中。</p>"
+    "<p>KBonk 与浏览器源的版本不一致。</p><p>请确认OBS或直播姬中使用的浏览器源文件路径如下（点击文本进行复制）：</p><p><input readonly id='bonkerInput'></p><p>如果确认路径无误，请确认OBS中的源已经刷新。</p>",
+    "<p>浏览器源没有返回版本号。</p><p>KBonk与浏览器源可能版本不一致。</p><p>请确认OBS或直播姬中使用的浏览器源文件路径如下（点击文本进行复制）：</p><p><input readonly id='bonkerInput'></p><p>如果确认路径无误，请确认OBS中的源已经刷新。</p>"
 ];
 
 // consolelog
@@ -99,7 +99,7 @@ ipcRenderer.on("status", (event, message) => { setStatus(event, message); });
 
 async function setStatus(_, message) {
     if (status == message) return;
-    if (status == 2) {
+    if (status == 2 || status == 9 || status == 10) {
         document.querySelector("#bonkerInput").removeEventListener("click", selectAndCopyBonkerPath);
     }
     status = message;
@@ -129,7 +129,7 @@ async function setStatus(_, message) {
     else
         document.querySelector("#statusDesc").innerHTML = statusDesc[status];
 
-    if (status == 2) {
+    if (status == 2 || status == 9 || status == 10) {
         let bonkerPathInput = document.querySelector("#bonkerInput");
         bonkerPathInput.value = __dirname + '\\bonker.html';
         bonkerPathInput.addEventListener("click", selectAndCopyBonkerPath);
@@ -1237,6 +1237,7 @@ async function addBonk() {
         "spinSpeedMax": await getData("spinSpeedMax"),
         "itemsOverride": false,
         "soundsOverride": false,
+        "hideOnHit": false,
         "impactDecals": [],
         "windupSounds": [],
         "windupDelay": 0
@@ -1465,6 +1466,14 @@ async function bonkDetails(customBonkName) {
             customBonks[customBonkName].windupDelay = parseFloat(bonkDetailsTable.querySelector(".windupDelay").value);
             setData("customBonks", customBonks);
         });
+
+        // 击中后消失
+        bonkDetailsTable.querySelector(".hideOnHit").checked = customBonks[customBonkName].hideOnHit;
+        bonkDetailsTable.querySelector(".hideOnHit").addEventListener("change", async () => {
+            customBonks = await getData("customBonks");
+            customBonks[customBonkName].hideOnHit = bonkDetailsTable.querySelector(".hideOnHit").checked;
+            setData("customBonks", customBonks);
+        })
     }
 }
 
