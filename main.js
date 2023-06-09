@@ -915,7 +915,10 @@ function onGiftHandler({ data: { coin_type, giftName, num, price } }) {
 
   // 如果查找到，则投掷绑定好的投掷
   if (giftCooldowns[data.gifts[giftEventIndex].name] == null && data.gifts[giftEventIndex].enabled) {
-    if (data.multiGiftsEnabled && !data.giftWithCoinCountEnabled) { // 如果开启复数礼物限制 且 没有开启礼物按照瓜子/电池数量投掷
+    let bonkType = data.gifts[giftEventIndex].bonkType;
+    if (data.customBonks[bonkType].barrageCountManual) {  // 如果自定义类型中开启了手动数量，则投掷自定义类型中定义的数量
+      num = data.customBonks[bonkType].barrageCount;
+    } else if (data.multiGiftsEnabled && !data.giftWithCoinCountEnabled) { // 如果开启复数礼物限制 且 没有开启礼物按照瓜子/电池数量投掷
       num = num > data.multiGiftsMaxCount ? data.multiGiftsMaxCount : num;
       Logger.warn("=== GIFT: Gift with gift number, after clamping: " + num);
     } else if (data.giftWithCoinCountEnabled) { // 如果开启礼物按照瓜子/电池数量投掷
