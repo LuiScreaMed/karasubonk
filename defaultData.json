@@ -789,7 +789,7 @@
     ],
     "spinSpeedMin": 5,
     "spinSpeedMax": 10,
-    "minimizeToTray": true,
+    "minimizeToTray": false,
     "physicsSim": true,
     "physicsFPS": 60,
     "physicsGravity": 1,
