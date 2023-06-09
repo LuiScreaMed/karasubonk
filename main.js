@@ -1059,7 +1059,7 @@ function onGuardBuyHandler({ data: { guard_level, num, price } }) {
 // 处理关注
 var canFollow = true;
 function onFollowHandler({ data: { msg_type } }) {
-  if (msg_type !== 2) return;
+  if (msg_type !== 2 && msg_type !== 4 && msg_type !== 5) return;
   if (canFollow && data.followEnabled) {
     switch (data.followType) {
       case "single":
