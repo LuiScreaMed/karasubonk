@@ -863,8 +863,10 @@ function onDanmakuHandler({ info: [, message] }) {
         }
 
         // 冷却
-        commandCooldowns[data.commands[i].name] = true;
-        setTimeout(() => { delete commandCooldowns[data.commands[i].name]; }, data.commands[i].cooldown * 1000);
+        if (data.commands[i].cooldown > 0) {
+          commandCooldowns[data.commands[i].name] = true;
+          setTimeout(() => { delete commandCooldowns[data.commands[i].name]; }, data.commands[i].cooldown * 1000);
+        }
         break;
       }
     }
@@ -877,8 +879,11 @@ function onSuperChatHandler({ data: { price } }) {
   price = price * 10;
   if (canSuperChat && data.superChatEnabled && price >= data.superChatMinBattery) {
     throwCoins({ coinType: CoinType.battery, num: price, max: data.superChatMaxCount, unit: data.superChatCoinUnit });
-    canSuperChat = false;
-    setTimeout(() => { canSuperChat = true }, data.superChatCooldown * 1000);
+
+    if (data.superChatCooldown > 0) {
+      canSuperChat = false;
+      setTimeout(() => { canSuperChat = true }, data.superChatCooldown * 1000);
+    }
   }
 }
 
@@ -942,8 +947,10 @@ function onGiftHandler({ data: { coin_type, giftName, num, price } }) {
         break;
     }
 
-    giftCooldowns[data.gifts[giftEventIndex].name] = true;
-    setTimeout(() => { delete giftCooldowns[data.gifts[giftEventIndex].name] }, data.gifts[giftEventIndex].cooldown * 1000);
+    if (data.gifts[giftEventIndex].cooldown > 0) {
+      giftCooldowns[data.gifts[giftEventIndex].name] = true;
+      setTimeout(() => { delete giftCooldowns[data.gifts[giftEventIndex].name] }, data.gifts[giftEventIndex].cooldown * 1000);
+    }
   }
 
 }
@@ -953,8 +960,11 @@ var canThrowGiftToCoins = true;
 function handleGiftToCoins({ coin_type, num, price }) {
   if (!canThrowGiftToCoins) return;
 
-  canThrowGiftToCoins = false;
-  setTimeout(() => { canThrowGiftToCoins = true }, data.coinsThrowCooldown * 1000);
+  if (data.coinsThrowCooldown > 0) {
+    canThrowGiftToCoins = false;
+    setTimeout(() => { canThrowGiftToCoins = true }, data.coinsThrowCooldown * 1000);
+  }
+
   throwCoins({
     coinType: getCoinType(coin_type),
     num: num * price,
@@ -1012,9 +1022,12 @@ function throwCoins({ coinType, num, max, unit = 1 }) {
 var canGuard = true;
 function onGuardBuyHandler({ data: { guard_level, num, price } }) {
   if (!canGuard || !data.guardEnabled) return;
-  canGuard = false;
-  setTimeout(() => { canGuard = true }, data.guardCooldown * 1000);
   let giftName = `guard${guard_level}`;
+
+  if (data.guardCooldown > 0) {
+    canGuard = false;
+    setTimeout(() => { canGuard = true }, data.guardCooldown * 1000);
+  }
 
   // 判断大航海投掷数量类型，如果为按月数则直接num，否则按照单月花费元数投掷
   let count = data.guardNumType == "num" ? num : (price / 1000);
