@@ -42,21 +42,38 @@ ipcRenderer.on("consoleLog", (_, ...args) => {
     console.log(...args);
 })
 
-ipcRenderer.on("connectInputDisabled", (_, { input, button }) => {
-    document.querySelector("#roomid").disabled = input;
-    document.querySelector("#logout").disabled = button;
-    document.querySelector("#logout").classList[button ? "add" : "remove"]("disabled");
+// 连接房间状态改变
+ipcRenderer.on("connectStatus", (_, status) => {
+    setRoomInputStatus(status);
 })
 
 ipcRenderer.on("connected", () => {
     document.querySelector("#logout").innerText = "断开连接";
 });
 
+// bilibili 连接失败
+ipcRenderer.on("biliConnectFailed", () => {
+    showToast("B站直播间连接失败，请重试", ToastType.error);
+})
+
+// 房间号留空报错
+ipcRenderer.on("roomidEmptyError", () => {
+    showToast("请输入正确的房间号", ToastType.error);
+    setRoomInputStatus(RoomInputStatus.disconnected);
+})
+
 var userDataPath = null;
 ipcRenderer.on("userDataPath", (event, message) => {
     userDataPath = message;
 })
 ipcRenderer.send("getUserDataPath");
+
+// 设置app底部元素的disable
+function setRoomidFormDisabled({ input, button }) {
+    document.querySelector("#roomid").disabled = input;
+    document.querySelector("#logout").disabled = button;
+    document.querySelector("#logout").classList[button ? "add" : "remove"]("disabled");
+}
 
 // 连接浏览器源步骤时，路径文本框的复制功能
 async function selectAndCopyBonkerPath() {
@@ -68,16 +85,12 @@ async function selectAndCopyBonkerPath() {
 // 仅允许输入数字
 document.querySelector("#roomid").oninput = function () {
     this.value = this.value.replace(/\D/g, '');
-    if (this.value === "" || this.value === "0") {
-        this.value = "1"
-    }
 }
 
+// 点击连接房间
 document.querySelector("#logout").addEventListener("click", async () => {
     let roomid = document.querySelector("#roomid").value;
-    setData("roomid", roomid);
     ipcRenderer.send("connect", roomid);
-    document.querySelector("#logout").innerText = "连接";
 });
 
 document.querySelector("#githubLink a").addEventListener("click", () => { ipcRenderer.send("link"); });
@@ -94,6 +107,34 @@ document.querySelector("#creditGithubLink").addEventListener("click", () => {
 document.querySelector("#bilibiliLink").addEventListener("click", () => {
     ipcRenderer.send("bilibiliLink");
 })
+
+// 房间连接状态
+const RoomInputStatus = {
+    disconnected: 0,
+    connecting: 1,
+    connected: 2
+}
+
+// 房间连接部分的状设置
+function setRoomInputStatus(status) {
+    switch (status) {
+        case RoomInputStatus.disconnected: {
+            document.querySelector("#logout").innerText = "连接";
+            setRoomidFormDisabled({ button: undefined, input: undefined });
+            break;
+        }
+        case RoomInputStatus.connecting: {
+            document.querySelector("#logout").innerText = "连接";
+            setRoomidFormDisabled({ button: true, input: true });
+            break;
+        }
+        case RoomInputStatus.connected: {
+            document.querySelector("#logout").innerText = "断开连接";
+            setRoomidFormDisabled({ button: undefined, input: true });
+            break;
+        }
+    }
+}
 
 ipcRenderer.on("status", (event, message) => { setStatus(event, message); });
 

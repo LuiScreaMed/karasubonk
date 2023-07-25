@@ -1,8 +1,11 @@
-const { app, Menu, Tray, BrowserWindow, ipcMain, session } = require("electron");
+const { app, Menu, Tray, BrowserWindow, ipcMain, session, Notification } = require("electron");
 const fs = require("fs");
 const { KeepLiveWS, getRoomid, getConf } = require("bilibili-live-ws");
 const log = require("electron-log");
 
+if (process.platform === 'win32') {
+  app.setAppUserModelId('Karasubonk Bilibili');
+}
 
 var mainWindow;
 
@@ -104,44 +107,69 @@ ipcMain.on("getUserDataPath", () => {
 // Authentication
 // --------------
 
-var biliClient, connected = false, connecting = false, listenersActive = false;
+var biliClient, connected = false, connecting = false, listenersActive = false, closeRetry = 0, conf = {}, connectId;
 
 //连接至房间
 async function connect(roomid) {
   connecting = true;
-  if (!biliClient && roomid) {
+  if (!biliClient) {
     Logger.info("bilibili connecting");
-    mainWindow.webContents.send("connectInputDisabled", { input: true, button: true });
-    roomid = Number(roomid);
-    let conf = {};
+    mainWindow.webContents.send("connectStatus", 1);
+    if (!roomid) {
+      return mainWindow.webContents.send("roomidEmptyError");
+    }
+
+    connectId = parseInt(roomid);
     try {
-      roomid = await getRoomid(roomid);
-      conf = await getConf(roomid);
+      connectId = await getRoomid(connectId);
+      if (connectId === undefined) {
+        return mainWindow.webContents.send("roomidEmptyError");
+      }
+      conf = await getConf(connectId);
+      connectToBilibili();
     } catch (e) {
+      mainWindow.webContents.send("connectStatus", 0);
+      connectFailed();
       Logger.error("Getting roomid or conf error");
       Logger.error(e);
       Logger.error("Getting roomid or conf error end");
     }
-    biliClient = new KeepLiveWS(roomid, conf);
 
-    biliClient.on("open", connectOpen);
-    biliClient.on("heartbeat", onHeartBeat);
-    biliClient.on("msg", onMessage);
-    biliClient.on("error", onError);
-    biliClient.on("close", onClose);
   } else {
     Logger.info("bilibili disconnecting");
     disconnect();
   }
 }
 
+// 连接B站并开启监听
+function connectToBilibili() {
+  biliClient = new KeepLiveWS(connectId, conf);
+
+  biliClient.on("open", connectOpen);
+  biliClient.on("heartbeat", onHeartBeat);
+  biliClient.on("msg", onMessage);
+  biliClient.on("error", onError);
+  biliClient.on("close", onClose);
+}
+
+// 关闭监听并断开B站的连接
+function disconnectFromBilibili() {
+  biliClient.off("open", connectOpen);
+  biliClient.off("heartbeat", onHeartBeat);
+  biliClient.off("msg", onMessage);
+  biliClient.off("error", onError);
+  biliClient.off("close", onClose);
+  biliClient.close();
+  biliClient = undefined;
+}
+
 // 连接开启时
 function connectOpen() {
+  mainWindow.webContents.send("connectStatus", 2);
+  setData("roomid", connectId);
   Logger.info("bilibili connection opened.");
   connected = true;
   connecting = false;
-  mainWindow.webContents.send("connected");
-  mainWindow.webContents.send("connectInputDisabled", { input: true, button: undefined });
   listenersActive = true;
 }
 
@@ -152,28 +180,50 @@ function onError(error) {
   Logger.error("bilibili connection error end.")
 }
 
+// 连接失败通知
+function connectFailed() {
+  if (!mainWindow) return;
+  if (mainWindow.isMinimized()) {
+    let notification = new Notification({
+      body: "B站直播间连接失败，请重试",
+      title: "Karasubonk Bilibili",
+
+    });
+    notification.on("click", () => {
+      if (!mainWindow) return;
+      if (mainWindow.isMinimized()) {
+        mainWindow.restore();
+      }
+    });
+    notification.show();
+  } else {
+    mainWindow.webContents.send('biliConnectFailed');
+  }
+}
+
 // 连接关闭时
-function onClose(reason) {
-  Logger.error("bilibili connection closed:")
-  try {
-    Logger.error(JSON.stringify(reason))
-  } catch (e) { }
-  Logger.error(toString(reason))
-  Logger.error("bilibili connection closed end.")
+function onClose() {
+  Logger.error("bilibili connection closed")
+  if (closeRetry < 5) {
+    closeRetry++;
+    disconnectFromBilibili();
+    setTimeout(() => {
+      connectToBilibili();
+    }, 500);
+  } else {
+    closeRetry = 0;
+    connectFailed();
+    disconnect();
+  }
 }
 
 // 断开连接
 function disconnect() {
   connected = false;
   connecting = false;
-  biliClient.off("open", connectOpen);
-  biliClient.off("heartbeat", onHeartBeat);
-  biliClient.off("msg", onMessage);
-  biliClient.off("error", onError);
-  biliClient.close();
-  biliClient = undefined;
   listenersActive = false;
-  mainWindow.webContents.send("connectInputDisabled", { input: undefined, button: undefined });
+  disconnectFromBilibili();
+  mainWindow.webContents.send("connectStatus", 0);
   Logger.info("bilibili disconnected");
 }
 
@@ -181,7 +231,7 @@ function disconnect() {
 function onHeartBeat(online) { }
 
 // 当点击了连接/断开连接按钮后
-ipcMain.on("connect", (event, roomid) => {
+ipcMain.on("connect", (_, roomid) => {
   if (connected)
     disconnect();
   else
@@ -920,10 +970,7 @@ function onGiftHandler({ data: { coin_type, giftName, num, price } }) {
 
   // 如果查找到，则投掷绑定好的投掷
   if (giftCooldowns[data.gifts[giftEventIndex].name] == null && data.gifts[giftEventIndex].enabled) {
-    let bonkType = data.gifts[giftEventIndex].bonkType;
-    if (data.customBonks[bonkType].barrageCountManual) {  // 如果自定义类型中开启了手动数量，则投掷自定义类型中定义的数量
-      num = data.customBonks[bonkType].barrageCount;
-    } else if (data.multiGiftsEnabled && !data.giftWithCoinCountEnabled) { // 如果开启复数礼物限制 且 没有开启礼物按照瓜子/电池数量投掷
+    if (data.multiGiftsEnabled && !data.giftWithCoinCountEnabled) { // 如果开启复数礼物限制 且 没有开启礼物按照瓜子/电池数量投掷
       num = num > data.multiGiftsMaxCount ? data.multiGiftsMaxCount : num;
       Logger.warn("=== GIFT: Gift with gift number, after clamping: " + num);
     } else if (data.giftWithCoinCountEnabled) { // 如果开启礼物按照瓜子/电池数量投掷
