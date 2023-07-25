@@ -196,6 +196,8 @@ async function setStatus(_, message) {
 // Adding a new image to the list
 document.querySelector("#newImage").addEventListener("click", () => { document.querySelector("#loadImage").click(); });
 document.querySelector("#loadImage").addEventListener("change", loadImage);
+// 替换图片回调
+document.querySelector("#replaceImage").addEventListener("change", replaceImage);
 
 async function loadImage() {
     var throws = await getData("throws");
@@ -235,6 +237,28 @@ async function loadImage() {
 
     // Reset the image upload
     document.querySelector("#loadImage").value = null;
+}
+
+// 替换图片回调
+async function replaceImage() {
+    var throws = await getData("throws");
+    var files = document.querySelector("#replaceImage").files;
+    var imageFile = files[0];
+    var location = throws[currentImageIndex].location;
+    // 删除原图片
+    fs.unlinkSync(userDataPath + "/" + location);
+
+    // 将新图片复制并重命名
+    var filename = location.substr(location.lastIndexOf("/") + 1, location.lastIndexOf(".") - (location.lastIndexOf("/") + 1)) + imageFile.name.substr(imageFile.name.lastIndexOf("."));
+    fs.copyFileSync(imageFile.path, userDataPath + "/throws/" + filename);
+
+    throws[currentImageIndex].location = "throws/" + filename;
+    setData("throws", throws);
+    openImages();
+    copyFilesToDirectory();
+
+    // Reset the image replace
+    document.querySelector("#replaceImage").value = null;
 }
 
 document.querySelector("#imageTable").querySelector(".selectAll input").addEventListener("change", async () => {
@@ -296,6 +320,11 @@ async function openImages() {
                     openImageDetails();
                     showPanel("imageDetails", true);
                 });
+
+                row.querySelector(".imageReplace").addEventListener("click", () => {
+                    currentImageIndex = index;
+                    document.querySelector("#replaceImage").click();
+                })
 
                 row.querySelector(".imageRemove").addEventListener("click", () => {
                     throws.splice(index, 1);
