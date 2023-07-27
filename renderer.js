@@ -327,6 +327,8 @@ async function openImages() {
                 })
 
                 row.querySelector(".imageRemove").addEventListener("click", () => {
+                    // 删除后删除文件
+                    fs.unlinkSync(userDataPath + "/" + throws[index].location);
                     throws.splice(index, 1);
                     setData("throws", throws);
                     openImages();
@@ -1014,8 +1016,13 @@ async function openImageDetails() {
 
 }
 
+// 击中音效
 document.querySelector("#newSound").addEventListener("click", () => { document.querySelector("#loadSound").click(); });
 document.querySelector("#loadSound").addEventListener("change", loadSound);
+// 替换音频回调
+document.querySelector("#replaceSound").addEventListener("change", replaceSound);
+
+var currentSoundIndex = -1;
 
 async function loadSound() {
     var impacts = await getData("impacts");
@@ -1049,6 +1056,29 @@ async function loadSound() {
     document.querySelector("#loadSound").value = null;
 }
 
+// 替换击中音效回调
+async function replaceSound() {
+    var impacts = await getData("impacts");
+    var files = document.querySelector("#replaceSound").files;
+    var soundFile = files[0];
+    var location = impacts[currentSoundIndex].location;
+
+    // 删除原音效
+    fs.unlinkSync(userDataPath + "/" + location);
+
+    // 将新音效复制并重命名
+    var filename = location.substr(location.lastIndexOf("/") + 1, location.lastIndexOf(".") - (location.lastIndexOf("/") + 1)) + soundFile.name.substr(soundFile.name.lastIndexOf("."));
+    fs.copyFileSync(soundFile.path, userDataPath + "/impacts/" + filename);
+
+    impacts[currentSoundIndex].location = "impacts/" + filename;
+    setData("impacts", impacts);
+    openSounds();
+    copyFilesToDirectory();
+
+    // Reset the sound replace
+    document.querySelector("#replaceSound").value = null;
+}
+
 document.querySelector("#soundTable").querySelector(".selectAll input").addEventListener("change", async () => {
     document.querySelector("#soundTable").querySelectorAll(".imageEnabled").forEach((element) => {
         element.checked = document.querySelector("#soundTable").querySelector(".selectAll input").checked;
@@ -1076,11 +1106,17 @@ async function openSounds() {
                 row.querySelector(".imageLabel").innerText = impacts[index].location.substr(impacts[index].location.lastIndexOf('/') + 1);
                 document.querySelector("#soundTable").appendChild(row);
 
-                row.querySelector(".imageRemove").addEventListener("click", () => {
+                row.querySelector(".imageRemove").addEventListener("click", () => {// 删除后删除文件
+                    fs.unlinkSync(userDataPath + "/" + impacts[index].location);
                     impacts.splice(index, 1);
                     setData("impacts", impacts);
                     openSounds();
                 });
+
+                row.querySelector(".soundReplace").addEventListener("click", () => {
+                    currentSoundIndex = index;
+                    document.querySelector("#replaceSound").click();
+                })
 
                 row.querySelector(".imageEnabled").checked = impacts[index].enabled;
                 row.querySelector(".imageEnabled").addEventListener("change", () => {
@@ -1294,7 +1330,7 @@ async function addBonk() {
         newBonkNumber++;
 
     customBonks["自定义投掷 " + newBonkNumber] = {
-        "barrageCountManual": true,
+        "barrageCountManual": false,
         "barrageCount": 1,
         "barrageFrequencyOverride": false,
         "barrageFrequency": await getData("barrageFrequency"),
