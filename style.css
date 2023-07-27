@@ -503,12 +503,47 @@ a {
     grid-column: 2;
 }
 
-.soundRow .imageRowInner>.soundVolume,
+.soundRow .imageRowInner>.soundOptions,
 .guardSoundRow .imageRowInner>.guardSoundVolume,
 .coinSoundRow .imageRowInner>.guardSoundVolume {
     grid-row: 2;
     grid-column: 2;
+    display: flex;
+    /* max-height: 29px; */
+}
+
+.soundOptions .soundVolume {
+    width: 100%;
     max-height: 29px;
+}
+
+.soundReplaceLabel {
+    position: relative;
+    flex-shrink: 0;
+    margin-left: 8px;
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+}
+
+.soundReplaceLabel>button {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    display: none;
+}
+
+.soundReplaceLabel>img {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    transition: transform 0.25s;
+}
+
+.soundReplaceLabel>img:hover {
+    transform: scale(1.1);
 }
 
 .imageRowInner>.delete {
@@ -516,7 +551,7 @@ a {
     grid-column: 4;
 }
 
-.imageRowInner>.replace-holder {
+.imageRowInner>.imageReplaceHolder {
     grid-row: 2;
     grid-column: 3;
 }
@@ -644,20 +679,20 @@ a {
     transform: scale(1.1);
 }
 
-.replace-holder {
+.imageReplaceHolder {
     width: 100%;
     display: flex;
     justify-content: end;
 }
 
-.replace {
+.imageReplaceLabel {
     position: relative;
     width: 30px;
     height: 30px;
     cursor: pointer;
 }
 
-.replace>button {
+.imageReplaceLabel>button {
     position: absolute;
     width: 100%;
     height: 100%;
@@ -665,7 +700,7 @@ a {
     display: none;
 }
 
-.replace>img {
+.imageReplaceLabel>img {
     position: absolute;
     width: 100%;
     height: 100%;
@@ -673,7 +708,7 @@ a {
     transition: transform 0.25s;
 }
 
-.replace>img:hover {
+.imageReplaceLabel>img:hover {
     transform: scale(1.1);
 }
 
@@ -919,6 +954,29 @@ a {
 
 .grid4-5 {
     grid-column: 4 / 6 !important;
+}
+
+#hitExpressionDetail {
+    grid-column: 4 / 6;
+    grid-row: 11 / 13;
+    display: grid;
+    grid-template-columns: 256px 128px;
+    gap: 8px;
+    position: relative;
+}
+
+#hitExpressionDetail .loadingMask {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#hitExpressionDetail .loadingMask .refreshIcon {
+    animation: infinite 1.5s rotateLeft linear;
 }
 
 #wideWindow {
@@ -1452,6 +1510,16 @@ mark {
 
 .hide {
     animation: forwards hideUp 0.3s;
+}
+
+@keyframes rotateLeft {
+    0% {
+        transform: rotate(0);
+    }
+
+    100% {
+        transform: rotate(-360deg);
+    }
 }
 
 @keyframes showUp {

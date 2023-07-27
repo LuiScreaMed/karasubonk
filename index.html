@@ -165,20 +165,28 @@
               <p class="grid1">投掷角度（最大）</p>
               <input type="number" id="throwAngleMax" class="grid2" max="90" value="45" step="1">
 
-              <p class="grid4">击中表情</p>
-              <div class="grid5 expressionSelect">
-                <select id="hitExpressionSelect">
-                  <option style="display: none;"></option>
-                </select>
-                <div id="expressionRefresh">
-                  <img class="refreshBtn" src="ui/refresh30.png" alt="refresh">
+              <div id="hitExpressionDetail">
+                <p class="grid1">击中表情</p>
+                <div class="grid2 expressionSelect">
+                  <select id="hitExpressionSelect">
+                    <option style="display: none;"></option>
+                  </select>
+                  <div id="expressionRefresh">
+                    <img class="refreshBtn" src="ui/refresh30.png" alt="refresh">
+                  </div>
+                </div>
+                <p class="grid1">表情持续时间（秒）</p>
+                <input type="number" id="hitExpressionDuration" class="grid2" min="0" value="0.2">
+                <div class="loadingMask" style="display:none">
+                  <img class="refreshIcon" src="ui/refresh30.png">
                 </div>
               </div>
 
+
+              <!-- EMPTY DIV FOR SPACING -->
               <div class="grid2"></div>
 
-              <p class="grid4">表情持续时间（秒）</p>
-              <input type="number" id="hitExpressionDuration" class="grid5" min="0" value="0.2">
+              <br />
 
               <!-- EMPTY DIV FOR SPACING -->
               <div class="grid2"></div>
@@ -492,8 +500,8 @@
                     </label>
                     <img class="imageImage" src="throws/辣条.png"></img>
                     <p class="imageLabel">IMAGE URL</p>
-                    <div class="replace-holder">
-                      <label class="replace">
+                    <div class="imageReplaceHolder">
+                      <label class="imageReplaceLabel">
                         <button class="imageReplace"></button>
                         <img src="ui/replace.png" class="checkmark">
                       </label>
@@ -633,8 +641,9 @@
                   </label>
                 </div>
               </div>
+              <input id="loadSound" type="file" accept="audio/*" multiple hidden>
+              <input id="replaceSound" type="file" accept="audio/*" hidden>
               <div id="newSound" class="new row">
-                <input id="loadSound" type="file" accept="audio/*" multiple hidden>
                 <div class="imageRowShadow">
                   <div class="imageRowInner">
                     <img class="imageImage" src="ui/add.png"></img>
@@ -655,7 +664,13 @@
                       <img src="ui/speaker.png" class="checkmark" title="Volume"></img>
                     </label>
                     <p class="imageLabel">音效路径</p>
-                    <input class="soundVolume" type="range" min="0" max="1" step="0.1">
+                    <div class="soundOptions">
+                      <input class="soundVolume" type="range" min="0" max="1" step="0.1">
+                      <label class="soundReplaceLabel">
+                        <button class="soundReplace"></button>
+                        <img src="ui/replace.png" class="checkmark">
+                      </label>
+                    </div>
                     <label class="delete">
                       <button class="imageRemove"></button>
                       <img src="ui/x.png" class="checkmark"></img>
