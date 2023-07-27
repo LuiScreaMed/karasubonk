@@ -1106,6 +1106,11 @@ async function openSounds() {
                 row.querySelector(".imageLabel").innerText = impacts[index].location.substr(impacts[index].location.lastIndexOf('/') + 1);
                 document.querySelector("#soundTable").appendChild(row);
 
+                // 受击音效预览
+                row.querySelector(".soundPreview").addEventListener("click", () => {
+                    previewAudio(impacts[index].location, impacts[index].volume);
+                })
+
                 row.querySelector(".imageRemove").addEventListener("click", () => {// 删除后删除文件
                     fs.unlinkSync(userDataPath + "/" + impacts[index].location);
                     impacts.splice(index, 1);
@@ -2521,4 +2526,26 @@ function sleep(duration) {
     return new Promise(function (resolve) {
         setTimeout(resolve, duration);
     });
+}
+
+var audio;
+// audio preview
+// 音频预览
+async function previewAudio(sound, volume) {
+    let globalVolume = await getData("volume");
+    if (audio) {
+        if (!audio.paused) {
+            audio.pause();
+        }
+        audio = undefined;
+    }
+    audio = new Audio();
+    audio.addEventListener('canplaythrough', function () {
+        this.addEventListener('ended', () => {
+            audio = undefined;
+        })
+        this.play();
+    });
+    audio.volume = volume * globalVolume;
+    audio.src = userDataPath + "/" + sound.substr(0, sound.indexOf("/") + 1) + encodeURIComponent(sound.substr(sound.indexOf("/") + 1));
 }
