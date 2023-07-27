@@ -228,6 +228,7 @@ function connectKarasu() {
                     if (response.data.authenticated) {
                         console.log("Authenticated");
                         vTubeIsOpen = true;
+                        subscribeModelLoad();
                     }
                     else {
                         console.log("Invalid Token");
@@ -788,3 +789,53 @@ function setExpression(expressionName, flag) {
 
     socketVTube.send(JSON.stringify(request));
 }
+
+var modelLoaded = false;
+
+// 注册模型加载事件回调
+function subscribeModelLoad() {
+    var request = {
+        "apiName": "VTubeStudioPublicAPI",
+        "apiVersion": "1.0",
+        "requestID": "14",
+        "messageType": "EventSubscriptionRequest",
+        "data": {
+            "eventName": "ModelLoadedEvent",
+            "subscribe": true,
+        }
+    }
+
+    socketVTube.onmessage = function (event) {
+        socketVTube.onmessage = null;
+        const tempData = JSON.parse(event.data);
+        if (tempData.messageType == "APIError") {
+            setTimeout(() => {
+                subscribeModelLoad();
+            }, 3000);
+        }
+    }
+
+    // 接收并判断是否是模型更换事件，如是则判断模型是否更换
+    socketVTube.addEventListener("message", (event) => {
+        let tempData = JSON.parse(event.data);
+        if (tempData.messageType != "ModelLoadedEvent") return;
+        if (tempData.data.modelLoaded) {
+            if (modelLoaded != false || !karasuIsOpen) return;
+            let request = {
+                "type": "modelLoaded"
+            }
+            socketKarasu.send(JSON.stringify(request));
+        } else {
+            modelLoaded = tempData.data.modelLoaded;
+        }
+
+        console.log(tempData.data);
+    })
+
+    socketVTube.send(JSON.stringify(request));
+}
+
+// 模型加载或卸载的回调
+// function onModelLoaded() {
+
+// }

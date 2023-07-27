@@ -975,8 +975,32 @@ a {
     align-items: center;
 }
 
-#hitExpressionDetail .loadingMask .refreshIcon {
+#hitExpressionDetail .refreshIcon {
     animation: infinite 1.5s rotateLeft linear;
+}
+
+#hitExpressionDetail .errorText {
+    display: none;
+}
+
+#hitExpressionDetail .vtsDisconnect {
+    display: flex !important;
+}
+
+#hitExpressionDetail .vtsDisconnect .errorText {
+    display: initial;
+}
+
+#hitExpressionDetail .vtsDisconnect .refreshIcon {
+    display: none !important;
+}
+
+#hitExpressionDetail .loadingMask.idle {
+    display: none;
+}
+
+#hitExpressionDetail .loadingMask.disabled .refreshIcon {
+    display: none;
 }
 
 #wideWindow {

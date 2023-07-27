@@ -62,6 +62,11 @@ ipcRenderer.on("roomidEmptyError", () => {
     setRoomInputStatus(RoomInputStatus.disconnected);
 })
 
+// 获取表情回调
+ipcRenderer.on("gettingExpression", () => {
+    setExpressionDetailStatus(expressionDetailStatus.loading);
+})
+
 var userDataPath = null;
 ipcRenderer.on("userDataPath", (event, message) => {
     userDataPath = message;
@@ -187,6 +192,13 @@ async function setStatus(_, message) {
     }
     else
         document.querySelector("#calibrateButtons").classList.add("hidden");
+
+    // 表情设置判断
+    if (status == 0 || status == 3 || status == 4 || status == 6) {
+        document.querySelector("#hitExpressionDetail .loadingMask").classList.remove("vtsDisconnect");
+    } else {
+        document.querySelector("#hitExpressionDetail .loadingMask").classList.add("vtsDisconnect");
+    }
 }
 
 // ---------
@@ -1850,6 +1862,8 @@ ipcRenderer.on("expressions", async (_, expressions) => {
         select.appendChild(expression);
     }
 
+    // 获取是否勾选了表情功能
+    let hitExpressionEnabled = await getData("hitExpression");
     // 获取已经选择了的表情
     let hitExpressionName = await getData("hitExpressionName");
 
@@ -1862,7 +1876,40 @@ ipcRenderer.on("expressions", async (_, expressions) => {
             }
         }
     }
+
+    setExpressionDetailStatus(hitExpressionEnabled ? expressionDetailStatus.idle : expressionDetailStatus.disabled);
 });
+
+const expressionDetailStatus = {
+    idle: 0,
+    loading: 1,
+    disabled: 2,
+}
+
+// 设置开关表情后表情选项的显示
+function setExpressionDetailStatus(status) {
+    let mask = document.querySelector("#hitExpressionDetail .loadingMask");
+    switch (status) {
+        case expressionDetailStatus.idle: {
+            mask.classList.add("idle");
+            mask.classList.remove("disabled");
+            mask.classList.remove("loading");
+            break;
+        }
+        case expressionDetailStatus.disabled: {
+            mask.classList.add("disabled");
+            mask.classList.remove("idle");
+            mask.classList.remove("loading");
+            break;
+        }
+        case expressionDetailStatus.loading: {
+            mask.classList.add("loading");
+            mask.classList.remove("disabled");
+            mask.classList.remove("idle");
+            break;
+        }
+    }
+}
 
 // ----
 // Data
@@ -2181,6 +2228,7 @@ document.querySelector("#closeEyes").addEventListener("change", function () {
         setData("openEyes", false);
         document.querySelector("#hitExpression").checked = false;
         setData("hitExpression", false);
+        setExpressionDetailStatus(expressionDetailStatus.disabled);
     }
 });
 
@@ -2192,6 +2240,7 @@ document.querySelector("#openEyes").addEventListener("change", function () {
         setData("closeEyes", false);
         document.querySelector("#hitExpression").checked = false;
         setData("hitExpression", false);
+        setExpressionDetailStatus(expressionDetailStatus.disabled);
     }
 });
 
@@ -2204,6 +2253,9 @@ document.querySelector("#hitExpression").addEventListener("change", function () 
         setData("closeEyes", false);
         document.querySelector("#openEyes").checked = false;
         setData("openEyes", false);
+        setExpressionDetailStatus(expressionDetailStatus.idle);
+    } else {
+        setExpressionDetailStatus(expressionDetailStatus.disabled);
     }
 })
 

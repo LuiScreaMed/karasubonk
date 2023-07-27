@@ -364,12 +364,24 @@ function checkVersion() {
 // get expressions
 function getExpressions() {
   if (!gettingExpressions && socket != null) {
+    mainWindow.webContents.send("gettingExpression");
     gettingExpressions = true;
     var request = {
       "type": "getExpressionList"
     }
     socket.send(JSON.stringify(request))
   }
+}
+
+const MessageType = {
+  versionReport: "versionReport",
+  calibrating: "calibrating",
+  status: "status",
+  setAuthVTS: "setAuthVTS",
+  getAuthVTS: "getAuthVTS",
+  expressions: "expressions",
+  log: "log",
+  modelLoaded: "modelLoaded"
 }
 
 createServer();
@@ -398,74 +410,88 @@ function createServer() {
       socket.on("message", function message(request) {
         request = JSON.parse(request);
 
-        if (request.type == "versionReport") {
-          noResponse = false;
-          badVersion = parseFloat(request.version) != data.version;
-        }
-        if (request.type == "calibrating") {
-          switch (request.stage) {
-            case "min":
-              if (request.size > -99) {
-                calibrateStage = 0;
-                calibrate();
-              }
-              else {
-                setData(request.modelID + "Min", [request.positionX, request.positionY], false);
-                calibrateStage = 2;
-                calibrate();
-              }
-              break;
-            case "max":
-              if (request.size < 99) {
-                calibrateStage = 2;
-                calibrate();
-              }
-              else {
-                setData(request.modelID + "Max", [request.positionX, request.positionY], false);
-                calibrateStage = 4;
-                calibrate();
-              }
-              break;
+        switch (request.type) {
+          case MessageType.versionReport: {
+            noResponse = false;
+            badVersion = parseFloat(request.version) != data.version;
+            break;
           }
-        }
-        else if (request.type == "status") {
-          connectedVTube = request.connectedVTube;
+          case MessageType.calibrating: {
+            switch (request.stage) {
+              case "min":
+                if (request.size > -99) {
+                  calibrateStage = 0;
+                  calibrate();
+                }
+                else {
+                  setData(request.modelID + "Min", [request.positionX, request.positionY], false);
+                  calibrateStage = 2;
+                  calibrate();
+                }
+                break;
+              case "max":
+                if (request.size < 99) {
+                  calibrateStage = 2;
+                  calibrate();
+                }
+                else {
+                  setData(request.modelID + "Max", [request.positionX, request.positionY], false);
+                  calibrateStage = 4;
+                  calibrate();
+                }
+                break;
+            }
+            break;
+          }
+          case MessageType.status: {
+            connectedVTube = request.connectedVTube;
 
-          // 第一次连接后获取表情列表
-          // get expressions after the first time connected to VTS
-          if (connectedVTube && !receivedExpressions) {
-            Logger.info("VTS connected, getting expressions");
+            // 第一次连接后获取表情列表
+            // get expressions after the first time connected to VTS
+            if (connectedVTube && !receivedExpressions) {
+              Logger.info("VTS connected, getting expressions");
+              getExpressions();
+            }
+            break;
+          }
+          case MessageType.setAuthVTS: {
+            setData("authVTS", request.token);
+            var request = {
+              "type": "getAuthVTS",
+              "token": request.token
+            }
+            socket.send(JSON.stringify(request));
+            break;
+          }
+          case MessageType.getAuthVTS: {
+            var request = {
+              "type": "getAuthVTS",
+              "token": data.authVTS
+            }
+            socket.send(JSON.stringify(request));
+            break;
+          }
+          // 保存vts模型的表情列表
+          // save expression list from vts model
+          case MessageType.expressions: {
+            gettingExpressions = false;
+            receivedExpressions = true;
+            mainWindow.webContents.send("expressions", request.expressions);
+            break;
+          }
+          // bonker 日志
+          // bonker logger
+          case MessageType.log: {
+            Logger.info("Bonker Log");
+            Logger.info(request.log);
+            Logger.info("Bonker Log end");
+            break;
+          }
+          // 更换模型
+          case MessageType.modelLoaded: {
             getExpressions();
+            break;
           }
-        }
-        else if (request.type == "setAuthVTS") {
-          setData("authVTS", request.token);
-          var request = {
-            "type": "getAuthVTS",
-            "token": request.token
-          }
-          socket.send(JSON.stringify(request));
-        }
-        else if (request.type == "getAuthVTS") {
-          var request = {
-            "type": "getAuthVTS",
-            "token": data.authVTS
-          }
-          socket.send(JSON.stringify(request));
-        }
-        // 保存vts模型的表情列表
-        // save expression list from vts model
-        else if (request.type == "expressions") {
-          gettingExpressions = false;
-          receivedExpressions = true;
-          mainWindow.webContents.send("expressions", request.expressions);
-        }
-        // bonker 日志
-        // bonker logger
-        else if (request.type == "log") {
-          Logger.info("Bonker Log");
-          Logger.info(request.log);
-          Logger.info("Bonker Log end");
         }
       });
 
