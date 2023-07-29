@@ -135,11 +135,31 @@
               <p class="grid1">旋转速度（最低）</p>
               <input type="number" id="spinSpeedMin" class="grid2" min="0" value="5" step="0.1">
 
-              <p class="grid4">模型恢复速度（越高越快）</p>
-              <input type="number" id="returnSpeed" class="grid5" min="0" value="0.05">
+              <p class="grid4">动作水平反转</p>
+              <label class="checkbox grid5">
+                <input type="checkbox" id="modelFlinchReverseX">
+                <div class="checkHover"></div>
+                <img src="ui/checkmark.png" class="checkmark">
+              </label>
 
               <p class="grid1">旋转速度（最高）</p>
               <input type="number" id="spinSpeedMax" class="grid2" min="0" value="10" step="0.1">
+
+              <p class="grid4">动作垂直反转</p>
+              <label class="checkbox grid5">
+                <input type="checkbox" id="modelFlinchReverseY">
+                <div class="checkHover"></div>
+                <img src="ui/checkmark.png" class="checkmark">
+              </label>
+
+              <p class="grid1">投掷角度（最小）</p>
+              <input type="number" id="throwAngleMin" class="grid2" min="-90" value="-45" step="1">
+
+              <p class="grid4">动作恢复速度（越高越快）</p>
+              <input type="number" id="returnSpeed" class="grid5" min="0" value="0.05">
+
+              <p class="grid1">投掷角度（最大）</p>
+              <input type="number" id="throwAngleMax" class="grid2" max="90" value="45" step="1">
 
               <p class="grid4">被击中时闭眼</p>
               <label class="checkbox grid5">
@@ -148,18 +168,12 @@
                 <img src="ui/checkmark.png" class="checkmark">
               </label>
 
-              <p class="grid1">投掷角度（最小）</p>
-              <input type="number" id="throwAngleMin" class="grid2" min="-90" value="-45" step="1">
-
               <p class="grid4">被击中时睁眼</p>
               <label class="checkbox grid5">
                 <input type="checkbox" id="openEyes">
                 <div class="checkHover"></div>
                 <img src="ui/checkmark.png" class="checkmark">
               </label>
-
-              <p class="grid1">投掷角度（最大）</p>
-              <input type="number" id="throwAngleMax" class="grid2" max="90" value="45" step="1">
 
               <p class="grid4">被击中时切换表情</p>
               <label class="checkbox grid5">

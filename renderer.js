@@ -2151,6 +2151,8 @@ window.onload = async function () {
     loadData("giftWithCoinCountUnit");
     loadData("saveLogs");
     loadData("modelFlinchRatio");
+    loadData("modelFlinchReverseX");
+    loadData("modelFlinchReverseY");
 
     openImages();
     openGuardImages();
@@ -2220,6 +2222,8 @@ document.querySelector("#physicsHorizontal").addEventListener("change", () => { 
 document.querySelector("#physicsVertical").addEventListener("change", () => { setData("physicsVertical", parseFloat(document.querySelector("#physicsVertical").value)) });
 document.querySelector("#hitExpressionDuration").addEventListener("change", () => { clampValue(document.querySelector("#hitExpressionDuration"), 0, null); setData("hitExpressionDuration", parseFloat(document.querySelector('#hitExpressionDuration').value)); });
 document.querySelector("#saveLogs").addEventListener("change", () => setData("saveLogs", document.querySelector("#saveLogs").checked));
+document.querySelector("#modelFlinchReverseX").addEventListener("change", () => setData("modelFlinchReverseX", document.querySelector("#modelFlinchReverseX").checked))
+document.querySelector("#modelFlinchReverseY").addEventListener("change", () => setData("modelFlinchReverseY", document.querySelector("#modelFlinchReverseY").checked))
 
 document.querySelector("#closeEyes").addEventListener("change", function () {
     const val = this.checked;

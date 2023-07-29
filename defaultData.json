@@ -817,5 +817,7 @@
     "guardMaxCount": 200,
     "guardUnit": 20,
     "guardCooldown": 0,
-    "modelFlinchRatio": 1
+    "modelFlinchRatio": 1,
+    "modelFlinchReverseX": false,
+    "modelFlinchReverseY": false
 }

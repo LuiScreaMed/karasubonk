@@ -542,6 +542,8 @@ function bonk(image, weight, scale, sound, volume, data, faceWidthMin, faceWidth
                 const hitExpressionName = data.hitExpressionName;
                 const hitExpressionDuration = data.hitExpressionDuration;
                 const flinchRatio = data.modelFlinchRatio;
+                const reverseX = data.modelFlinchReverseX ? -1 : 1;
+                const reverseY = data.modelFlinchReverseY ? -1 : 1;
 
                 var audio, canPlayAudio;
                 if (sound != null) {
@@ -618,7 +620,7 @@ function bonk(image, weight, scale, sound, volume, data, faceWidthMin, faceWidth
                     root.appendChild(pivot);
                     document.querySelector("body").appendChild(root);
 
-                    setTimeout(function () { flinch(multH, angle, weight, data.parametersHorizontal, data.parametersVertical, data.parametersEyes, data.returnSpeed, eyeState, hitExpressionName, hitExpressionDuration, flinchRatio); }, data.throwDuration * 500, data.throwAngleMin, data.throwAngleMax);
+                    setTimeout(function () { flinch(multH, angle, weight, data.parametersHorizontal, data.parametersVertical, data.parametersEyes, data.returnSpeed, eyeState, hitExpressionName, hitExpressionDuration, flinchRatio, reverseX, reverseY); }, data.throwDuration * 500, data.throwAngleMin, data.throwAngleMax);
 
                     if (sound != null)
                         setTimeout(function () { audio.play(); }, (data.throwDuration * 500) + data.delay);
@@ -702,12 +704,12 @@ function simulatePhysics() {
 var expressionTimer;
 
 var parametersH = ["FaceAngleX", "FaceAngleZ", "FacePositionX"], parametersV = ["FaceAngleY"], parametersE = ["EyeOpenLeft", "EyeOpenRight"];
-function flinch(multH, angle, mag, paramH, paramV, paramE, returnSpeed, eyeState, hitExpressionName, expressionDuration, flinchRatio) {
+function flinch(multH, angle, mag, paramH, paramV, paramE, returnSpeed, eyeState, hitExpressionName, expressionDuration, flinchRatio, reverseX, reverseY) {
     var parameterValues = [];
     for (var i = 0; i < paramH.length; i++)
-        parameterValues.push({ "id": paramH[i][0], "value": /* paramH[i][1] + */ (multH < 0 ? paramH[i][2] : paramH[i][3]) * mag * flinchRatio });
+        parameterValues.push({ "id": paramH[i][0], "value": /* paramH[i][1] + */ (multH < 0 ? paramH[i][2] : paramH[i][3]) * mag * flinchRatio * reverseX });
     for (var i = 0; i < paramV.length; i++)
-        parameterValues.push({ "id": paramV[i][0], "value": /* paramV[i][1] + */ (angle > 0 ? paramV[i][2] : paramV[i][3]) * Math.abs(angle) / 45 * mag * flinchRatio });
+        parameterValues.push({ "id": paramV[i][0], "value": /* paramV[i][1] + */ (angle > 0 ? paramV[i][2] : paramV[i][3]) * Math.abs(angle) / 45 * mag * flinchRatio * reverseY });
 
     if (eyeState == 3) {
         clearTimeout(expressionTimer);
@@ -736,17 +738,17 @@ function flinch(multH, angle, mag, paramH, paramV, paramE, returnSpeed, eyeState
 
         parameterValues = [];
         for (var i = 0; i < paramH.length; i++)
-            parameterValues.push({ "id": paramH[i][0], "value": /* paramH[i][1] + */ (multH < 0 ? paramH[i][2] : paramH[i][3]) * mag * weight * flinchRatio });
+            parameterValues.push({ "id": paramH[i][0], "value": /* paramH[i][1] + */ (multH < 0 ? paramH[i][2] : paramH[i][3]) * mag * weight * flinchRatio * reverseX });
         for (var i = 0; i < paramV.length; i++)
-            parameterValues.push({ "id": paramV[i][0], "value": /* paramV[i][1] + */ (multH * angle > 0 ? paramV[i][2] : paramV[i][3]) * Math.abs(angle) / 45 * mag * weight * flinchRatio });
+            parameterValues.push({ "id": paramV[i][0], "value": /* paramV[i][1] + */ (multH * angle > 0 ? paramV[i][2] : paramV[i][3]) * Math.abs(angle) / 45 * mag * weight * flinchRatio * reverseY });
 
         if (eyeState == 1) {
             for (var i = 0; i < paramE.length; i++)
-                parameterValues.push({ "id": paramE[i][0], "value": -paramE[i][1] * weight * flinchRatio });
+                parameterValues.push({ "id": paramE[i][0], "value": -paramE[i][1] * weight});
         }
         else if (eyeState == 2) {
             for (var i = 0; i < paramE.length; i++)
-                parameterValues.push({ "id": paramE[i][0], "value": paramE[i][1] * weight * flinchRatio });
+                parameterValues.push({ "id": paramE[i][0], "value": paramE[i][1] * weight});
         }
 
         request = {
