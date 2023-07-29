@@ -280,7 +280,7 @@ function connectKarasu() {
             }
             socketVTube.onmessage = async function (event) {
                 const tempData = JSON.parse(event.data).data;
-                const paramInfo = tempData.defaultParameters;
+                const paramInfo = [...tempData.defaultParameters, ...tempData.customParameters];
                 const modelID = tempData.modelID;
 
                 const faceWidthMin = data.data[modelID + "Min"] == null ? 0 : data.data[modelID + "Min"][0];
@@ -288,45 +288,70 @@ function connectKarasu() {
                 const faceWidthMax = data.data[modelID + "Max"] == null ? 0 : data.data[modelID + "Max"][0];
                 const faceHeightMax = data.data[modelID + "Max"] == null ? 0 : data.data[modelID + "Max"][1];
 
+                let tempParametersH = [data.data.paramsFaceAngleX, data.data.paramsFaceAngleZ, data.data.paramsFacePositionX];
+                let tempParametersV = [data.data.paramsFaceAngleY];
+                let tempParametersE = [data.data.paramsEyeOpenLeft, data.data.paramsEyeOpenRight];
+                if (data.data.customizeInputParams) {
+                    for (var i = 0; i < tempParametersH.length; i++) {
+                        if (!tempParametersH[i]) {
+                            tempParametersH[i] = parametersH[i];
+                        }
+                    }
+                    for (var i = 0; i < tempParametersV.length; i++) {
+                        if (!tempParametersV[i]) {
+                            tempParametersV[i] = parametersV[i];
+                        }
+                    }
+                    for (var i = 0; i < tempParametersE.length; i++) {
+                        if (!tempParametersE[i]) {
+                            tempParametersE[i] = parametersE[i];
+                        }
+                    }
+                } else {
+                    tempParametersH = parametersH;
+                    tempParametersV = parametersV;
+                    tempParametersE = parametersE;
+                }
+
                 data.data.parametersHorizontal = [];
-                for (var i = 0; i < parametersH.length; i++) {
+                for (var i = 0; i < tempParametersH.length; i++) {
                     var value = 0, min = -30, max = 30;
                     for (var j = 0; j < paramInfo.length; j++) {
-                        if (paramInfo[j].name == parametersH[i]) {
+                        if (paramInfo[j].name == tempParametersH[i]) {
                             value = paramInfo[j].value;
                             min = paramInfo[j].min;
                             max = paramInfo[j].max;
                             break;
                         }
                     }
-                    data.data.parametersHorizontal[i] = [parametersH[i], value, min, max];
+                    data.data.parametersHorizontal[i] = [tempParametersH[i], value, min, max];
                 }
 
                 data.data.parametersVertical = [];
-                for (var i = 0; i < parametersV.length; i++) {
+                for (var i = 0; i < tempParametersV.length; i++) {
                     var value = 0, min = -30, max = 30;
                     for (var j = 0; j < paramInfo.length; j++) {
-                        if (paramInfo[j].name == parametersV[i]) {
+                        if (paramInfo[j].name == tempParametersV[i]) {
                             value = paramInfo[j].value;
                             min = paramInfo[j].min;
                             max = paramInfo[j].max;
                             break;
                         }
                     }
-                    data.data.parametersVertical[i] = [parametersV[i], value, min, max];
+                    data.data.parametersVertical[i] = [tempParametersV[i], value, min, max];
                 }
 
                 data.data.parametersEyes = [];
-                for (var i = 0; i < parametersE.length; i++) {
+                for (var i = 0; i < tempParametersE.length; i++) {
                     var value = 0, min = 0, max = 1;
                     for (var j = 0; j < paramInfo.length; j++) {
-                        if (paramInfo[j].name == parametersE[i]) {
+                        if (paramInfo[j].name == tempParametersE[i]) {
                             min = paramInfo[j].min;
                             max = paramInfo[j].max;
                             break;
                         }
                     }
-                    data.data.parametersEyes[i] = [parametersE[i], Math.abs(max - min)];
+                    data.data.parametersEyes[i] = [tempParametersE[i], Math.abs(max - min)];
                 }
 
                 console.log("Received " + data.type);
@@ -744,11 +769,11 @@ function flinch(multH, angle, mag, paramH, paramV, paramE, returnSpeed, eyeState
 
         if (eyeState == 1) {
             for (var i = 0; i < paramE.length; i++)
-                parameterValues.push({ "id": paramE[i][0], "value": -paramE[i][1] * weight});
+                parameterValues.push({ "id": paramE[i][0], "value": -paramE[i][1] * weight });
         }
         else if (eyeState == 2) {
             for (var i = 0; i < paramE.length; i++)
-                parameterValues.push({ "id": paramE[i][0], "value": paramE[i][1] * weight});
+                parameterValues.push({ "id": paramE[i][0], "value": paramE[i][1] * weight });
         }
 
         request = {

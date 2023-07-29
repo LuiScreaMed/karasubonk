@@ -2153,6 +2153,13 @@ window.onload = async function () {
     loadData("modelFlinchRatio");
     loadData("modelFlinchReverseX");
     loadData("modelFlinchReverseY");
+    loadData("customizeInputParams");
+    loadData("paramsFaceAngleX");
+    loadData("paramsFaceAngleY");
+    loadData("paramsFaceAngleZ");
+    loadData("paramsFacePositionX");
+    loadData("paramsEyeOpenLeft");
+    loadData("paramsEyeOpenRight");
 
     openImages();
     openGuardImages();
@@ -2225,6 +2232,16 @@ document.querySelector("#saveLogs").addEventListener("change", () => setData("sa
 document.querySelector("#modelFlinchReverseX").addEventListener("change", () => setData("modelFlinchReverseX", document.querySelector("#modelFlinchReverseX").checked))
 document.querySelector("#modelFlinchReverseY").addEventListener("change", () => setData("modelFlinchReverseY", document.querySelector("#modelFlinchReverseY").checked))
 
+document.querySelector("#customizeInputParams").addEventListener("change", () => {
+    const checked = document.querySelector("#customizeInputParams").checked;
+    setData("customizeInputParams", checked);
+    if (checked) {
+        document.querySelector("#customizeInputParamsDetail .disableMask").classList.add("hidden");
+    } else {
+        document.querySelector("#customizeInputParamsDetail .disableMask").classList.remove("hidden");
+    }
+})
+
 document.querySelector("#closeEyes").addEventListener("change", function () {
     const val = this.checked;
     setData("closeEyes", val);
@@ -2272,6 +2289,14 @@ document.querySelector("#portThrower").addEventListener("change", () => setData(
 document.querySelector("#portVTubeStudio").addEventListener("change", () => setData("portVTubeStudio", parseInt(document.querySelector("#portVTubeStudio").value)));
 document.querySelector("#minimizeToTray").addEventListener("change", () => setData("minimizeToTray", document.querySelector("#minimizeToTray").checked));
 document.querySelector("#modelFlinchRatio").addEventListener("change", () => { clampValue(document.querySelector("#modelFlinchRatio"), 0, 1); setData("modelFlinchRatio", parseFloat(document.querySelector("#modelFlinchRatio").value)) });
+
+// 自定义参数
+document.querySelector("#paramsFaceAngleX").addEventListener("change", () => setData("paramsFaceAngleX", document.querySelector("#paramsFaceAngleX").value));
+document.querySelector("#paramsFaceAngleY").addEventListener("change", () => setData("paramsFaceAngleY", document.querySelector("#paramsFaceAngleY").value));
+document.querySelector("#paramsFaceAngleZ").addEventListener("change", () => setData("paramsFaceAngleZ", document.querySelector("#paramsFaceAngleZ").value));
+document.querySelector("#paramsFacePositionX").addEventListener("change", () => setData("paramsFacePositionX", document.querySelector("#paramsFacePositionX").value));
+document.querySelector("#paramsEyeOpenLeft").addEventListener("change", () => setData("paramsEyeOpenLeft", document.querySelector("#paramsEyeOpenLeft").value));
+document.querySelector("#paramsEyeOpenRight").addEventListener("change", () => setData("paramsEyeOpenRight", document.querySelector("#paramsEyeOpenRight").value));
 
 function clampValue(node, min, max) {
     var val = node.value;

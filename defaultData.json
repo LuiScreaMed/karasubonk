@@ -819,5 +819,12 @@
     "guardCooldown": 0,
     "modelFlinchRatio": 1,
     "modelFlinchReverseX": false,
-    "modelFlinchReverseY": false
+    "modelFlinchReverseY": false,
+    "customizeInputParams": false,
+    "paramsFaceAngleX": "",
+    "paramsFaceAngleY": "",
+    "paramsFaceAngleZ": "",
+    "paramsFacePositionX": "",
+    "paramsEyeOpenLeft": "",
+    "paramsEyeOpenRight": ""
 }

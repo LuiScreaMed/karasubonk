@@ -1003,6 +1003,25 @@ a {
     display: none;
 }
 
+#customizeInputParamsDetail {
+    grid-column: 1 / 3;
+    grid-row: 24 / 30;
+    display: grid;
+    grid-template-columns: 256px 128px;
+    gap: 8px;
+    position: relative;
+}
+
+#customizeInputParamsDetail .disableMask {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 #wideWindow {
     position: absolute;
     width: calc(100% - 64px);
@@ -1075,6 +1094,7 @@ mark {
     line-height: 30px;
     gap: 8px;
     grid-template-columns: 256px 128px 32px 256px 128px;
+    justify-content: center;
 }
 
 #settings p {

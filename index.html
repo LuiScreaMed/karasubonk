@@ -264,9 +264,16 @@
               <p class="grid1">VTS API端口</p>
               <input type="number" id="portVTubeStudio" class="grid2" value="8001">
 
-              <p class="grid4">重力跟随模型旋转</p>
+              <p class="grid4">重力方向跟随模型旋转</p>
               <label class="checkbox grid5">
                 <input type="checkbox" id="physicsRotate">
+                <div class="checkHover"></div>
+                <img src="ui/checkmark.png" class="checkmark">
+              </label>
+
+              <p class="grid1">自定义输入参数</p>
+              <label class="checkbox grid2">
+                <input type="checkbox" id="customizeInputParams">
                 <div class="checkHover"></div>
                 <img src="ui/checkmark.png" class="checkmark">
               </label>
@@ -274,8 +281,29 @@
               <p class="grid4">水平弹性系数</p>
               <input type="number" id="physicsHorizontal" class="grid5" value="1">
 
+              <div id="customizeInputParamsDetail">
+                <p class="grid1">脸部角度X</p>
+                <input type="text" id="paramsFaceAngleX" class="grid2" placeholder="FaceAngleX">
+                <p class="grid1">脸部角度Y</p>
+                <input type="text" id="paramsFaceAngleY" class="grid2" placeholder="FaceAngleY">
+                <p class="grid1">脸部角度Z</p>
+                <input type="text" id="paramsFaceAngleZ" class="grid2" placeholder="FaceAngleZ">
+                <p class="grid1">脸部位置X</p>
+                <input type="text" id="paramsFacePositionX" class="grid2" placeholder="FacePositionX">
+                <p class="grid1">左眼开闭</p>
+                <input type="text" id="paramsEyeOpenLeft" class="grid2" placeholder="EyeOpenLeft">
+                <p class="grid1">右眼开闭</p>
+                <input type="text" id="paramsEyeOpenRight" class="grid2" placeholder="EyeOpenRight">
+                <div class="disableMask"></div>
+              </div>
+
               <p class="grid4">垂直弹性系数</p>
               <input type="number" id="physicsVertical" class="grid5" value="1">
+
+              <!-- EMPTY DIV FOR SPACING -->
+              <div class="grid1"></div>
+
+              <br />
             </div>
             <div class="credit">
               <div class="divider"></div>
