@@ -958,7 +958,7 @@ a {
 
 #hitExpressionDetail {
     grid-column: 4 / 6;
-    grid-row: 11 / 13;
+    grid-row: 12 / 14;
     display: grid;
     grid-template-columns: 256px 128px;
     gap: 8px;

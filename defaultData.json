@@ -816,5 +816,6 @@
     "guardNumType": "num",
     "guardMaxCount": 200,
     "guardUnit": 20,
-    "guardCooldown": 0
+    "guardCooldown": 0,
+    "modelFlinchRatio": 1
 }

@@ -333,7 +333,7 @@ function connectKarasu() {
 
                 switch (data.type) {
                     case "single":
-                        bonk(data.image, data.weight, data.scale, data.sound, data.volume, data.data, faceWidthMin, faceWidthMax, faceHeightMin, faceHeightMax, null, false);
+                        bonk(data.image, data.weight, data.scale, data.sound, data.volume, data.data, faceWidthMin, faceWidthMax, faceHeightMin, faceHeightMax, null, false, data.data.modelFlinchRatio);
                         break;
                     case "barrage":
                         var i = 0;
@@ -344,11 +344,11 @@ function connectKarasu() {
                         const volumes = data.volume;
                         const max = Math.min(images.length, sounds.length, weights.length);
 
-                        bonk(images[i], weights[i], scales[i], sounds[i], volumes[i], data.data, faceWidthMin, faceWidthMax, faceHeightMin, faceHeightMax, null, false);
+                        bonk(images[i], weights[i], scales[i], sounds[i], volumes[i], data.data, faceWidthMin, faceWidthMax, faceHeightMin, faceHeightMax, null, false, data.data.modelFlinchRatio);
                         i++;
                         if (i < max) {
                             var bonker = setInterval(function () {
-                                bonk(images[i], weights[i], scales[i], sounds[i], volumes[i], data.data, faceWidthMin, faceWidthMax, faceHeightMin, faceHeightMax, null, false);
+                                bonk(images[i], weights[i], scales[i], sounds[i], volumes[i], data.data, faceWidthMin, faceWidthMax, faceHeightMin, faceHeightMax, null, false, data.data.modelFlinchRatio);
                                 if (++i >= max)
                                     clearInterval(bonker);
                             }, data.data.barrageFrequency * 1000);
@@ -400,11 +400,11 @@ function connectKarasu() {
                             windup.play();
 
                         setTimeout(() => {
-                            bonk(cImages[i], cWeights[i], cScales[i], cSounds[i], cVolumes[i], data.data, faceWidthMin, faceWidthMax, faceHeightMin, faceHeightMax, cImpactDecals[i], hideOnHit);
+                            bonk(cImages[i], cWeights[i], cScales[i], cSounds[i], cVolumes[i], data.data, faceWidthMin, faceWidthMax, faceHeightMin, faceHeightMax, cImpactDecals[i], hideOnHit, data.data.modelFlinchRatio);
                             i++;
                             if (i < cMax) {
                                 var bonker = setInterval(function () {
-                                    bonk(cImages[i], cWeights[i], cScales[i], cSounds[i], cVolumes[i], data.data, faceWidthMin, faceWidthMax, faceHeightMin, faceHeightMax, cImpactDecals[i], hideOnHit);
+                                    bonk(cImages[i], cWeights[i], cScales[i], cSounds[i], cVolumes[i], data.data, faceWidthMin, faceWidthMax, faceHeightMin, faceHeightMax, cImpactDecals[i], hideOnHit, data.data.modelFlinchRatio);
                                     if (++i >= cMax)
                                         clearInterval(bonker);
                                 }, data.data.barrageFrequency * 1000);
@@ -519,7 +519,7 @@ setInterval(() => {
     }
 }, 1000);
 
-function bonk(image, weight, scale, sound, volume, data, faceWidthMin, faceWidthMax, faceHeightMin, faceHeightMax, impactDecal, hideOnHit) {
+function bonk(image, weight, scale, sound, volume, data, faceWidthMin, faceWidthMax, faceHeightMin, faceHeightMax, impactDecal, hideOnHit, flinchRatio) {
     if (vTubeIsOpen) {
         var request = {
             "apiName": "VTubeStudioPublicAPI",
@@ -617,7 +617,7 @@ function bonk(image, weight, scale, sound, volume, data, faceWidthMin, faceWidth
                     root.appendChild(pivot);
                     document.querySelector("body").appendChild(root);
 
-                    setTimeout(function () { flinch(multH, angle, weight, data.parametersHorizontal, data.parametersVertical, data.parametersEyes, data.returnSpeed, eyeState, hitExpressionName, hitExpressionDuration); }, data.throwDuration * 500, data.throwAngleMin, data.throwAngleMax);
+                    setTimeout(function () { flinch(multH, angle, weight, data.parametersHorizontal, data.parametersVertical, data.parametersEyes, data.returnSpeed, eyeState, hitExpressionName, hitExpressionDuration, flinchRatio); }, data.throwDuration * 500, data.throwAngleMin, data.throwAngleMax);
 
                     if (sound != null)
                         setTimeout(function () { audio.play(); }, (data.throwDuration * 500) + data.delay);
@@ -701,12 +701,12 @@ function simulatePhysics() {
 var expressionTimer;
 
 var parametersH = ["FaceAngleX", "FaceAngleZ", "FacePositionX"], parametersV = ["FaceAngleY"], parametersE = ["EyeOpenLeft", "EyeOpenRight"];
-function flinch(multH, angle, mag, paramH, paramV, paramE, returnSpeed, eyeState, hitExpressionName, expressionDuration) {
+function flinch(multH, angle, mag, paramH, paramV, paramE, returnSpeed, eyeState, hitExpressionName, expressionDuration, flinchRatio) {
     var parameterValues = [];
     for (var i = 0; i < paramH.length; i++)
-        parameterValues.push({ "id": paramH[i][0], "value": /* paramH[i][1] + */ (multH < 0 ? paramH[i][2] : paramH[i][3]) * mag });
+        parameterValues.push({ "id": paramH[i][0], "value": /* paramH[i][1] + */ (multH < 0 ? paramH[i][2] : paramH[i][3]) * mag * flinchRatio });
     for (var i = 0; i < paramV.length; i++)
-        parameterValues.push({ "id": paramV[i][0], "value": /* paramV[i][1] + */ (angle > 0 ? paramV[i][2] : paramV[i][3]) * Math.abs(angle) / 45 * mag });
+        parameterValues.push({ "id": paramV[i][0], "value": /* paramV[i][1] + */ (angle > 0 ? paramV[i][2] : paramV[i][3]) * Math.abs(angle) / 45 * mag * flinchRatio });
 
     if (eyeState == 3) {
         clearTimeout(expressionTimer);
@@ -735,17 +735,17 @@ function flinch(multH, angle, mag, paramH, paramV, paramE, returnSpeed, eyeState
 
         parameterValues = [];
         for (var i = 0; i < paramH.length; i++)
-            parameterValues.push({ "id": paramH[i][0], "value": /* paramH[i][1] + */ (multH < 0 ? paramH[i][2] : paramH[i][3]) * mag * weight });
+            parameterValues.push({ "id": paramH[i][0], "value": /* paramH[i][1] + */ (multH < 0 ? paramH[i][2] : paramH[i][3]) * mag * weight * flinchRatio });
         for (var i = 0; i < paramV.length; i++)
-            parameterValues.push({ "id": paramV[i][0], "value": /* paramV[i][1] + */ (multH * angle > 0 ? paramV[i][2] : paramV[i][3]) * Math.abs(angle) / 45 * mag * weight });
+            parameterValues.push({ "id": paramV[i][0], "value": /* paramV[i][1] + */ (multH * angle > 0 ? paramV[i][2] : paramV[i][3]) * Math.abs(angle) / 45 * mag * weight * flinchRatio });
 
         if (eyeState == 1) {
             for (var i = 0; i < paramE.length; i++)
-                parameterValues.push({ "id": paramE[i][0], "value": -paramE[i][1] * weight });
+                parameterValues.push({ "id": paramE[i][0], "value": -paramE[i][1] * weight * flinchRatio });
         }
         else if (eyeState == 2) {
             for (var i = 0; i < paramE.length; i++)
-                parameterValues.push({ "id": paramE[i][0], "value": paramE[i][1] * weight });
+                parameterValues.push({ "id": paramE[i][0], "value": paramE[i][1] * weight * flinchRatio });
         }
 
         request = {

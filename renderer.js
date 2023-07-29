@@ -1983,7 +1983,7 @@ async function loadData(field) {
     }
     else {
         const node = document.querySelector("#" + field);
-        const val = node.type == "checkbox" ? node.checked : (node.type == "number" ? parseFloat(node.value) : node.value);
+        const val = node.type == "checkbox" ? node.checked : (node.type == "number" || node.type == "range" ? parseFloat(node.value) : node.value);
         setData(field, val);
     }
 }
@@ -2150,6 +2150,7 @@ window.onload = async function () {
     loadData("giftWithCoinCountMaxCount");
     loadData("giftWithCoinCountUnit");
     loadData("saveLogs");
+    loadData("modelFlinchRatio");
 
     openImages();
     openGuardImages();
@@ -2266,6 +2267,7 @@ document.querySelector("#volume").addEventListener("change", () => { clampValue(
 document.querySelector("#portThrower").addEventListener("change", () => setData("portThrower", parseInt(document.querySelector("#portThrower").value)));
 document.querySelector("#portVTubeStudio").addEventListener("change", () => setData("portVTubeStudio", parseInt(document.querySelector("#portVTubeStudio").value)));
 document.querySelector("#minimizeToTray").addEventListener("change", () => setData("minimizeToTray", document.querySelector("#minimizeToTray").checked));
+document.querySelector("#modelFlinchRatio").addEventListener("change", () => { clampValue(document.querySelector("#modelFlinchRatio"), 0, 1); setData("modelFlinchRatio", parseFloat(document.querySelector("#modelFlinchRatio").value)) });
 
 function clampValue(node, min, max) {
     var val = node.value;

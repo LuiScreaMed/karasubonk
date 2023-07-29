@@ -129,11 +129,17 @@
               <p class="grid1">投掷时长（秒）</p>
               <input type="number" id="throwDuration" class="grid2" min="0.1" value="1.0">
 
-              <p class="grid4">模型恢复速度（秒）</p>
-              <input type="number" id="returnSpeed" class="grid5" min="0" value="0.05">
+              <p class="grid4">动作幅度系数（0~1）</p>
+              <input type="range" id="modelFlinchRatio" class="grid5" min="0" max="1" value="1" step="0.1">
 
               <p class="grid1">旋转速度（最低）</p>
               <input type="number" id="spinSpeedMin" class="grid2" min="0" value="5" step="0.1">
+
+              <p class="grid4">模型恢复速度（越高越快）</p>
+              <input type="number" id="returnSpeed" class="grid5" min="0" value="0.05">
+
+              <p class="grid1">旋转速度（最高）</p>
+              <input type="number" id="spinSpeedMax" class="grid2" min="0" value="10" step="0.1">
 
               <p class="grid4">被击中时闭眼</p>
               <label class="checkbox grid5">
@@ -142,8 +148,8 @@
                 <img src="ui/checkmark.png" class="checkmark">
               </label>
 
-              <p class="grid1">旋转速度（最高）</p>
-              <input type="number" id="spinSpeedMax" class="grid2" min="0" value="10" step="0.1">
+              <p class="grid1">投掷角度（最小）</p>
+              <input type="number" id="throwAngleMin" class="grid2" min="-90" value="-45" step="1">
 
               <p class="grid4">被击中时睁眼</p>
               <label class="checkbox grid5">
@@ -152,8 +158,8 @@
                 <img src="ui/checkmark.png" class="checkmark">
               </label>
 
-              <p class="grid1">投掷角度（最小）</p>
-              <input type="number" id="throwAngleMin" class="grid2" min="-90" value="-45" step="1">
+              <p class="grid1">投掷角度（最大）</p>
+              <input type="number" id="throwAngleMax" class="grid2" max="90" value="45" step="1">
 
               <p class="grid4">被击中时切换表情</p>
               <label class="checkbox grid5">
@@ -161,9 +167,6 @@
                 <div class="checkHover"></div>
                 <img src="ui/checkmark.png" class="checkmark">
               </label>
-
-              <p class="grid1">投掷角度（最大）</p>
-              <input type="number" id="throwAngleMax" class="grid2" max="90" value="45" step="1">
 
               <div id="hitExpressionDetail">
                 <p class="grid1">击中表情</p>
@@ -185,12 +188,7 @@
 
 
               <!-- EMPTY DIV FOR SPACING -->
-              <div class="grid2"></div>
-
-              <br />
-
-              <!-- EMPTY DIV FOR SPACING -->
-              <div class="grid2"></div>
+              <div class="grid4"></div>
 
               <br />
 
