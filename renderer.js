@@ -2120,6 +2120,13 @@ window.onload = async function () {
         }
     })
 
+    getData("customizeInputParams").then((res) => {
+        document.querySelector("#customizeInputParams").checked = res;
+        if (res) {
+            document.querySelector("#customizeInputParamsDetail .disableMask").classList.add("hidden")
+        }
+    })
+
     loadData("barrageCount");
     loadData("barrageFrequency");
     loadData("throwDuration");
@@ -2153,7 +2160,6 @@ window.onload = async function () {
     loadData("modelFlinchRatio");
     loadData("modelFlinchReverseX");
     loadData("modelFlinchReverseY");
-    loadData("customizeInputParams");
     loadData("paramsFaceAngleX");
     loadData("paramsFaceAngleY");
     loadData("paramsFaceAngleZ");
@@ -2297,6 +2303,24 @@ document.querySelector("#paramsFaceAngleZ").addEventListener("change", () => set
 document.querySelector("#paramsFacePositionX").addEventListener("change", () => setData("paramsFacePositionX", document.querySelector("#paramsFacePositionX").value));
 document.querySelector("#paramsEyeOpenLeft").addEventListener("change", () => setData("paramsEyeOpenLeft", document.querySelector("#paramsEyeOpenLeft").value));
 document.querySelector("#paramsEyeOpenRight").addEventListener("change", () => setData("paramsEyeOpenRight", document.querySelector("#paramsEyeOpenRight").value));
+
+// 重置设置
+let clickedReset = false;
+let resetBtnTimer = null;
+document.querySelector("#resetSettings").addEventListener("click", () => {
+    if (clickedReset) {
+        resetSettings();
+    } else {
+        clickedReset = true;
+        document.querySelector("#resetSettings .confirm").classList.add("showConfirm");
+        resetBtnTimer = setTimeout(() => {
+            clearTimeout(resetBtnTimer);
+            resetBtnTimer = null;
+            clickedReset = false;
+            document.querySelector("#resetSettings .confirm").classList.remove("showConfirm");
+        }, 3000);
+    }
+})
 
 function clampValue(node, min, max) {
     var val = node.value;
@@ -2582,18 +2606,18 @@ function testCustomBonk(customName) {
 // Toast 气泡
 async function showToast(text = "", type = "default", duration = 1500) {
     let toast = document.createElement("div");
-    toast.id = "toast";
+    toast.classList.add("toast");
     toast.innerText = text;
     toast.classList.add("show");
     toast.classList.add(type);
     document.body.prepend(toast);
     await sleep(400);
     setTimeout(async () => {
-        document.querySelector("#toast").classList.remove("show");
-        document.querySelector("#toast").classList.add("hide");
+        toast.classList.remove("show");
+        toast.classList.add("hide");
 
         await sleep(400);
-        document.querySelector("#toast").remove();
+        toast.remove();
     }, duration)
 }
 
@@ -2631,4 +2655,67 @@ async function previewAudio(sound, volume) {
     });
     audio.volume = volume * globalVolume;
     audio.src = userDataPath + "/" + sound.substr(0, sound.indexOf("/") + 1) + encodeURIComponent(sound.substr(sound.indexOf("/") + 1));
+}
+
+// 重置设置
+async function resetSettings() {
+    ipcRenderer.send("logger", "ResetSettings, deleting user data...");
+    let mask = document.createElement("div");
+    mask.classList.add("resetMask");
+    mask.innerText = "正在重置设置...";
+    mask.classList.add("show");
+    document.body.prepend(mask);
+    try {
+        if (deleteDirAndFiles(userDataPath)) {
+            mask.innerText = "重置完成，将在3秒后重启...";
+            setTimeout(() => {
+                ipcRenderer.send("resetComplete");
+            }, 3000);
+        } else {
+            showToast("重置失败！", ToastType.error)
+            mask.classList.remove("show");
+            mask.classList.add("hide");
+
+            await sleep(400);
+            mask.remove();
+        }
+    } catch (e) {
+        console.log(e);
+        ipcRenderer.send("logger", "ResetSettings failed", e);
+        showToast("重置失败！", ToastType.error)
+        mask.classList.remove("show");
+        mask.classList.add("hide");
+
+        await sleep(400);
+        mask.remove();
+    }
+}
+
+// 删除文件夹和文件
+function deleteDirAndFiles(path) {
+    // console.log("currentpath: " + path);
+    let files = [];
+    if (fs.existsSync(path)) {
+
+        files = fs.readdirSync(path);
+        // console.log(files);
+        for (let i = 0; i < files.length; i++) {
+            let curPath = path + "\\" + files[i];
+            // console.log(files[i])
+            if (fs.statSync(curPath).isDirectory()) {
+                deleteDirAndFiles(curPath);
+            } else {
+                try {
+                    fs.unlinkSync(curPath);
+                } catch (e) { }
+            }
+        }
+
+        try {
+            fs.rmdirSync(path);
+        } catch (e) { }
+        return true;
+    } else {
+        return false;
+    }
 }

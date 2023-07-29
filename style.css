@@ -1022,6 +1022,44 @@ a {
     align-items: center;
 }
 
+#resetSettings {
+    grid-column: 1;
+    position: relative;
+    height: 30px;
+    background-color: #2A2A2A;
+    box-shadow: -8px 8px 16px rgba(0, 0, 0, 0.5);
+    cursor: pointer;
+}
+
+#resetSettings .text {
+    user-select: none;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#resetSettings .confirm {
+    user-select: none;
+    background-color: rgb(231, 56, 56);
+    width: 100%;
+    height: 100%;
+    transition: width 0.2s;
+    overflow: hidden;
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    clip-path: polygon(0% 0, 0% 0, 0% 100%, 0% 100%);
+    transition: clip-path 0.5s;
+}
+
+#resetSettings .confirm.showConfirm {
+    clip-path: polygon(0% 0, 100% 0, 100% 100%, 0% 100%);
+}
+
 #wideWindow {
     position: absolute;
     width: calc(100% - 64px);
@@ -1525,7 +1563,7 @@ mark {
     transform: rotate(-90deg);
 }
 
-#toast {
+.toast {
     padding: 8px 16px;
     position: absolute;
     background-color: rgb(66, 66, 66);
@@ -1538,14 +1576,25 @@ mark {
     z-index: 999;
 }
 
-#toast.success {
+.toast.success {
     background-color: rgb(39, 218, 95);
     box-shadow: rgb(48, 228, 105) 0px 0px 16px;
 }
 
-#toast.error {
+.toast.error {
     background-color: rgb(231, 56, 56);
     box-shadow: rgb(240, 82, 82) 0px 0px 16px;
+}
+
+.resetMask {
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    z-index: 998;
 }
 
 .show {

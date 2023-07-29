@@ -103,6 +103,12 @@ ipcMain.on("getUserDataPath", () => {
   mainWindow.webContents.send("userDataPath", app.getPath("userData"));
 });
 
+ipcMain.on("logger", (_, ...args) => {
+  Logger.info("Renderer Log");
+  Logger.info(...args);
+  Logger.info("Renderer Log End");
+})
+
 // --------------
 // Authentication
 // --------------
@@ -336,12 +342,20 @@ ipcMain.on("toRelease", () => require('electron').shell.openExternal("https://gi
 
 ipcMain.on("getExpressions", getExpressions);
 
+// 重置设置
+ipcMain.on("resetComplete", () => {
+  exiting = true;
+  app.relaunch();
+  app.quit();
+})
+
 
 // ----------------
 // Websocket Server
 // ----------------
 
 const WebSocket = require("ws");
+const { exit } = require("process");
 
 var wss, portInUse = false, socket, connectedVTube = false, badVersion = false, noResponse = false, receivedExpressions = false, gettingExpressions = false;
 
