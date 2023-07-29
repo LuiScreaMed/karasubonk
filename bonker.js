@@ -333,7 +333,7 @@ function connectKarasu() {
 
                 switch (data.type) {
                     case "single":
-                        bonk(data.image, data.weight, data.scale, data.sound, data.volume, data.data, faceWidthMin, faceWidthMax, faceHeightMin, faceHeightMax, null, false, data.data.modelFlinchRatio);
+                        bonk(data.image, data.weight, data.scale, data.sound, data.volume, data.data, faceWidthMin, faceWidthMax, faceHeightMin, faceHeightMax, null, false);
                         break;
                     case "barrage":
                         var i = 0;
@@ -344,11 +344,11 @@ function connectKarasu() {
                         const volumes = data.volume;
                         const max = Math.min(images.length, sounds.length, weights.length);
 
-                        bonk(images[i], weights[i], scales[i], sounds[i], volumes[i], data.data, faceWidthMin, faceWidthMax, faceHeightMin, faceHeightMax, null, false, data.data.modelFlinchRatio);
+                        bonk(images[i], weights[i], scales[i], sounds[i], volumes[i], data.data, faceWidthMin, faceWidthMax, faceHeightMin, faceHeightMax, null, false);
                         i++;
                         if (i < max) {
                             var bonker = setInterval(function () {
-                                bonk(images[i], weights[i], scales[i], sounds[i], volumes[i], data.data, faceWidthMin, faceWidthMax, faceHeightMin, faceHeightMax, null, false, data.data.modelFlinchRatio);
+                                bonk(images[i], weights[i], scales[i], sounds[i], volumes[i], data.data, faceWidthMin, faceWidthMax, faceHeightMin, faceHeightMax, null, false);
                                 if (++i >= max)
                                     clearInterval(bonker);
                             }, data.data.barrageFrequency * 1000);
@@ -400,11 +400,11 @@ function connectKarasu() {
                             windup.play();
 
                         setTimeout(() => {
-                            bonk(cImages[i], cWeights[i], cScales[i], cSounds[i], cVolumes[i], data.data, faceWidthMin, faceWidthMax, faceHeightMin, faceHeightMax, cImpactDecals[i], hideOnHit, data.data.modelFlinchRatio);
+                            bonk(cImages[i], cWeights[i], cScales[i], cSounds[i], cVolumes[i], data.data, faceWidthMin, faceWidthMax, faceHeightMin, faceHeightMax, cImpactDecals[i], hideOnHit);
                             i++;
                             if (i < cMax) {
                                 var bonker = setInterval(function () {
-                                    bonk(cImages[i], cWeights[i], cScales[i], cSounds[i], cVolumes[i], data.data, faceWidthMin, faceWidthMax, faceHeightMin, faceHeightMax, cImpactDecals[i], hideOnHit, data.data.modelFlinchRatio);
+                                    bonk(cImages[i], cWeights[i], cScales[i], cSounds[i], cVolumes[i], data.data, faceWidthMin, faceWidthMax, faceHeightMin, faceHeightMax, cImpactDecals[i], hideOnHit);
                                     if (++i >= cMax)
                                         clearInterval(bonker);
                                 }, data.data.barrageFrequency * 1000);
@@ -519,7 +519,7 @@ setInterval(() => {
     }
 }, 1000);
 
-function bonk(image, weight, scale, sound, volume, data, faceWidthMin, faceWidthMax, faceHeightMin, faceHeightMax, impactDecal, hideOnHit, flinchRatio) {
+function bonk(image, weight, scale, sound, volume, data, faceWidthMin, faceWidthMax, faceHeightMin, faceHeightMax, impactDecal, hideOnHit) {
     if (vTubeIsOpen) {
         var request = {
             "apiName": "VTubeStudioPublicAPI",
@@ -541,6 +541,7 @@ function bonk(image, weight, scale, sound, volume, data, faceWidthMin, faceWidth
                 const eyeState = data.closeEyes ? 1 : (data.openEyes ? 2 : (data.hitExpression ? 3 : 0));
                 const hitExpressionName = data.hitExpressionName;
                 const hitExpressionDuration = data.hitExpressionDuration;
+                const flinchRatio = data.modelFlinchRatio;
 
                 var audio, canPlayAudio;
                 if (sound != null) {
