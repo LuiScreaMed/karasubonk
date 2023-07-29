@@ -978,12 +978,15 @@ function onGiftHandler({ data: { coin_type, giftName, num, price } }) {
   let giftEventIndex = -1;
   if (data.gifts != null) {
     for (let i = 0; i < data.gifts.length; i++) {
-      if (data.gifts[i].name.toLowerCase() === giftName.toLowerCase() && data.gifts[i].enabled) {
+      if (data.gifts[i].name.toLowerCase() === giftName.toLowerCase()) {
         giftEventIndex = i;
         break;
       }
     }
   }
+
+  // 如果礼物不启用，则都不投掷
+  if (giftEventIndex != -1 && !data.gifts[giftEventIndex].enabled) return;
 
   // 如果查找不到该礼物的事件，则判断是否投掷电池和瓜子
   if (giftEventIndex === -1) {
@@ -995,7 +998,7 @@ function onGiftHandler({ data: { coin_type, giftName, num, price } }) {
   }
 
   // 如果查找到，则投掷绑定好的投掷
-  if (giftCooldowns[data.gifts[giftEventIndex].name] == null && data.gifts[giftEventIndex].enabled) {
+  if (giftCooldowns[data.gifts[giftEventIndex].name] == null) {
     if (data.multiGiftsEnabled && !data.giftWithCoinCountEnabled) { // 如果开启复数礼物限制 且 没有开启礼物按照瓜子/电池数量投掷
       num = num > data.multiGiftsMaxCount ? data.multiGiftsMaxCount : num;
       Logger.warn("=== GIFT: Gift with gift number, after clamping: " + num);
