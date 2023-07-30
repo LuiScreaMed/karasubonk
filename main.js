@@ -127,11 +127,13 @@ async function connect(roomid) {
 
     connectId = parseInt(roomid);
     try {
-      connectId = await getRoomid(connectId);
+      const { data: { room_id, uid } } = await fetch(`https://api.live.bilibili.com/room/v1/Room/mobileRoomInit?id=${roomid}`).then(w => w.json());
+      connectId = room_id;
       if (connectId === undefined) {
         return mainWindow.webContents.send("roomidEmptyError");
       }
       conf = await getConf(connectId);
+      conf.uid = uid;
       connectToBilibili();
     } catch (e) {
       mainWindow.webContents.send("connectStatus", 0);
