@@ -1,6 +1,6 @@
 const { app, Menu, Tray, BrowserWindow, ipcMain, session, Notification } = require("electron");
 const fs = require("fs");
-const { KeepLiveWS, getRoomid, getConf } = require("bilibili-live-ws");
+const { KeepLiveWS, getRoomid, KeepLiveTCP } = require("bilibili-live-ws");
 const log = require("electron-log");
 
 if (process.platform === 'win32') {
@@ -113,7 +113,7 @@ ipcMain.on("logger", (_, ...args) => {
 // Authentication
 // --------------
 
-var biliClient, connected = false, connecting = false, listenersActive = false, closeRetry = 0, conf = {}, connectId;
+var biliClient, connected = false, connecting = false, listenersActive = false, closeRetry = 0, conf = {}, connectId, danmuInfo, hostIndex;
 
 //连接至房间
 async function connect(roomid) {
@@ -127,13 +127,16 @@ async function connect(roomid) {
 
     connectId = parseInt(roomid);
     try {
-      const { data: { room_id, uid } } = await (await fetch(`https://api.live.bilibili.com/room/v1/Room/mobileRoomInit?id=${roomid}`)).json();
-      connectId = room_id;
+      Logger.info("getting room_id and uid");
+      const tempData = await (await fetch(`https://api.live.bilibili.com/room/v1/Room/mobileRoomInit?id=${roomid}`)).json();
+      Logger.info(tempData);
+      Logger.info("getting room_id and uid end");
+      connectId = tempData.data.room_id;
       if (connectId === undefined) {
         return mainWindow.webContents.send("roomidEmptyError");
       }
-      conf = await getConf(connectId);
-      conf.uid = uid;
+      hostIndex = 0;
+      danmuInfo = (await (await fetch(`https://api.live.bilibili.com/xlive/web-room/v1/index/getDanmuInfo?id=${roomid}`)).json()).data;
       connectToBilibili();
     } catch (e) {
       mainWindow.webContents.send("connectStatus", 0);
@@ -149,9 +152,26 @@ async function connect(roomid) {
   }
 }
 
+function getConf() {
+  if (hostIndex >= danmuInfo.host_list.length) hostIndex = 0;
+  let host = danmuInfo.host_list[hostIndex].host;
+  hostIndex++;
+
+  return {
+    key: danmuInfo.token,
+    host,
+    address: `wss://${host}/sub`,
+  }
+}
+
 // 连接B站并开启监听
 function connectToBilibili() {
-  biliClient = new KeepLiveWS(connectId, conf);
+  conf = getConf();
+  Logger.info("connect conf");
+  Logger.info(conf);
+  Logger.info("connect conf end");
+
+  biliClient = new KeepLiveTCP(connectId, conf);
 
   biliClient.on("open", connectOpen);
   biliClient.on("heartbeat", onHeartBeat);
@@ -162,13 +182,15 @@ function connectToBilibili() {
 
 // 关闭监听并断开B站的连接
 function disconnectFromBilibili() {
-  biliClient.off("open", connectOpen);
-  biliClient.off("heartbeat", onHeartBeat);
-  biliClient.off("msg", onMessage);
-  biliClient.off("error", onError);
-  biliClient.off("close", onClose);
-  biliClient.close();
-  biliClient = undefined;
+  if (biliClient) {
+    biliClient.off("open", connectOpen);
+    biliClient.off("heartbeat", onHeartBeat);
+    biliClient.off("msg", onMessage);
+    biliClient.off("error", onError);
+    biliClient.off("close", onClose);
+    biliClient.close();
+    biliClient = undefined;
+  }
 }
 
 // 连接开启时
@@ -209,13 +231,14 @@ function connectFailed() {
   }
 }
 
+let connectErrTimer = null;
 // 连接关闭时
 function onClose() {
   Logger.error("bilibili connection closed")
   if (closeRetry < 5) {
     closeRetry++;
     disconnectFromBilibili();
-    setTimeout(() => {
+    connectErrTimer = setTimeout(() => {
       connectToBilibili();
     }, 500);
   } else {
@@ -227,6 +250,7 @@ function onClose() {
 
 // 断开连接
 function disconnect() {
+  clearTimeout(connectErrTimer);
   connected = false;
   connecting = false;
   listenersActive = false;
