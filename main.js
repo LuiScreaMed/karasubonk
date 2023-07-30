@@ -127,7 +127,7 @@ async function connect(roomid) {
 
     connectId = parseInt(roomid);
     try {
-      const { data: { room_id, uid } } = await fetch(`https://api.live.bilibili.com/room/v1/Room/mobileRoomInit?id=${roomid}`).then(w => w.json());
+      const { data: { room_id, uid } } = await (await fetch(`https://api.live.bilibili.com/room/v1/Room/mobileRoomInit?id=${roomid}`)).json();
       connectId = room_id;
       if (connectId === undefined) {
         return mainWindow.webContents.send("roomidEmptyError");
