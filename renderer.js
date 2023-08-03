@@ -2002,25 +2002,32 @@ function copyFilesToDirectory() {
 
 // Place all settings from data into the proper location on load
 window.onload = async function () {
-    // UPDATE 1.19 (or new installation)
     if (!fs.existsSync(userDataPath))
         fs.mkdirSync(userDataPath);
 
-    if (!fs.existsSync(userDataPath + "/data.json") && fs.existsSync(__dirname + "/data.json"))
-        fs.copyFileSync(__dirname + "/data.json", userDataPath + "/data.json");
-
-    ///没有当前文件夹则创建
+    // 初始化文件逻辑
     folders.forEach((folder) => {
-        if (!fs.existsSync(userDataPath + "/" + folder))
-            fs.mkdirSync(userDataPath + "/" + folder);
+        if (!fs.existsSync(__dirname + "/default_assets/" + folder))
+            fs.mkdirSync(__dirname + "/default_assets/" + folder);
 
         if (!fs.existsSync(__dirname + "/" + folder))
             fs.mkdirSync(__dirname + "/" + folder);
 
-        fs.readdirSync(__dirname + "/" + folder).forEach(file => {
-            if (!fs.existsSync(userDataPath + "/" + folder + "/" + file))
-                fs.copyFileSync(__dirname + "/" + folder + "/" + file, userDataPath + "/" + folder + "/" + file);
-        });
+        // 如果没有当前文件夹，则创建并将默认资源复制进去
+        if (!fs.existsSync(userDataPath + "/" + folder)) {
+            fs.mkdirSync(userDataPath + "/" + folder);
+
+            // 将默认资源存进userDataPath中
+            fs.readdirSync(__dirname + "/default_assets/" + folder).forEach(file => {
+                fs.copyFileSync(__dirname + "/default_assets/" + folder + "/" + file, userDataPath + "/" + folder + "/" + file);
+            });
+        } else {    // 如果有，则将图片以非覆盖的形式复制到userDataPath
+
+            fs.readdirSync(__dirname + "/" + folder).forEach(file => {
+                if (!fs.existsSync(userDataPath + "/" + folder + "/" + file))
+                    fs.copyFileSync(__dirname + "/" + folder + "/" + file, userDataPath + "/" + folder + "/" + file);
+            });
+        }
     })
 
     // 获取房间号
