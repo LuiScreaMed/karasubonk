@@ -113,7 +113,7 @@ ipcMain.on("logger", (_, ...args) => {
 // Authentication
 // --------------
 
-var biliClient, connected = false, connecting = false, listenersActive = false, closeRetry = 0, conf = {}, connectId, danmuInfo, hostIndex;
+var biliClient, connected = false, connecting = false, listenersActive = false, closeRetry = 0, conf = {}, connectId, danmuInfo, hostIndex, uid;
 
 //连接至房间
 async function connect(roomid) {
@@ -132,6 +132,7 @@ async function connect(roomid) {
       Logger.info(tempData);
       Logger.info("getting room_id and uid end");
       connectId = tempData.data.room_id;
+      uid = tempData.data.uid;
       if (connectId === undefined) {
         return mainWindow.webContents.send("roomidEmptyError");
       }
@@ -161,6 +162,7 @@ function getConf() {
     key: danmuInfo.token,
     host,
     address: `wss://${host}/sub`,
+    uid
   }
 }
 
@@ -274,6 +276,9 @@ ipcMain.on("connect", (_, roomid) => {
 // 弹幕、广播等全部信息
 function onMessage(data) {
   let cmd = data.cmd;
+  Logger.info("Received Message");
+  Logger.info(JSON.stringify(data));
+  Logger.info("Received Message end");
   switch (cmd) {
     case 'DANMU_MSG': // 弹幕
       Logger.info("Received Danmaku");
