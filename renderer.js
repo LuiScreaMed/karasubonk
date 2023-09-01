@@ -341,6 +341,7 @@ async function openImages() {
                 row.querySelector(".imageRemove").addEventListener("click", () => {
                     // 删除后删除文件
                     fs.unlinkSync(userDataPath + "/" + throws[index].location);
+                    fs.unlinkSync(__dirname + "/" + throws[index].location);
                     throws.splice(index, 1);
                     setData("throws", throws);
                     openImages();
@@ -1125,6 +1126,7 @@ async function openSounds() {
 
                 row.querySelector(".imageRemove").addEventListener("click", () => {// 删除后删除文件
                     fs.unlinkSync(userDataPath + "/" + impacts[index].location);
+                    fs.unlinkSync(__dirname + "/" + impacts[index].location);
                     impacts.splice(index, 1);
                     setData("impacts", impacts);
                     openSounds();
