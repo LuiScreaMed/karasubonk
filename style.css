@@ -23,6 +23,7 @@ body {
     padding: 0;
     margin: 0;
     /* font-family: 'Noto Sans', Verdana, Geneva, Tahoma, sans-serif; */
+    overflow: hidden;
     color: white;
 }
 
@@ -1595,6 +1596,75 @@ mark {
     align-items: center;
     position: absolute;
     z-index: 998;
+}
+
+#sponser {
+    z-index: 10;
+    position: absolute;
+    bottom: -200px;
+    transition: bottom 0.5s;
+    width: 450px;
+    height: 200px;
+}
+
+#sponser:hover {
+    bottom: 0;
+}
+
+.sponser-header {
+    position: absolute;
+    top: -37px;
+    right: 0;
+    background: var(--color-orange);
+    height: 37px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0 6px;
+    user-select: none;
+}
+
+.sponser-body {
+    height: 100%;
+    width: 100%;
+    background: #303030;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    user-select: none;
+}
+
+.payways {
+    display: flex;
+    flex-direction: row;
+}
+
+.payway {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.payway:not(:last-child) {
+    margin-right: 36px;
+}
+
+.pay-img {
+    width: 128px;
+    height: 128px;
+    margin-bottom: 4px;
+}
+
+.image-fill {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.pay-img-inner {
+    user-select: none;
+    -webkit-user-drag: none;
 }
 
 .show {
