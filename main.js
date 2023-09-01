@@ -162,6 +162,7 @@ function getConf() {
     key: danmuInfo.token,
     host,
     address: `wss://${host}/sub`,
+    protover: 3,
     uid
   }
 }
