@@ -1,6 +1,6 @@
 const { app, Menu, Tray, BrowserWindow, ipcMain, session, Notification } = require("electron");
 const fs = require("fs");
-const { KeepLiveWS, getRoomid, KeepLiveTCP } = require("bilibili-live-ws");
+const { KeepLiveWS, getRoomid, KeepLiveTCP, LiveTCP, LiveWS } = require("bilibili-live-ws");
 const log = require("electron-log");
 
 if (process.platform === 'win32') {
@@ -113,7 +113,7 @@ ipcMain.on("logger", (_, ...args) => {
 // Authentication
 // --------------
 
-var biliClient, connected = false, connecting = false, listenersActive = false, closeRetry = 0, conf = {}, connectId, danmuInfo, hostIndex, uid;
+var biliClient, connected = false, connecting = false, listenersActive = false, closeRetry = 0, conf = {}, connectId, danmuInfo, hostIndex, uid, buvid;
 
 //连接至房间
 async function connect(roomid) {
@@ -128,16 +128,24 @@ async function connect(roomid) {
     connectId = parseInt(roomid);
     try {
       Logger.info("getting room_id and uid");
-      const tempData = await (await fetch(`https://api.live.bilibili.com/room/v1/Room/mobileRoomInit?id=${roomid}`)).json();
-      Logger.info(tempData);
+      const roomData = await (await fetch(`https://api.live.bilibili.com/room/v1/Room/mobileRoomInit?id=${roomid}`)).json();
+      Logger.info(roomData);
       Logger.info("getting room_id and uid end");
-      connectId = tempData.data.room_id;
-      uid = tempData.data.uid;
+      connectId = roomData.data.room_id;
+      uid = roomData.data.uid;
       if (connectId === undefined) {
         return mainWindow.webContents.send("roomidEmptyError");
       }
+      Logger.info("getting buvid");
+      const buvidData = (await (await fetch("https://api.bilibili.com/x/frontend/finger/spi")).json()).data;
+      buvid = buvidData.b_3;
+      Logger.info(buvid);
+      Logger.info("getting buvid end");
       hostIndex = 0;
       danmuInfo = (await (await fetch(`https://api.live.bilibili.com/xlive/web-room/v1/index/getDanmuInfo?id=${roomid}`)).json()).data;
+      Logger.info("danmuInfo");
+      Logger.info(danmuInfo);
+      Logger.info("danmuInfo end");
       connectToBilibili();
     } catch (e) {
       mainWindow.webContents.send("connectStatus", 0);
@@ -156,13 +164,17 @@ async function connect(roomid) {
 function getConf() {
   if (hostIndex >= danmuInfo.host_list.length) hostIndex = 0;
   let host = danmuInfo.host_list[hostIndex].host;
+  let wwsPort = danmuInfo.host_list[hostIndex].wss_port;
   hostIndex++;
 
   return {
     key: danmuInfo.token,
     host,
-    address: `wss://${host}/sub`,
+    // host: "broadcastlv.chat.bilibili.com",
+    address: `wss://${host}:${wwsPort}/sub`,
+    // address: `wss://broadcastlv.chat.bilibili.com/sub`,
     protover: 3,
+    buvid,
     uid
   }
 }
@@ -174,7 +186,7 @@ function connectToBilibili() {
   Logger.info(conf);
   Logger.info("connect conf end");
 
-  biliClient = new KeepLiveTCP(connectId, conf);
+  biliClient = new LiveWS(connectId, conf);
 
   biliClient.on("open", connectOpen);
   biliClient.on("heartbeat", onHeartBeat);
@@ -197,7 +209,8 @@ function disconnectFromBilibili() {
 }
 
 // 连接开启时
-function connectOpen() {
+function connectOpen(...args) {
+  Logger.info(...args);
   mainWindow.webContents.send("connectStatus", 2);
   setData("roomid", connectId);
   Logger.info("bilibili connection opened.");
@@ -277,44 +290,38 @@ ipcMain.on("connect", (_, roomid) => {
 // 弹幕、广播等全部信息
 function onMessage(data) {
   let cmd = data.cmd;
-  Logger.info("Received Message");
-  Logger.info(JSON.stringify(data));
-  Logger.info("Received Message end");
   switch (cmd) {
     case 'DANMU_MSG': // 弹幕
-      Logger.info("Received Danmaku");
-      Logger.info(JSON.stringify(data));
-      Logger.info("Received Danmaku end");
+      Logger.info("Received Message: Danmaku");
       onDanmakuHandler(data);
       break;
     case 'SUPER_CHAT_MESSAGE_JPN':
     case 'SUPER_CHAT_MESSAGE':  // 醒目留言
-      Logger.info("Received Super Chat");
-      Logger.info(JSON.stringify(data));
-      Logger.info("Received Super Chat end");
+      Logger.info("Received Message: Super Chat");
       onSuperChatHandler(data);
       break;
     case 'SEND_GIFT': // 礼物
-      Logger.info("Received Gift");
-      Logger.info(JSON.stringify(data));
-      Logger.info("Received Gift end");
+      Logger.info("Received Message: Gift");
       onGiftHandler(data);
       break;
     case 'GUARD_BUY': // 上舰
-      Logger.info("Received Guard");
-      Logger.info(JSON.stringify(data));
-      Logger.info("Received Guard end");
+      Logger.info("Received Message: Guard");
       onGuardBuyHandler(data);
       break;
     case 'INTERACT_WORD': // 用户进入直播间，判断关注
-      Logger.info("Received Interact Word");
-      Logger.info(JSON.stringify(data));
-      Logger.info("Received Interact Word end");
+      Logger.info("Received Message: Interact Word");
       onFollowHandler(data);
       break;
+    case 'LIKE_INFO_V3_CLICK': // 点赞
+      Logger.info("Received Message: Like");
+      onLikeHandler(data);
+      break;
     default:
+      Logger.info("Received Message: Others");
       break;
   }
+  Logger.info(JSON.stringify(data));
+  Logger.info("Received Message end");
 }
 
 // Periodically reporting status back to renderer
@@ -1211,6 +1218,29 @@ function onFollowHandler({ data: { msg_type } }) {
     if (data.followCooldown > 0) {
       canFollow = false;
       setTimeout(() => { canFollow = true; }, data.followCooldown * 1000);
+    }
+  }
+}
+
+// 处理点赞
+var canLike = true;
+function onLikeHandler({ data: { msg_type } }) {
+  if (canLike && data.likeEnabled) {
+    switch (data.likeType) {
+      case "single":
+        single();
+        break;
+      case "barrage":
+        barrage();
+        break;
+      default:
+        custom(data.likeType);
+        break;
+    }
+
+    if (data.likeCooldown > 0) {
+      canLike = false;
+      setTimeout(() => { canLike = true; }, data.likeCooldown * 1000);
     }
   }
 }

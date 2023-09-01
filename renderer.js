@@ -1826,7 +1826,7 @@ async function openEvents() {
     });
 
     var node = document.querySelector("#followType");
-    while (node.childElementCount > 4)
+    while (node.childElementCount > 2)
         node.removeChild(node.lastChild);
 
     for (var key in customBonks) {
@@ -1834,6 +1834,17 @@ async function openEvents() {
         customBonk.value = key;
         customBonk.innerText = key;
         node.appendChild(customBonk);
+    }
+
+    var node2 = document.querySelector("#likeType");
+    while (node2.childElementCount > 2)
+        node2.removeChild(node2.lastChild);
+
+    for (var key in customBonks) {
+        var customBonk = document.createElement("option");
+        customBonk.value = key;
+        customBonk.innerText = key;
+        node2.appendChild(customBonk);
     }
 }
 
@@ -2111,6 +2122,11 @@ window.onload = async function () {
     loadData("followType");
     loadData("followCooldown");
 
+    // 点赞
+    loadData("likeEnabled");
+    loadData("likeType");
+    loadData("likeCooldown");
+
     // 醒目留言
     loadData("superChatEnabled");
     loadData("superChatMinBattery");
@@ -2211,6 +2227,11 @@ document.querySelector("#giftWithCoinCountUnit").addEventListener("change", () =
 document.querySelector("#followEnabled").addEventListener("change", () => setData("followEnabled", document.querySelector("#followEnabled").checked));
 document.querySelector("#followType").addEventListener("change", () => setData("followType", document.querySelector("#followType").value));
 document.querySelector("#followCooldown").addEventListener("change", () => { clampValue(document.querySelector("#followCooldown"), 0, null); setData("followCooldown", parseFloat(document.querySelector("#followCooldown").value)) });
+
+// 点赞
+document.querySelector("#likeEnabled").addEventListener("change", () => setData("likeEnabled", document.querySelector("#likeEnabled").checked));
+document.querySelector("#likeType").addEventListener("change", () => setData("likeType", document.querySelector("#likeType").value));
+document.querySelector("#likeCooldown").addEventListener("change", () => { clampValue(document.querySelector("#likeCooldown"), 0, null); setData("likeCooldown", parseFloat(document.querySelector("#likeCooldown").value)) });
 
 // 醒目留言
 document.querySelector("#superChatEnabled").addEventListener("change", () => setData("superChatEnabled", document.querySelector("#superChatEnabled").checked));
