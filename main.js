@@ -175,7 +175,7 @@ function getConf() {
     // address: `wss://broadcastlv.chat.bilibili.com/sub`,
     protover: 3,
     buvid,
-    uid
+    uid: 0
   }
 }
 
