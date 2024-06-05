@@ -2,6 +2,15 @@ const { app, Menu, Tray, BrowserWindow, ipcMain, session, Notification } = requi
 const fs = require("fs");
 const { KeepLiveWS, getRoomid, KeepLiveTCP, LiveTCP, LiveWS } = require("bilibili-live-ws");
 const log = require("electron-log");
+const axios = require('axios');
+const https = require('https');
+
+// 创建忽略 SSL 的 axios 实例
+const request = axios.default.create({
+  httpsAgent: new https.Agent({
+    rejectUnauthorized: false
+  })
+});
 
 if (process.platform === 'win32') {
   app.setAppUserModelId('Karasubonk Bilibili');
@@ -128,7 +137,8 @@ async function connect(roomid) {
     connectId = parseInt(roomid);
     try {
       Logger.info("getting room_id and uid");
-      const roomData = await (await fetch(`https://api.live.bilibili.com/room/v1/Room/mobileRoomInit?id=${roomid}`)).json();
+      const roomData = (await request.get(`https://api.live.bilibili.com/room/v1/Room/mobileRoomInit?id=${roomid}`)).data;
+      // const roomData = await (await fetch(`https://api.live.bilibili.com/room/v1/Room/mobileRoomInit?id=${roomid}`)).json();
       Logger.info(roomData);
       Logger.info("getting room_id and uid end");
       connectId = roomData.data.room_id;
@@ -137,12 +147,14 @@ async function connect(roomid) {
         return mainWindow.webContents.send("roomidEmptyError");
       }
       Logger.info("getting buvid");
-      const buvidData = (await (await fetch("https://api.bilibili.com/x/frontend/finger/spi")).json()).data;
+      const buvidData = (await request.get("https://api.bilibili.com/x/frontend/finger/spi")).data;
+      // const buvidData = (await (await fetch("https://api.bilibili.com/x/frontend/finger/spi")).json()).data;
       buvid = buvidData.b_3;
       Logger.info(buvid);
       Logger.info("getting buvid end");
       hostIndex = 0;
-      danmuInfo = (await (await fetch(`https://api.live.bilibili.com/xlive/web-room/v1/index/getDanmuInfo?id=${roomid}`)).json()).data;
+      danmuInfo = (await request.get(`https://api.live.bilibili.com/xlive/web-room/v1/index/getDanmuInfo?id=${roomid}`)).data;
+      // danmuInfo = (await (await fetch(`https://api.live.bilibili.com/xlive/web-room/v1/index/getDanmuInfo?id=${roomid}`)).json()).data;
       Logger.info("danmuInfo");
       Logger.info(danmuInfo);
       Logger.info("danmuInfo end");

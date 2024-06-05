@@ -8,6 +8,7 @@
   },
   "main": "main.js",
   "dependencies": {
+    "axios": "^1.7.2",
     "bilibili-live-ws": "^6.3.1",
     "electron-log": "^4.4.8",
     "electron-squirrel-startup": "^1.0.0",
