@@ -303,10 +303,6 @@ ipcMain.on("connect", (_, roomid) => {
 function onMessage(data) {
   let cmd = data.cmd;
   switch (cmd) {
-    case 'DANMU_MSG': // 弹幕
-      Logger.info("Received Message: Danmaku");
-      onDanmakuHandler(data);
-      break;
     case 'SUPER_CHAT_MESSAGE_JPN':
     case 'SUPER_CHAT_MESSAGE':  // 醒目留言
       Logger.info("Received Message: Super Chat");
@@ -329,6 +325,13 @@ function onMessage(data) {
       onLikeHandler(data);
       break;
     default:
+      // 弹幕
+      if (cmd.startsWith("DANMU_MSG")) {
+        Logger.info("Received Message: Danmaku");
+        onDanmakuHandler(data);
+        break;
+      }
+      // 其他
       Logger.info("Received Message: Others");
       break;
   }
