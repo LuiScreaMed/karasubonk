@@ -464,8 +464,6 @@ const MessageType = {
   modelLoaded: "modelLoaded"
 }
 
-createServer();
-
 function createServer() {
   portInUse = false;
 
