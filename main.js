@@ -32,6 +32,29 @@ else {
   })
 }
 
+const USER_DATA_PATH = app.getPath("userData");
+const KBONK_DATA_PATH = __dirname + "/data.json";
+const KBONK_DATA_JSON_USER_DATA_PATH = USER_DATA_PATH + "/data.json";
+const KBONK_DEFAULT_DATA_PATH = __dirname + "/defaultData.json";
+
+var data = undefined;
+
+// 初始化设置
+const initConfig = () => {
+  // Loading data from file
+  // If no data exists, create data from default data file
+  const defaultData = JSON.parse(fs.readFileSync(KBONK_DEFAULT_DATA_PATH, "utf8"));
+  if (!fs.existsSync(USER_DATA_PATH))
+    fs.mkdirSync(USER_DATA_PATH);
+  if (!fs.existsSync(KBONK_DATA_JSON_USER_DATA_PATH)) {
+    if (fs.existsSync(KBONK_DATA_PATH))
+      fs.copyFileSync(KBONK_DATA_PATH, KBONK_DATA_JSON_USER_DATA_PATH);
+    else
+      fs.writeFileSync(KBONK_DATA_JSON_USER_DATA_PATH, JSON.stringify(defaultData));
+  }
+  data = JSON.parse(fs.readFileSync(KBONK_DATA_JSON_USER_DATA_PATH, "utf8"));
+}
+
 const createWindow = () => {
   mainWindow = new BrowserWindow({
     width: 1024,
@@ -97,6 +120,7 @@ function setTray() {
 
 var tray = null, contextMenu;
 app.whenReady().then(() => {
+  initConfig();
   createWindow();
 
   app.on("activate", () => {
@@ -370,19 +394,6 @@ setInterval(() => {
       mainWindow.webContents.send("status", status);
   }
 }, 100);
-
-// Loading data from file
-// If no data exists, create data from default data file
-const defaultData = JSON.parse(fs.readFileSync(__dirname + "/defaultData.json", "utf8"));
-if (!fs.existsSync(app.getPath("userData")))
-  fs.mkdirSync(app.getPath("userData"));
-if (!fs.existsSync(app.getPath("userData") + "/data.json")) {
-  if (fs.existsSync(__dirname + "/data.json"))
-    fs.copyFileSync(__dirname + "/data.json", app.getPath("userData") + "/data.json");
-  else
-    fs.writeFileSync(app.getPath("userData") + "/data.json", JSON.stringify(defaultData));
-}
-var data = JSON.parse(fs.readFileSync(app.getPath("userData") + "/data.json", "utf8"));
 
 ipcMain.on("help", () => require('electron').shell.openExternal("https://www.bilibili.com/read/cv24077574"));
 ipcMain.on("link", () => require('electron').shell.openExternal("https://github.com/LuiScreaMed/karasubonk"));
@@ -839,7 +850,7 @@ ipcMain.on("setData", (_, arg) => {
 
 function setData(field, value, external) {
   data[field] = value;
-  fs.writeFileSync(app.getPath("userData") + "/data.json", JSON.stringify(data));
+  fs.writeFileSync(KBONK_DATA_JSON_USER_DATA_PATH, JSON.stringify(data));
   if (external)
     mainWindow.webContents.send("doneWriting");
 
