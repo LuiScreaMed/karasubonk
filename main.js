@@ -121,6 +121,7 @@ function setTray() {
 var tray = null, contextMenu;
 app.whenReady().then(() => {
   initConfig();
+  createServer();
   createWindow();
 
   app.on("activate", () => {
