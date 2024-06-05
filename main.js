@@ -53,6 +53,30 @@ const initConfig = () => {
       fs.writeFileSync(KBONK_DATA_JSON_USER_DATA_PATH, JSON.stringify(defaultData));
   }
   data = JSON.parse(fs.readFileSync(KBONK_DATA_JSON_USER_DATA_PATH, "utf8"));
+
+  // 向下兼容
+  if (coinsThrowCompatibly()) {
+    fs.writeFileSync(KBONK_DATA_JSON_USER_DATA_PATH, JSON.stringify(data))
+  }
+}
+
+// 瓜子电池投掷单位向下兼容
+const coinsThrowCompatibly = () => {
+  let changed = false;
+  if (data.coinsThrowUnit) {
+    data.coinsThrowBatteryUnit = data.coinsThrowUnit;
+    data.coinsThrowSilverUnit = 100;
+    delete data.coinsThrowUnit;
+    changed = true;
+  }
+  // 礼物按照瓜子/电池数量投掷
+  if (data.giftWithCoinCountUnit) {
+    data.giftWithCoinCountBatteryUnit = data.giftWithCoinCountUnit;
+    data.giftWithCoinCountSilverUnit = 100;
+    delete data.giftWithCoinCountUnit;
+    changed = true;
+  }
+  return changed;
 }
 
 const createWindow = () => {
@@ -172,13 +196,13 @@ async function connect(roomid) {
         return mainWindow.webContents.send("roomidEmptyError");
       }
       Logger.info("getting buvid");
-      const buvidData = (await request.get("https://api.bilibili.com/x/frontend/finger/spi")).data;
+      const buvidData = (await request.get("https://api.bilibili.com/x/frontend/finger/spi")).data.data;
       // const buvidData = (await (await fetch("https://api.bilibili.com/x/frontend/finger/spi")).json()).data;
       buvid = buvidData.b_3;
       Logger.info(buvid);
       Logger.info("getting buvid end");
       hostIndex = 0;
-      danmuInfo = (await request.get(`https://api.live.bilibili.com/xlive/web-room/v1/index/getDanmuInfo?id=${roomid}`)).data;
+      danmuInfo = (await request.get(`https://api.live.bilibili.com/xlive/web-room/v1/index/getDanmuInfo?id=${roomid}`)).data.data;
       // danmuInfo = (await (await fetch(`https://api.live.bilibili.com/xlive/web-room/v1/index/getDanmuInfo?id=${roomid}`)).json()).data;
       Logger.info("danmuInfo");
       Logger.info(danmuInfo);
@@ -1073,7 +1097,7 @@ function onGiftHandler({ data: { coin_type, giftName, num, price } }) {
   // 如果查找不到该礼物的事件，则判断是否投掷电池和瓜子
   if (giftEventIndex === -1) {
     if (data.coinsThrowEnabled) {
-      Logger.warn("=== GIFT: Gift not found in presets");
+      Logger.warn("=== GIFT: Gift not found in presets, throwing coins");
       handleGiftToCoins({ coin_type, num, price });
     }
     return;
@@ -1088,7 +1112,7 @@ function onGiftHandler({ data: { coin_type, giftName, num, price } }) {
       Logger.warn("=== GIFT: Gift coin counts, ready to calculate");
       num = num * price;
       Logger.warn("=== GIFT: Gift coin counts, num * price: " + num);
-      num = Math.ceil(num / data.giftWithCoinCountUnit);
+      num = Math.ceil(num / (coin_type == "silver" ? data.giftWithCoinCountSilverUnit : data.giftWithCoinCountBatteryUnit));
       Logger.warn("=== GIFT: Gift coin counts, Math.ceil(num / data.giftWithCoinCountUnit): " + num);
       num = num > data.giftWithCoinCountMaxCount ? data.giftWithCoinCountMaxCount : num;
       Logger.warn("=== GIFT: Gift coin counts, after clamping: " + num);
@@ -1128,7 +1152,7 @@ function handleGiftToCoins({ coin_type, num, price }) {
     num: num * price,
     max:
       data.coinsThrowMaxCount,
-    unit: data.coinsThrowUnit
+    unit: coin_type == "silver" ? data.coinsThrowSilverUnit : data.coinsThrowBatteryUnit
   });
 }
 

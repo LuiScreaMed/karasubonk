@@ -1188,7 +1188,7 @@
                 <p class="grid3">最少瓜子</p>
                 <input type="number" id="coinMinSilver" class="grid4" step="1" min="0" value="0">
 
-                <!-- 未绑定礼物类型的礼物投掷瓜子电池 -->
+                <!-- 未绑定礼物类型的电池礼物投掷电池 -->
                 <b class="grid1">启用</b>
                 <b class="grid2">选项</b>
 
@@ -1197,15 +1197,18 @@
                   <div class="checkHover"></div>
                   <img src="ui/checkmark.png" class="checkmark">
                 </label>
-                <p class="grid2">投掷瓜子电池</p>
+                <p class="grid2">投掷电池/瓜子</p>
 
                 <p class="grid3">投掷上限</p>
                 <input type="number" id="coinsThrowMaxCount" class="grid4" step="1" min="0" value="100">
 
                 <p class="grid2">(仅未绑定礼物类型的礼物)</p>
 
-                <p class="grid3">投掷单位</p>
-                <input type="number" id="coinsThrowUnit" class="grid4" step="1" min="1" value="1">
+                <p class="grid3">电池投掷单位</p>
+                <input type="number" id="coinsThrowBatteryUnit" class="grid4" step="1" min="1" value="1">
+
+                <p class="grid3">瓜子投掷单位</p>
+                <input type="number" id="coinsThrowSilverUnit" class="grid4" step="1" min="1" value="1">
 
                 <p class="grid3">冷却时长（秒）</p>
                 <input type="number" id="coinsThrowCooldown" class="grid4" min="0" value="0">
@@ -1224,7 +1227,6 @@
                 <p class="grid3">投掷上限</p>
                 <input type="number" id="multiGiftsMaxCount" class="grid4" step="1" min="0" value="100">
 
-                <!-- 礼物复数时上限 -->
                 <b class="grid1">启用</b>
                 <b class="grid2">选项</b>
 
@@ -1233,15 +1235,21 @@
                   <div class="checkHover"></div>
                   <img src="ui/checkmark.png" class="checkmark">
                 </label>
-                <p class="grid2">礼物按照瓜子/电池数量投掷</p>
+                <p class="grid2">礼物按照电池/瓜子数量投掷</p>
 
+                <!-- 按电池数量 -->
                 <p class="grid3">投掷上限</p>
                 <input type="number" id="giftWithCoinCountMaxCount" class="grid4" step="1" min="0" value="100">
 
                 <p class="grid2">（覆盖复数礼物限制）</p>
 
-                <p class="grid3">投掷单位</p>
-                <input type="number" id="giftWithCoinCountUnit" class="grid4" step="1" min="0" value="1">
+                <p class="grid3">电池礼物投掷单位</p>
+                <input type="number" id="giftWithCoinCountBatteryUnit" class="grid4" step="1" min="0" value="1">
+
+                <!-- 按瓜子数量 -->
+
+                <p class="grid3">瓜子礼物投掷单位</p>
+                <input type="number" id="giftWithCoinCountSilverUnit" class="grid4" step="1" min="0" value="1">
               </div>
 
               <br />

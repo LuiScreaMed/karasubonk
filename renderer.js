@@ -1,7 +1,7 @@
 const { ipcRenderer } = require("electron");
 const fs = require("fs");
 
-const version = 1.09;
+const version = 1.10;
 
 // ------
 // Status
@@ -2111,10 +2111,11 @@ window.onload = async function () {
     loadData("coinMinBattery");
     loadData("coinMinSilver");
 
-    // 投掷电池和瓜子设置
+    // 投掷电池/瓜子设置
     loadData("coinsThrowEnabled");
     loadData("coinsThrowMaxCount");
-    loadData("coinsThrowUnit");
+    loadData("coinsThrowBatteryUnit");
+    loadData("coinsThrowSilverUnit");
     loadData("coinsThrowCooldown");
 
     // 复数礼物限制
@@ -2182,9 +2183,13 @@ window.onload = async function () {
     loadData("minimizeToTray");
     loadData("hitExpression");
     loadData("hitExpressionDuration");
+
+    // 礼物按照电池/瓜子数量投掷
     loadData("giftWithCoinCountEnabled");
     loadData("giftWithCoinCountMaxCount");
-    loadData("giftWithCoinCountUnit");
+    loadData("giftWithCoinCountBatteryUnit");
+    loadData("giftWithCoinCountSilverUnit");
+
     loadData("saveLogs");
     loadData("modelFlinchRatio");
     loadData("modelFlinchReverseX");
@@ -2215,7 +2220,8 @@ document.querySelector("#coinMinSilver").addEventListener("change", () => { clam
 // 投掷瓜子电池
 document.querySelector("#coinsThrowEnabled").addEventListener("change", () => setData("coinsThrowEnabled", document.querySelector("#coinsThrowEnabled").checked));
 document.querySelector("#coinsThrowMaxCount").addEventListener("change", () => { clampValue(document.querySelector("#coinsThrowMaxCount"), 1, null); setData("coinsThrowMaxCount", parseInt(document.querySelector("#coinsThrowMaxCount").value)) });
-document.querySelector("#coinsThrowUnit").addEventListener("change", () => { clampValue(document.querySelector("#coinsThrowUnit"), 0, null); setData("coinsThrowUnit", parseInt(document.querySelector("#coinsThrowUnit").value)) });
+document.querySelector("#coinsThrowBatteryUnit").addEventListener("change", () => { clampValue(document.querySelector("#coinsThrowBatteryUnit"), 0, null); setData("coinsThrowBatteryUnit", parseInt(document.querySelector("#coinsThrowBatteryUnit").value)) });
+document.querySelector("#coinsThrowSilverUnit").addEventListener("change", () => { clampValue(document.querySelector("#coinsThrowSilverUnit"), 0, null); setData("coinsThrowSilverUnit", parseInt(document.querySelector("#coinsThrowSilverUnit").value)) });
 document.querySelector("#coinsThrowCooldown").addEventListener("change", () => { clampValue(document.querySelector("#coinsThrowCooldown"), 0, null); setData("coinsThrowCooldown", parseFloat(document.querySelector("#coinsThrowCooldown").value)) });
 
 // 复数礼物
@@ -2225,7 +2231,8 @@ document.querySelector("#multiGiftsMaxCount").addEventListener("change", () => {
 // 复数礼物跟随瓜子电池数量
 document.querySelector("#giftWithCoinCountEnabled").addEventListener("change", () => { setData("giftWithCoinCountEnabled", document.querySelector("#giftWithCoinCountEnabled").checked) });
 document.querySelector("#giftWithCoinCountMaxCount").addEventListener("change", () => { clampValue(document.querySelector("#giftWithCoinCountMaxCount"), 0, null); setData("giftWithCoinCountMaxCount", parseInt(document.querySelector("#giftWithCoinCountMaxCount").value)) });
-document.querySelector("#giftWithCoinCountUnit").addEventListener("change", () => { clampValue(document.querySelector("#giftWithCoinCountUnit"), 1, null); setData("giftWithCoinCountUnit", parseInt(document.querySelector("#giftWithCoinCountUnit").value)) });
+document.querySelector("#giftWithCoinCountBatteryUnit").addEventListener("change", () => { clampValue(document.querySelector("#giftWithCoinCountBatteryUnit"), 1, null); setData("giftWithCoinCountBatteryUnit", parseInt(document.querySelector("#giftWithCoinCountBatteryUnit").value)) });
+document.querySelector("#giftWithCoinCountSilverUnit").addEventListener("change", () => { clampValue(document.querySelector("#giftWithCoinCountSilverUnit"), 1, null); setData("giftWithCoinCountSilverUnit", parseInt(document.querySelector("#giftWithCoinCountSilverUnit").value)) });
 
 // 关注
 document.querySelector("#followEnabled").addEventListener("change", () => setData("followEnabled", document.querySelector("#followEnabled").checked));
