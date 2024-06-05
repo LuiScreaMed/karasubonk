@@ -2219,7 +2219,7 @@ window.onload = async function () {
     copyFilesToDirectory();
 
     checkVersion();
-    document.title += " " + version;
+    document.title += " " + version.toFixed(2);
     setData("version", version);
 }
 

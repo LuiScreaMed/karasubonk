@@ -46,8 +46,8 @@ document.onclick = function (e) {
 
 var badVersion = false, mainVersion;
 function tryWarnVersion() {
-    document.querySelector("#mainVersion").innerHTML = mainVersion;
-    document.querySelector("#bonkerVersion").innerHTML = version;
+    document.querySelector("#mainVersion").innerHTML = mainVersion.toFixed(2);
+    document.querySelector("#bonkerVersion").innerHTML = version.toFixed(2);
     document.querySelector("#warnVersion").hidden = !badVersion;
 }
 
