@@ -1825,27 +1825,39 @@ async function openEvents() {
         });
     });
 
-    var node = document.querySelector("#followType");
-    while (node.childElementCount > 2)
-        node.removeChild(node.lastChild);
+    var followType = await getData("followType");
+
+    var followTypeSelect = document.querySelector("#followType");
+    while (followTypeSelect.childElementCount > 2)
+        followTypeSelect.removeChild(followTypeSelect.lastChild);
 
     for (var key in customBonks) {
         var customBonk = document.createElement("option");
         customBonk.value = key;
         customBonk.innerText = key;
-        node.appendChild(customBonk);
+        followTypeSelect.appendChild(customBonk);
     }
+    followTypeSelect.value = followType;
+    followTypeSelect.addEventListener("change", () => {
+        setData("followType", followTypeSelect.value);
+    });
 
-    var node2 = document.querySelector("#likeType");
-    while (node2.childElementCount > 2)
-        node2.removeChild(node2.lastChild);
+    var likeType = await getData("likeType");
+
+    var likeTypeSelect = document.querySelector("#likeType");
+    while (likeTypeSelect.childElementCount > 2)
+        likeTypeSelect.removeChild(likeTypeSelect.lastChild);
 
     for (var key in customBonks) {
         var customBonk = document.createElement("option");
         customBonk.value = key;
         customBonk.innerText = key;
-        node2.appendChild(customBonk);
+        likeTypeSelect.appendChild(customBonk);
     }
+    likeTypeSelect.value = likeType;
+    likeTypeSelect.addEventListener("change", () => {
+        setData("likeType", likeTypeSelect.value);
+    });
 }
 
 // ----

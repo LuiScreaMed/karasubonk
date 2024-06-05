@@ -370,6 +370,7 @@ function onMessage(data) {
       onFollowHandler(data);
       break;
     case 'LIKE_INFO_V3_CLICK': // 点赞
+    case 'LIKE_INFO_V3_UPDATE':
       Logger.info("Received Message: Like");
       onLikeHandler(data);
       break;
