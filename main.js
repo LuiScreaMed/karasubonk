@@ -60,6 +60,15 @@ const initConfig = () => {
   }
 }
 
+// 设置开机自启动
+const setAppLaunchAfterLogin = () => {
+  Logger.warn(`设置开机启动：${data.launchAfterLogin || false}`);
+  app.setLoginItemSettings({
+    openAtLogin: data.launchAfterLogin || false,
+    args: ["launch-after-login"]
+  });
+}
+
 // 瓜子电池投掷单位向下兼容
 const coinsThrowCompatibly = () => {
   let changed = false;
@@ -147,6 +156,7 @@ app.whenReady().then(() => {
   initConfig();
   createServer();
   createWindow();
+  setAppLaunchAfterLogin();
 
   app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
@@ -881,6 +891,10 @@ function setData(field, value, external) {
   fs.writeFileSync(KBONK_DATA_JSON_USER_DATA_PATH, JSON.stringify(data));
   if (external)
     mainWindow.webContents.send("doneWriting");
+
+  if (field == "launchAfterLogin") {
+    setAppLaunchAfterLogin();
+  }
 
   if (field == "version")
     checkVersion();

@@ -807,7 +807,7 @@
     "coinsThrowMaxCount": 50,
     "coinsThrowBatteryUnit": 10,
     "coinsThrowSilverUnit": 100,
-    "coinsThrowCooldown": 5,
+    "coinsThrowCooldown": 0,
     "multiGiftsEnabled": true,
     "multiGiftsMaxCount": 50,
     "hitExpression": false,
@@ -831,5 +831,7 @@
     "paramsFaceAngleZ": "",
     "paramsFacePositionX": "",
     "paramsEyeOpenLeft": "",
-    "paramsEyeOpenRight": ""
+    "paramsEyeOpenRight": "",
+    "launchAfterLogin": false,
+    "autoConnectAfterLaunch": false
 }

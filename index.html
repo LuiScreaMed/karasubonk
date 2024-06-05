@@ -220,9 +220,9 @@
                 </div>
               </div>
 
-              <p class="grid1">在系统托盘区显示</p>
+              <p class="grid1">开机启动</p>
               <label class="checkbox grid2">
-                <input type="checkbox" id="minimizeToTray">
+                <input type="checkbox" id="launchAfterLogin">
                 <div class="checkHover"></div>
                 <img src="ui/checkmark.png" class="checkmark">
               </label>
@@ -234,9 +234,9 @@
                 <img src="ui/checkmark.png" class="checkmark">
               </label>
 
-              <p class="grid1">保存运行日志</p>
+              <p class="grid1">启动后自动连接直播间</p>
               <label class="checkbox grid2">
-                <input type="checkbox" id="saveLogs">
+                <input type="checkbox" id="autoConnectAfterLaunch">
                 <div class="checkHover"></div>
                 <img src="ui/checkmark.png" class="checkmark">
               </label>
@@ -244,15 +244,22 @@
               <p class="grid4">物理模拟帧数</p>
               <input type="number" id="physicsFPS" class="grid5" min="1" max="60" value="60" step="1">
 
-
-              <p class="grid1">延时（毫秒）</p>
-              <input type="number" id="delay" class="grid2" min="0" value="0">
+              <p class="grid1">在系统托盘区显示</p>
+              <label class="checkbox grid2">
+                <input type="checkbox" id="minimizeToTray">
+                <div class="checkHover"></div>
+                <img src="ui/checkmark.png" class="checkmark">
+              </label>
 
               <p class="grid4">重力系数</p>
               <input type="number" id="physicsGravity" class="grid5" min="0.01" value="1">
 
-              <p class="grid1">浏览器源端口</p>
-              <input type="number" id="portThrower" class="grid2" value="8080">
+              <p class="grid1">保存运行日志</p>
+              <label class="checkbox grid2">
+                <input type="checkbox" id="saveLogs">
+                <div class="checkHover"></div>
+                <img src="ui/checkmark.png" class="checkmark">
+              </label>
 
               <p class="grid4">重力反转</p>
               <label class="checkbox grid5">
@@ -261,8 +268,8 @@
                 <img src="ui/checkmark.png" class="checkmark">
               </label>
 
-              <p class="grid1">VTS API端口</p>
-              <input type="number" id="portVTubeStudio" class="grid2" value="8001">
+              <p class="grid1">延时（毫秒）</p>
+              <input type="number" id="delay" class="grid2" min="0" value="0">
 
               <p class="grid4">重力方向跟随模型旋转</p>
               <label class="checkbox grid5">
@@ -271,15 +278,24 @@
                 <img src="ui/checkmark.png" class="checkmark">
               </label>
 
+              <p class="grid1">浏览器源端口</p>
+              <input type="number" id="portThrower" class="grid2" value="8080">
+
+              <p class="grid4">水平弹性系数</p>
+              <input type="number" id="physicsHorizontal" class="grid5" value="1">
+
+              <p class="grid1">VTS API端口</p>
+              <input type="number" id="portVTubeStudio" class="grid2" value="8001">
+
+              <p class="grid4">垂直弹性系数</p>
+              <input type="number" id="physicsVertical" class="grid5" value="1">
+
               <p class="grid1">自定义输入参数</p>
               <label class="checkbox grid2">
                 <input type="checkbox" id="customizeInputParams">
                 <div class="checkHover"></div>
                 <img src="ui/checkmark.png" class="checkmark">
               </label>
-
-              <p class="grid4">水平弹性系数</p>
-              <input type="number" id="physicsHorizontal" class="grid5" value="1">
 
               <div id="customizeInputParamsDetail">
                 <p class="grid1">脸部角度X</p>
@@ -296,9 +312,6 @@
                 <input type="text" id="paramsEyeOpenRight" class="grid2" placeholder="EyeOpenRight">
                 <div class="disableMask"></div>
               </div>
-
-              <p class="grid4">垂直弹性系数</p>
-              <input type="number" id="physicsVertical" class="grid5" value="1">
 
               <div id="resetSettings">
                 <div class="text">
@@ -1200,15 +1213,15 @@
                 <p class="grid2">投掷电池/瓜子</p>
 
                 <p class="grid3">投掷上限</p>
-                <input type="number" id="coinsThrowMaxCount" class="grid4" step="1" min="0" value="100">
+                <input type="number" id="coinsThrowMaxCount" class="grid4" step="1" min="0" value="50">
 
                 <p class="grid2">(仅未绑定礼物类型的礼物)</p>
 
                 <p class="grid3">电池投掷单位</p>
-                <input type="number" id="coinsThrowBatteryUnit" class="grid4" step="1" min="1" value="1">
+                <input type="number" id="coinsThrowBatteryUnit" class="grid4" step="1" min="1" value="10">
 
                 <p class="grid3">瓜子投掷单位</p>
-                <input type="number" id="coinsThrowSilverUnit" class="grid4" step="1" min="1" value="1">
+                <input type="number" id="coinsThrowSilverUnit" class="grid4" step="1" min="1" value="100">
 
                 <p class="grid3">冷却时长（秒）</p>
                 <input type="number" id="coinsThrowCooldown" class="grid4" min="0" value="0">
@@ -1239,7 +1252,7 @@
 
                 <!-- 按电池数量 -->
                 <p class="grid3">投掷上限</p>
-                <input type="number" id="giftWithCoinCountMaxCount" class="grid4" step="1" min="0" value="100">
+                <input type="number" id="giftWithCoinCountMaxCount" class="grid4" step="1" min="0" value="50">
 
                 <p class="grid2">（覆盖复数礼物限制）</p>
 
@@ -1249,7 +1262,7 @@
                 <!-- 按瓜子数量 -->
 
                 <p class="grid3">瓜子礼物投掷单位</p>
-                <input type="number" id="giftWithCoinCountSilverUnit" class="grid4" step="1" min="0" value="1">
+                <input type="number" id="giftWithCoinCountSilverUnit" class="grid4" step="1" min="0" value="100">
               </div>
 
               <br />

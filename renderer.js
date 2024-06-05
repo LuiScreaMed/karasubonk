@@ -2213,6 +2213,10 @@ window.onload = async function () {
     loadData("paramsEyeOpenLeft");
     loadData("paramsEyeOpenRight");
 
+    // 开机启动和自动连接
+    loadData("launchAfterLogin");
+    loadData("autoConnectAfterLaunch");
+
     openImages();
     openGuardImages();
     openCoinImages();
@@ -2221,9 +2225,19 @@ window.onload = async function () {
     checkVersion();
     document.title += " " + version.toFixed(2);
     setData("version", version);
+
+    autoConnect();
 }
 
 // Event listeners for changing settings
+
+// 开机启动和自动连接
+document.querySelector("#launchAfterLogin").addEventListener("change", () => {
+    setData("launchAfterLogin", document.querySelector("#launchAfterLogin").checked);
+})
+document.querySelector("#autoConnectAfterLaunch").addEventListener("change", () => {
+    setData("autoConnectAfterLaunch", document.querySelector("#autoConnectAfterLaunch").checked);
+})
 
 // 单个礼物最少价值
 document.querySelector("#coinMinBattery").addEventListener("change", () => { clampValue(document.querySelector("#coinMinBattery"), 0, null); setData("coinMinBattery", parseInt(document.querySelector("#coinMinBattery").value)) });
@@ -2614,6 +2628,17 @@ function showPanelLarge(panel) {
         }
         else
             back();
+    }
+}
+
+// 自动连接
+async function autoConnect() {
+    const connect = await getData("autoConnectAfterLaunch");
+    if (connect) {
+        let timer = setTimeout(() => {
+            clearTimeout(timer);
+            document.querySelector("#logout").click();
+        }, 1000);
     }
 }
 
