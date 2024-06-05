@@ -248,7 +248,7 @@ function disconnectFromBilibili() {
 function connectOpen(...args) {
   Logger.info(...args);
   mainWindow.webContents.send("connectStatus", 2);
-  setData("roomid", connectId);
+  setDataSafe("roomid", connectId);
   Logger.info("bilibili connection opened.");
   connected = true;
   connecting = false;
@@ -503,7 +503,7 @@ function createServer() {
                   calibrate();
                 }
                 else {
-                  setData(request.modelID + "Min", [request.positionX, request.positionY], false);
+                  setDataSafe(request.modelID + "Min", [request.positionX, request.positionY], false);
                   calibrateStage = 2;
                   calibrate();
                 }
@@ -514,7 +514,7 @@ function createServer() {
                   calibrate();
                 }
                 else {
-                  setData(request.modelID + "Max", [request.positionX, request.positionY], false);
+                  setDataSafe(request.modelID + "Max", [request.positionX, request.positionY], false);
                   calibrateStage = 4;
                   calibrate();
                 }
@@ -534,7 +534,7 @@ function createServer() {
             break;
           }
           case MessageType.setAuthVTS: {
-            setData("authVTS", request.token);
+            setDataSafe("authVTS", request.token);
             var request = {
               "type": "getAuthVTS",
               "token": request.token
@@ -847,6 +847,10 @@ function custom(customName, count = 1) {
 ipcMain.on("setData", (_, arg) => {
   setData(arg[0], arg[1], true);
 });
+
+function setDataSafe(field, value) {
+  mainWindow.webContents.send("setDataSafe", [field, value]);
+}
 
 function setData(field, value, external) {
   data[field] = value;

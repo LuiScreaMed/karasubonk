@@ -1959,6 +1959,10 @@ async function getData(field) {
     return data[field];
 }
 
+ipcRenderer.on("setDataSafe", (_, args) => {
+    setData(args[0], args[1]);
+})
+
 // Send new data to the main process to write to file
 function setData(field, value) {
     isWriting++;
