@@ -1,15 +1,19 @@
 const { app, Menu, Tray, BrowserWindow, ipcMain, session, Notification } = require("electron");
 const fs = require("fs");
-const { KeepLiveWS, getRoomid, KeepLiveTCP, LiveTCP, LiveWS } = require("bilibili-live-ws");
+const { LiveWS } = require("bilibili-live-ws");
 const log = require("electron-log");
 const axios = require('axios');
 const https = require('https');
 
 // 创建忽略 SSL 的 axios 实例
-const request = axios.default.create({
+// 1.11 修复请求 ua 问题
+const request = axios.create({
   httpsAgent: new https.Agent({
     rejectUnauthorized: false
-  })
+  }),
+  headers: {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36 Edg/136.0.0.0'
+  }
 });
 
 if (process.platform === 'win32') {
