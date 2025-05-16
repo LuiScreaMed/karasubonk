@@ -1,5 +1,5 @@
 // Karasubot Websocket Scripts
-const version = 1.10;
+const version = 1.11;
 
 var socketKarasu, karasuIsOpen = false;
 var isCalibrating = false;
@@ -653,10 +653,10 @@ function bonk(image, weight, scale, sound, volume, data, faceWidthMin, faceWidth
                     if (impactDecal != null)
                         setTimeout(function () {
                             const hit = document.createElement("img");
-                            hit.classList.add("thrown");
+                            hit.classList.add("thrown");    
                             hit.style.left = (window.innerWidth * xPos) - (impact.width * impactDecal.scale * sizeScale / 2) + randH + "px";
                             hit.style.top = (window.innerHeight * yPos) - (impact.height * impactDecal.scale * sizeScale / 2) + randV + "px";
-                            hit.src = "decals/" + encodeURIComponent(impactDecal.location.substr(7));
+                            hit.src = "decals/" + encodeURIComponent(impactDecal.location.substr(7)) + "?" + Math.random();
                             hit.style.width = impact.width * impactDecal.scale * sizeScale + "px";
                             hit.style.height = impact.height * impactDecal.scale * sizeScale + "px";
                             document.querySelector("body").appendChild(hit);
