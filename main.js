@@ -4,6 +4,7 @@ const { LiveWS } = require("bilibili-live-ws");
 const log = require("electron-log");
 const axios = require('axios');
 const https = require('https');
+const md5 = require('md5');
 
 // 创建忽略 SSL 的 axios 实例
 // 1.11 修复请求 ua 问题
@@ -187,6 +188,73 @@ ipcMain.on("logger", (_, ...args) => {
 
 var biliClient, connected = false, connecting = false, listenersActive = false, closeRetry = 0, conf = {}, connectId, danmuInfo, hostIndex, uid, buvid;
 
+// v1.12更新 wbi鉴权
+// wbi鉴权，代码修改自https://github.com/SocialSisterYi/bilibili-API-collect/blob/5865720b9504840dcbf767e66fb359343405572b/docs/misc/sign/wbi.md#javascript
+// 感谢大佬们
+const mixinKeyEncTab = [46, 47, 18, 2, 53, 8, 23, 32, 15, 50, 10, 31, 58, 3, 45, 35, 27, 43, 5, 49, 33, 9, 42, 19, 29, 28, 14, 39, 12, 38, 41, 13, 37, 48, 7, 16, 24, 55, 40, 61, 26, 17, 0, 1, 60, 51, 30, 4, 22, 25, 54, 21, 56, 59, 6, 63, 57, 62, 11, 36, 20, 34, 44, 52];
+
+// 对 imgKey 和 subKey 进行字符顺序打乱编码
+function getMixinKey(orig) {
+  return mixinKeyEncTab.map((n => orig[n])).join('').slice(0, 32);
+}
+
+// 为请求参数进行 wbi 签名
+function encWbi(params, img_key, sub_key) {
+  const mixin_key = getMixinKey(img_key + sub_key),
+    curr_time = Math.round(Date.now() / 1000),
+    chr_filter = /[!'()*]/g
+
+  Object.assign(params, { wts: curr_time }) // 添加 wts 字段
+  // 按照 key 重排参数
+  const query = Object
+    .keys(params)
+    .sort()
+    .map(key => {
+      // 过滤 value 中的 "!'()*" 字符
+      const value = params[key].toString().replace(chr_filter, '')
+      return `${encodeURIComponent(key)}=${encodeURIComponent(value)}`
+    })
+    .join('&')
+
+  const wbi_sign = md5(query + mixin_key) // 计算 w_rid
+
+  return query + '&w_rid=' + wbi_sign
+}
+
+// 获取最新的 img_key 和 sub_key
+async function getWbiKeys() {
+  const res = await request.get('https://api.bilibili.com/x/web-interface/nav', {
+    headers: {
+      Referer: 'https://www.bilibili.com/'
+    }
+  });
+  const { data: { wbi_img: { img_url, sub_url } } } = res.data;
+
+  return {
+    img_key: img_url.slice(
+      img_url.lastIndexOf('/') + 1,
+      img_url.lastIndexOf('.')
+    ),
+    sub_key: sub_url.slice(
+      sub_url.lastIndexOf('/') + 1,
+      sub_url.lastIndexOf('.')
+    )
+  }
+}
+
+/**
+ * 带wbi鉴权的GET请求
+ * @param {string} url 
+ * @param {{[key:string]: any}} params 
+ */
+async function getWithWbi(url, params) {
+  const web_keys = await getWbiKeys();
+  const img_key = web_keys.img_key, sub_key = web_keys.sub_key;
+  const query = encWbi(params, img_key, sub_key);
+  const res = await request.get(`${url}?${query}`);
+  return res;
+}
+
 //连接至房间
 async function connect(roomid) {
   connecting = true;
@@ -200,8 +268,8 @@ async function connect(roomid) {
     connectId = parseInt(roomid);
     try {
       Logger.info("getting room_id and uid");
-      const roomData = (await request.get(`https://api.live.bilibili.com/room/v1/Room/mobileRoomInit?id=${roomid}`)).data;
-      // const roomData = await (await fetch(`https://api.live.bilibili.com/room/v1/Room/mobileRoomInit?id=${roomid}`)).json();
+      const roomData = (await getWithWbi('https://api.live.bilibili.com/room/v1/Room/mobileRoomInit', { id: roomid })).data;
+      // const roomData = (await request.get(`https://api.live.bilibili.com/room/v1/Room/mobileRoomInit?id=${roomid}`)).data;
       Logger.info(roomData);
       Logger.info("getting room_id and uid end");
       connectId = roomData.data.room_id;
@@ -211,13 +279,13 @@ async function connect(roomid) {
       }
       Logger.info("getting buvid");
       const buvidData = (await request.get("https://api.bilibili.com/x/frontend/finger/spi")).data.data;
-      // const buvidData = (await (await fetch("https://api.bilibili.com/x/frontend/finger/spi")).json()).data;
+      // const buvidData = (await request.get("https://api.bilibili.com/x/frontend/finger/spi")).data.data;
       buvid = buvidData.b_3;
       Logger.info(buvid);
       Logger.info("getting buvid end");
       hostIndex = 0;
-      danmuInfo = (await request.get(`https://api.live.bilibili.com/xlive/web-room/v1/index/getDanmuInfo?id=${roomid}`)).data.data;
-      // danmuInfo = (await (await fetch(`https://api.live.bilibili.com/xlive/web-room/v1/index/getDanmuInfo?id=${roomid}`)).json()).data;
+      danmuInfo = (await getWithWbi('https://api.live.bilibili.com/xlive/web-room/v1/index/getDanmuInfo', { id: roomid })).data.data;
+      // danmuInfo = (await request.get(`https://api.live.bilibili.com/xlive/web-room/v1/index/getDanmuInfo?id=${roomid}`)).data.data;
       Logger.info("danmuInfo");
       Logger.info(danmuInfo);
       Logger.info("danmuInfo end");
