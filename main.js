@@ -277,12 +277,13 @@ async function connect(roomid) {
       if (connectId === undefined) {
         return mainWindow.webContents.send("roomidEmptyError");
       }
-      Logger.info("getting buvid");
+      Logger.info("getting buvid and add it to Cookie");
       const buvidData = (await request.get("https://api.bilibili.com/x/frontend/finger/spi")).data.data;
       // const buvidData = (await request.get("https://api.bilibili.com/x/frontend/finger/spi")).data.data;
       buvid = buvidData.b_3;
       Logger.info(buvid);
-      Logger.info("getting buvid end");
+      request.defaults.headers['Cookie'] = 'buvid3=' + buvid;
+      Logger.info("getting buvid and add it to Cookie end");
       hostIndex = 0;
       danmuInfo = (await getWithWbi('https://api.live.bilibili.com/xlive/web-room/v1/index/getDanmuInfo', { id: roomid })).data.data;
       // danmuInfo = (await request.get(`https://api.live.bilibili.com/xlive/web-room/v1/index/getDanmuInfo?id=${roomid}`)).data.data;
