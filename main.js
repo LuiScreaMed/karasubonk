@@ -5,6 +5,7 @@ const log = require("electron-log");
 const axios = require('axios');
 const https = require('https');
 const md5 = require('md5');
+const protobuf = require('protobufjs');
 
 // 创建忽略 SSL 的 axios 实例
 // 1.11 修复请求 ua 问题
@@ -73,6 +74,10 @@ const setAppLaunchAfterLogin = () => {
     args: ["launch-after-login"]
   });
 }
+
+// 初始化 SEND_GIFT_V2 proto
+const sendGiftV2Proto = protobuf.loadSync(__dirname + "/protos/send_gift_v2.proto");
+const SendGiftV2 = sendGiftV2Proto.lookupType("SendGiftV2");
 
 // 瓜子电池投掷单位向下兼容
 const coinsThrowCompatibly = () => {
@@ -182,9 +187,7 @@ ipcMain.on("logger", (_, ...args) => {
   Logger.info("Renderer Log End");
 })
 
-// --------------
-// Authentication
-// --------------
+// #region Authentication
 
 var biliClient, connected = false, connecting = false, listenersActive = false, closeRetry = 0, conf = {}, connectId, danmuInfo, hostIndex, uid, buvid;
 
@@ -254,6 +257,8 @@ async function getWithWbi(url, params) {
   const res = await request.get(`${url}?${query}`);
   return res;
 }
+
+// #endregion
 
 //连接至房间
 async function connect(roomid) {
@@ -443,6 +448,10 @@ function onMessage(data) {
     case 'SEND_GIFT': // 礼物
       Logger.info("Received Message: Gift");
       onGiftHandler(data);
+      break;
+    case 'SEND_GIFT_V2':
+      Logger.info("Received Message: Gift V2");
+      onGiftV2Handler(data);
       break;
     case 'GUARD_BUY': // 上舰
       Logger.info("Received Message: Guard");
@@ -1223,6 +1232,21 @@ function onGiftHandler({ data: { coin_type, giftName, num, price } }) {
     }
   }
 
+}
+
+function onGiftV2Handler({ data: { dmscore, pb } }) {
+  const bytes = Buffer.from(pb, "base64");
+  const gift_data = SendGiftV2.decode(bytes);
+
+  Logger.info("=== Decoded Gift: ")
+  Logger.info(JSON.stringify(gift_data));
+
+  onGiftHandler({
+    data: {
+      ...gift_data.gift,
+      coin_type: gift_data.gift.coinType
+    }
+  });
 }
 
 // 礼物通过电池和瓜子投掷
