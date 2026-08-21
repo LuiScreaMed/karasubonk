@@ -425,7 +425,12 @@ function disconnect() {
 }
 
 // 心跳
-function onHeartBeat(online) { }
+function onHeartBeat(online) {
+  if (biliClient) {
+    biliClient.heartbeat();
+  }
+}
+
 
 // 当点击了连接/断开连接按钮后
 ipcMain.on("connect", (_, roomid) => {
